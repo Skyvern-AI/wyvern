@@ -1,0 +1,112 @@
+repos:
+  # Standard hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-yaml
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+      - id: fix-encoding-pragma
+
+  # Black, the code formatter, natively supports pre-commit
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8-bugbear, pep8-naming]
+
+  - repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: v2.0.0
+    hooks:
+      - id: autopep8
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.0.0
+    hooks:
+      - id: mypy
+        args: [--show-error-codes, --python-version=3.10]
+        additional_dependencies:
+          - fastapi
+          - uvicorn
+          - typer
+          - types-pyyaml
+          - types-boto3
+          - pyhumps
+          - setuptools
+          - pandas-stubs
+          - types-redis
+          - python-dotenv
+          - feast
+          - pytest
+          - types-protobuf
+          - snowflake-connector-python
+          - fastapi-utils
+          - pyinstrument
+          - ddtrace
+          - msgspec
+          - lz4
+          - types-requests
+          - more-itertools
+          - tqdm
+          - types-tqdm
+          - nest-asyncio
+        exclude: "^tests/"
+
+  # Check for spelling
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.1.0
+    hooks:
+      - id: codespell
+        exclude: ".supp$"
+        args: ["-L", "nd,ot,thist,paramater"]
+
+  - repo: https://github.com/asottile/add-trailing-comma
+    rev: v2.2.1
+    hooks:
+      - id: add-trailing-comma
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.9.0
+    hooks:
+      - id: python-check-blanket-noqa
+      - id: python-check-mock-methods
+      - id: python-no-log-warn
+      - id: python-use-type-annotations
+
+  - repo: https://github.com/prettier/pre-commit
+    rev: 57f39166b5a5a504d6808b87ab98d41ebf095b46
+    hooks:
+      - id: prettier
+
+  # Disallow some common capitalization mistakes
+  - repo: local
+    hooks:
+      - id: disallow-caps
+        name: Disallow improper capitalization
+        language: pygrep
+        entry: PyBind|Numpy|Cmake|CCache|PyTest|PyTest-Cov
+        exclude: |
+          (?x)(
+            ^\.pre-commit-config.yaml$ |
+            poetry.lock$
+          )
+  - repo: https://github.com/thlorenz/doctoc
+    rev: v2.2.0
+    hooks:
+      - id: doctoc
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        name: isort (python)
