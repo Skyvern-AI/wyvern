@@ -49,13 +49,13 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
         self._auth_token = auth_token or self.AUTH_TOKEN
         self._modelbit_url = url or self.URL
         self.headers = {
-            "Authorization": f"Bearer {self._auth_token}",
+            "Authorization": self._auth_token,
             "Content-Type": "application/json",
         }
 
         # TODO shu: test out the model_input_type
         self.model_input_type = self.get_type_args_simple(0)
-        self.model_ouput_type = self.get_type_args_simple(1)
+        self.model_output_type = self.get_type_args_simple(1)
 
         if not self._auth_token:
             raise WyvernModelbitTokenMissingError()
@@ -87,12 +87,10 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
         all_requests = [
             [
                 idx + 1,
-                {
-                    "features": [
-                        self.get_feature(identifier, feature_name)
-                        for feature_name in self.modelbit_features
-                    ],
-                },
+                [
+                    self.get_feature(identifier, feature_name)
+                    for feature_name in self.modelbit_features
+                ],
             ]
             for idx, identifier in enumerate(target_identifiers)
         ]
@@ -139,7 +137,7 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
                     target_identifiers[batch_idx * settings.MODELBIT_BATCH_SIZE + idx]
                 ] = individual_output[1]
 
-        return self.model_ouput_type(
+        return self.model_output_type(
             data=output_data,
             model_name=self.name,
         )

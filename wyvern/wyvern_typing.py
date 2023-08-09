@@ -20,4 +20,4 @@ UPSTREAM_OUTPUT_TYPE = TypeVar("UPSTREAM_OUTPUT_TYPE")
 REQUEST_SCHEMA = TypeVar("REQUEST_SCHEMA", bound=BaseModel)
 RESPONSE_SCHEMA = TypeVar("RESPONSE_SCHEMA", bound=BaseModel)
 
-WyvernFeature = Union[float, str, List[float], None]
+WyvernFeature = Union[bool, float, str, List[float], None]
