@@ -13,7 +13,7 @@ from wyvern.config import settings
 from wyvern.exceptions import WyvernAPIKeyMissingError, WyvernError
 
 BATCH_SIZE = 15000
-HTTP_TIMEOUT = 60
+HTTP_TIMEOUT = 180
 BATCH_SIZE_PER_GATHER = 4
 
 
