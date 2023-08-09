@@ -15,6 +15,7 @@ from wyvern.exceptions import WyvernAPIKeyMissingError, WyvernError
 BATCH_SIZE = 15000
 HTTP_TIMEOUT = 180
 BATCH_SIZE_PER_GATHER = 4
+RETRY_PER_BATCH = 2
 
 
 class WyvernAPI:
@@ -122,13 +123,21 @@ class WyvernAPI:
         for i in range(num_gathers):
             start_idx = i * BATCH_SIZE_PER_GATHER
             end_idx = min((i + 1) * BATCH_SIZE_PER_GATHER, num_batches)
-            gathered_responses = event_loop.run_until_complete(
-                self.process_batches(data_batches[start_idx:end_idx]),
-            )
-            for response in gathered_responses:
-                responses.append(
-                    self._convert_historical_features_to_df(response),
-                )
+            retry_count = 0
+            while retry_count < RETRY_PER_BATCH:
+                try:
+                    gathered_responses = event_loop.run_until_complete(
+                        self.process_batches(data_batches[start_idx:end_idx]),
+                    )
+                    for response in gathered_responses:
+                        responses.append(
+                            self._convert_historical_features_to_df(response),
+                        )
+                    break
+                except Exception as e:
+                    retry_count += 1
+                    if retry_count == RETRY_PER_BATCH:
+                        raise e
             progress_bar.update(end_idx - start_idx)
 
         # Concatenate the responses into a single DataFrame
