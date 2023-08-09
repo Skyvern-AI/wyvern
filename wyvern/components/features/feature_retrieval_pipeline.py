@@ -54,7 +54,6 @@ class FeatureRetrievalPipeline(
         self.real_time_features: List[
             RealtimeFeatureComponent
         ] = RealtimeFeatureComponent.real_time_features
-        logger.info(self.real_time_features)
         self.feature_retrieval_component: FeatureStoreRetrievalComponent = (
             feature_store_retrieval_component
         )
