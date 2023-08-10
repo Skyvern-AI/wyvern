@@ -647,6 +647,17 @@ files = [
 typing-extensions = {version = "*", markers = "python_version < \"3.10\""}
 
 [[package]]
+name = "cachetools"
+version = "5.3.1"
+description = "Extensible memoizing collections and decorators"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "cachetools-5.3.1-py3-none-any.whl", hash = "sha256:95ef631eeaea14ba2e36f06437f36463aac3a096799e876ee55e5cdccb102590"},
+    {file = "cachetools-5.3.1.tar.gz", hash = "sha256:dce83f2d9b4e1f732a8cd44af8e8fab2dbe46201467fc98b3ef8f269092bf62b"},
+]
+
+[[package]]
 name = "cattrs"
 version = "23.1.2"
 description = "Composable complex class support for attrs and dataclasses."
@@ -1098,6 +1109,22 @@ files = [
 
 [package.extras]
 mypy = ["mypy"]
+
+[[package]]
+name = "eppo-server-sdk"
+version = "1.2.2"
+description = "Eppo SDK for Python"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "eppo-server-sdk-1.2.2.tar.gz", hash = "sha256:0b511a360b11f6470227d16d127b403f36ace0fab10e085407d1a1de6665b1da"},
+    {file = "eppo_server_sdk-1.2.2-py3-none-any.whl", hash = "sha256:c3ddb2743397e1cceab68571eac8e07f9b93b37a09eeae2d31532c2f39be4679"},
+]
+
+[package.dependencies]
+cachetools = "*"
+pydantic = "<2"
+requests = "*"
 
 [[package]]
 name = "exceptiongroup"
@@ -4429,4 +4456,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.11"
-content-hash = "87147131645c390664d3a03b6eeeee9197ad022ec6f6fb6d115eeb4f3cd12383"
+content-hash = "8c5567fa8f96fdf5a2014757ed8cf0528ea03cb91fcc5130bfa006695519e4f0"
