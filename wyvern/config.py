@@ -43,6 +43,9 @@ class Settings(BaseSettings):
 
     MODELBIT_BATCH_SIZE: int = 30
 
+    # experimentation configurations
+    EPPO_API_KEY: str = ""
+
     class Config:
         env_file = (".env", ".env.prod")
         env_file_encoding = "utf-8"
