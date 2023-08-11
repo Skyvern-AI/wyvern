@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 import eppo_client  # type: ignore
 from eppo_client.assignment_logger import AssignmentLogger  # type: ignore
@@ -64,7 +64,12 @@ class EppoExperimentationClient(BaseExperimentationProvider):
         return client.get_assignment(entity_id, experiment_id, kwargs)
 
     def log_result(
-        self, experiment_id: str, entity_id: str, variant: str, **kwargs
+        self,
+        experiment_id: str,
+        entity_id: str,
+        variant: Optional[str],
+        error: Optional[str],
+        **kwargs
     ) -> None:
         """
         Logs the result for a given experiment and entity.
@@ -96,6 +101,7 @@ class EppoExperimentationClient(BaseExperimentationProvider):
                         result=variant,
                         timestamp=timestamp,
                         metadata=kwargs,
+                        error=error,
                     ),
                 ),
             ]

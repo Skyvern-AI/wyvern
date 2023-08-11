@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from typing import Optional
+
 from wyvern.exceptions import ExperimentationProviderNotSupportedError
 from wyvern.experimentation.providers.base import ExperimentationProvider
 from wyvern.experimentation.providers.eppo_provider import EppoExperimentationClient
@@ -19,7 +21,7 @@ class ExperimentationClient:
 
     def get_experiment_result(
         self, experiment_id: str, entity_id: str, **kwargs
-    ) -> str:
+    ) -> Optional[str]:
         """
         Get the result (variant) for a given experiment and entity using the chosen provider.
 
@@ -31,8 +33,15 @@ class ExperimentationClient:
         Returns:
         - str: The result (variant) assigned to the entity for the specified experiment.
         """
-        # TODO (kerem): What happens if the provider is down / returns None?
-        #  We should also enforce defining a default value for each experiment to return in such cases.
-        result = self.provider.get_result(experiment_id, entity_id, **kwargs)
-        self.provider.log_result(experiment_id, entity_id, result, **kwargs)
+        result = None
+        error_message = None
+
+        try:
+            result = self.provider.get_result(experiment_id, entity_id, **kwargs)
+        except Exception as e:
+            error_message = str(e)
+
+        self.provider.log_result(
+            experiment_id, entity_id, result, error_message, **kwargs
+        )
         return result

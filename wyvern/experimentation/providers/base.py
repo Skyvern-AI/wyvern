@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from abc import ABC, abstractmethod
 from enum import Enum
+from typing import Optional
 
 
 class ExperimentationProvider(str, Enum):
@@ -30,7 +31,12 @@ class BaseExperimentationProvider(ABC):
 
     @abstractmethod
     def log_result(
-        self, experiment_id: str, entity_id: str, variant: str, **kwargs
+        self,
+        experiment_id: str,
+        entity_id: str,
+        variant: Optional[str],
+        error: Optional[str],
+        **kwargs
     ) -> None:
         """
         Log the result (variant) for a given experiment and entity.
