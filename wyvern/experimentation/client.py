@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
+import logging
 from typing import Optional
 
+from wyvern.config import settings
 from wyvern.exceptions import ExperimentationProviderNotSupportedError
 from wyvern.experimentation.providers.base import ExperimentationProvider
 from wyvern.experimentation.providers.eppo_provider import EppoExperimentationClient
+
+logger = logging.getLogger(__name__)
 
 
 class ExperimentationClient:
@@ -14,7 +18,14 @@ class ExperimentationClient:
         Args:
         - provider_name (str): The name of the experimentation provider (e.g., "eppo").
         """
+        if not settings.EXPERIMENTATION_ENABLED:
+            logger.info("Experimentation is disabled")
+            self.enabled = False
+            return
+
+        self.enabled = True
         if provider_name == ExperimentationProvider.EPPO:
+            logger.info("Using EPPO experimentation provider")
             self.provider = EppoExperimentationClient()
         else:
             raise ExperimentationProviderNotSupportedError(provider_name=provider_name)
@@ -33,6 +44,12 @@ class ExperimentationClient:
         Returns:
         - str: The result (variant) assigned to the entity for the specified experiment.
         """
+        if not self.enabled:
+            logger.error(
+                "get_experiment_result called when experimentation is disabled",
+            )
+            return None
+
         result = None
         error_message = None
 
@@ -45,3 +62,8 @@ class ExperimentationClient:
             experiment_id, entity_id, result, error_message, **kwargs
         )
         return result
+
+
+experimentation_client = ExperimentationClient(
+    provider_name=settings.EXPERIMENTATION_PROVIDER,
+)

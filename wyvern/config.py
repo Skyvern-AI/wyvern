@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from pydantic import BaseSettings
 
+from wyvern.experimentation.providers.base import ExperimentationProvider
+
 
 class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
@@ -44,6 +46,8 @@ class Settings(BaseSettings):
     MODELBIT_BATCH_SIZE: int = 30
 
     # experimentation configurations
+    EXPERIMENTATION_ENABLED: bool = False
+    EXPERIMENTATION_PROVIDER: str = ExperimentationProvider.EPPO
     EPPO_API_KEY: str = ""
 
     class Config:
