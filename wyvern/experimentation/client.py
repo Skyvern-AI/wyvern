@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from .providers.eppo_provider import EppoExperimentationClient
+from wyvern.exceptions import ExperimentationProviderNotSupportedError
+from wyvern.experimentation.providers.base import ExperimentationProvider
+from wyvern.experimentation.providers.eppo_provider import EppoExperimentationClient
 
 
 class ExperimentationClient:
@@ -10,10 +12,10 @@ class ExperimentationClient:
         Args:
         - provider_name (str): The name of the experimentation provider (e.g., "eppo").
         """
-        if provider_name == "eppo":
+        if provider_name == ExperimentationProvider.EPPO:
             self.provider = EppoExperimentationClient()
         else:
-            raise ValueError(f"Unsupported provider: {provider_name}")
+            raise ExperimentationProviderNotSupportedError(provider_name=provider_name)
 
     def get_experiment_result(
         self, experiment_id: str, entity_id: str, **kwargs

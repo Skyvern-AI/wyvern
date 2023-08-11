@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+from typing import Dict
 
 from pydantic import BaseModel
 
@@ -11,7 +12,7 @@ class ExperimentationEventData(BaseModel):
     entity_id: str
     result: str
     timestamp: datetime
-    metadata: dict
+    metadata: Dict
 
 
 class ExperimentationEvent(LoggedEvent[ExperimentationEventData]):

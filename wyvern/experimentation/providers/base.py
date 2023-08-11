@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 from abc import ABC, abstractmethod
+from enum import Enum
+
+
+class ExperimentationProvider(str, Enum):
+    EPPO = "eppo"
 
 
 class BaseExperimentationProvider(ABC):

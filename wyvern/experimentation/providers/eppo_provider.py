@@ -10,11 +10,15 @@ from wyvern import request_context
 from wyvern.components.events.events import LoggedEvent
 from wyvern.config import settings
 from wyvern.event_logging import event_logger
+from wyvern.exceptions import ExperimentationClientInitializationError
 from wyvern.experimentation.experimentation_logging import (
     ExperimentationEvent,
     ExperimentationEventData,
 )
-from wyvern.experimentation.providers.base import BaseExperimentationProvider
+from wyvern.experimentation.providers.base import (
+    BaseExperimentationProvider,
+    ExperimentationProvider,
+)
 
 
 class EppoExperimentationClient(BaseExperimentationProvider):
@@ -32,11 +36,17 @@ class EppoExperimentationClient(BaseExperimentationProvider):
     def __init__(self):
         # AssignmentLogger is a dummy logger that does not log anything.
         # We handle logging ourselves in the log_result method.
-        client_config = Config(
-            api_key=settings.EPPO_API_KEY,
-            assignment_logger=AssignmentLogger(),
-        )
-        eppo_client.init(client_config)
+        try:
+            client_config = Config(
+                api_key=settings.EPPO_API_KEY,
+                assignment_logger=AssignmentLogger(),
+            )
+            eppo_client.init(client_config)
+        except Exception as e:
+            raise ExperimentationClientInitializationError(
+                provider_name=ExperimentationProvider.EPPO,
+                exception=e,
+            )
 
     def get_result(self, experiment_id: str, entity_id: str, **kwargs) -> str:
         """
