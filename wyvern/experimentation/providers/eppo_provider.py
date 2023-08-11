@@ -45,7 +45,7 @@ class EppoExperimentationClient(BaseExperimentationProvider):
         except Exception as e:
             raise ExperimentationClientInitializationError(
                 provider_name=ExperimentationProvider.EPPO,
-                exception=e,
+                error=e,
             )
 
     def get_result(self, experiment_id: str, entity_id: str, **kwargs) -> str:
