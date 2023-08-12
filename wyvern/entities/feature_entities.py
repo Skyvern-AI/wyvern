@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from typing import Dict
+from typing import Dict, Generic
 
-from pydantic.main import BaseModel
+from pydantic.generics import GenericModel
 
 from wyvern.entities.identifier import Identifier
-from wyvern.wyvern_typing import WyvernFeature
+from wyvern.wyvern_typing import T, WyvernFeature
 
 
-class FeatureData(BaseModel, frozen=True):
+class FeatureData(
+    GenericModel,
+    Generic[T],
+):
     identifier: Identifier
-    features: Dict[str, WyvernFeature] = {}
+    features: Dict[str, T] = {}
 
     def __str__(self) -> str:
         return f"identifier={self.identifier} features={self.features}"
@@ -19,6 +22,15 @@ class FeatureData(BaseModel, frozen=True):
     def __repr__(self):
         return self.__str__()
 
+    class Config:
+        frozen = True
 
-class FeatureMap(BaseModel, frozen=True):
-    feature_map: Dict[Identifier, FeatureData]
+
+class FeatureMap(GenericModel, Generic[T]):
+    feature_map: Dict[Identifier, FeatureData[T]] = {}
+
+    class Config:
+        frozen = True
+
+
+WyvernFeatureData = FeatureData[WyvernFeature]

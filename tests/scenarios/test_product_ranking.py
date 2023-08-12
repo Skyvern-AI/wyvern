@@ -27,6 +27,7 @@ from wyvern.entities.identifier_entities import ProductEntity, WyvernEntity
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.service import WyvernService
 from wyvern.wyvern_request import WyvernRequest
+from wyvern.wyvern_typing import WyvernFeature
 
 PRODUCT_ENTITY_1 = {
     "product_id": "test_product1",
@@ -266,8 +267,8 @@ class RankingRealtimeFeatureComponent(
         self,
         entity: Product,
         request: RealtimeFeatureRequest[ProductSearchRankingRequest],
-    ) -> Optional[FeatureData]:
-        return FeatureData(
+    ) -> Optional[FeatureData[WyvernFeature]]:
+        return FeatureData[WyvernFeature](
             identifier=entity.identifier,
             features={
                 "f_1": 1.2,

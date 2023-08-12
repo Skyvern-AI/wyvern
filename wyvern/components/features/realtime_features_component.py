@@ -18,7 +18,7 @@ from typing import (
 from pydantic.generics import GenericModel
 
 from wyvern.components.component import Component
-from wyvern.entities.feature_entities import FeatureData, FeatureMap
+from wyvern.entities.feature_entities import FeatureData, FeatureMap, WyvernFeatureData
 from wyvern.entities.identifier_entities import WyvernEntity
 from wyvern.feature_store.constants import (
     FULL_FEATURE_NAME_SEPARATOR,
@@ -49,7 +49,7 @@ class RealtimeFeatureComponent(
             RealtimeFeatureRequest[REQUEST_ENTITY],
             RealtimeFeatureEntity[PRIMARY_ENTITY, SECONDARY_ENTITY],
         ],
-        Optional[FeatureData],
+        Optional[WyvernFeatureData],
     ],
     Generic[PRIMARY_ENTITY, SECONDARY_ENTITY, REQUEST_ENTITY],
 ):
@@ -215,7 +215,7 @@ class RealtimeFeatureComponent(
             RealtimeFeatureEntity[PRIMARY_ENTITY, SECONDARY_ENTITY],
         ],
         **kwargs,
-    ) -> Optional[FeatureData]:
+    ) -> Optional[WyvernFeatureData]:
         # TODO (Suchintan): Delete this method -- this has been fully delegated upwards?
         request = input[0]
         entities = input[1]
@@ -291,7 +291,7 @@ class RealtimeFeatureComponent(
     async def compute_request_features_wrapper(
         self,
         request: RealtimeFeatureRequest[REQUEST_ENTITY],
-    ) -> Optional[FeatureData]:
+    ) -> Optional[WyvernFeatureData]:
         feature_data = await self.compute_request_features(request)
         return self.set_full_feature_name(feature_data)
 
@@ -299,7 +299,7 @@ class RealtimeFeatureComponent(
         self,
         entity: PRIMARY_ENTITY,
         request: RealtimeFeatureRequest[REQUEST_ENTITY],
-    ) -> Optional[FeatureData]:
+    ) -> Optional[WyvernFeatureData]:
         feature_data = await self.compute_features(entity, request)
         return self.set_full_feature_name(feature_data)
 
@@ -308,7 +308,7 @@ class RealtimeFeatureComponent(
         primary_entity: PRIMARY_ENTITY,
         secondary_entity: SECONDARY_ENTITY,
         request: RealtimeFeatureRequest[REQUEST_ENTITY],
-    ) -> Optional[FeatureData]:
+    ) -> Optional[WyvernFeatureData]:
         feature_data = await self.compute_composite_features(
             primary_entity,
             secondary_entity,
@@ -318,15 +318,15 @@ class RealtimeFeatureComponent(
 
     def set_full_feature_name(
         self,
-        feature_data: Optional[FeatureData],
-    ) -> Optional[FeatureData]:
+        feature_data: Optional[WyvernFeatureData],
+    ) -> Optional[WyvernFeatureData]:
         """
         Sets the full feature name for the feature data
         """
         if not feature_data:
             return None
 
-        return FeatureData(
+        return WyvernFeatureData(
             identifier=feature_data.identifier,
             features={
                 f"{self.name}:{feature_name}": feature_value
