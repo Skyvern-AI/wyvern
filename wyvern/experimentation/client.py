@@ -52,20 +52,18 @@ class ExperimentationClient:
             return None
 
         result = None
-        error_message = None
+        has_error = False
 
         try:
             result = self.provider.get_result(experiment_id, entity_id, **kwargs)
-        except Exception as e:
+        except Exception:
             logger.exception(
                 f"Error getting experiment result. Experiment ID: {experiment_id}, Entity ID: {entity_id} | "
                 f"{traceback.format_exc()}",
             )
-            error_message = str(e)
+            has_error = True
 
-        self.provider.log_result(
-            experiment_id, entity_id, result, error_message, **kwargs
-        )
+        self.provider.log_result(experiment_id, entity_id, result, has_error, **kwargs)
         return result
 
 

@@ -35,7 +35,7 @@ class BaseExperimentationProvider(ABC):
         experiment_id: str,
         entity_id: str,
         variant: Optional[str],
-        error: Optional[str],
+        has_error: bool,
         **kwargs
     ) -> None:
         """

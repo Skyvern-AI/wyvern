@@ -13,7 +13,7 @@ class ExperimentationEventData(BaseModel):
     result: Optional[str]
     timestamp: datetime
     metadata: Dict
-    error: Optional[str]
+    has_error: bool
 
 
 class ExperimentationEvent(LoggedEvent[ExperimentationEventData]):

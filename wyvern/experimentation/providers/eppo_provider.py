@@ -68,7 +68,7 @@ class EppoExperimentationClient(BaseExperimentationProvider):
         experiment_id: str,
         entity_id: str,
         variant: Optional[str],
-        error: Optional[str],
+        has_error: bool,
         **kwargs
     ) -> None:
         """
@@ -101,7 +101,7 @@ class EppoExperimentationClient(BaseExperimentationProvider):
                         result=variant,
                         timestamp=timestamp,
                         metadata=kwargs,
-                        error=error,
+                        has_error=has_error,
                     ),
                 ),
             ]
