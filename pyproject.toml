@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wyvern-ai"
-version = "0.0.5"
+version = "0.0.6"
 description = ""
 authors = ["Wyvern AI <info@wyvern.ai>"]
 readme = "README.md"
@@ -28,6 +28,7 @@ lz4 = "^4.3.2"
 more-itertools = "^9.1.0"
 tqdm = "^4.65.0"
 nest-asyncio = "^1.5.7"
+eppo-server-sdk = "^1.2.2"
 
 
 [tool.poetry.group.dev.dependencies]

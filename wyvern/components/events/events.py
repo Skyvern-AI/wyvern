@@ -15,6 +15,7 @@ class EventType(str, Enum):
     FEATURE = "FEATURE"
     MODEL = "MODEL"
     IMPRESSION = "IMPRESSION"
+    EXPERIMENTATION = "EXPERIMENTATION"
     CUSTOM = "CUSTOM"
 
 

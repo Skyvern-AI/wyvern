@@ -71,3 +71,11 @@ class WyvernAPIKeyMissingError(WyvernError):
         "Wyvern api key is missing. "
         "Pass api_key to WyvernAPI or define WYVERN_API_KEY in your environment."
     )
+
+
+class ExperimentationProviderNotSupportedError(WyvernError):
+    message = "Received error from feature store: {provider_name}"
+
+
+class ExperimentationClientInitializationError(WyvernError):
+    message = "Failed to initialize experimentation client for provider: {provider_name}, {error}"
