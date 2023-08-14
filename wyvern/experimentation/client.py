@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExperimentationClient:
-    def __init__(self, provider_name: str):
+    def __init__(self, provider_name: str, api_key: Optional[str] = None):
         """
         Initializes the ExperimentationClient with a specified provider.
 
@@ -27,7 +27,7 @@ class ExperimentationClient:
         self.enabled = True
         if provider_name == ExperimentationProvider.EPPO:
             logger.info("Using EPPO experimentation provider")
-            self.provider = EppoExperimentationClient()
+            self.provider = EppoExperimentationClient(api_key=api_key)
         else:
             raise ExperimentationProviderNotSupportedError(provider_name=provider_name)
 

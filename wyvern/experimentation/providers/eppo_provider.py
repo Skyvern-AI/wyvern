@@ -33,12 +33,13 @@ class EppoExperimentationClient(BaseExperimentationProvider):
     - log_result(experiment_id: str, entity_id: str, variant: str) -> None
     """
 
-    def __init__(self):
+    def __init__(self, api_key: Optional[str] = None):
+        api_key = api_key or settings.EPPO_API_KEY
         # AssignmentLogger is a dummy logger that does not log anything.
         # We handle logging ourselves in the log_result method.
         try:
             client_config = Config(
-                api_key=settings.EPPO_API_KEY,
+                api_key=api_key,
                 assignment_logger=AssignmentLogger(),
             )
             eppo_client.init(client_config)
