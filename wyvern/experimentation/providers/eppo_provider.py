@@ -68,8 +68,8 @@ class EppoExperimentationClient(BaseExperimentationProvider):
         self,
         experiment_id: str,
         entity_id: str,
-        variant: Optional[str],
-        has_error: bool,
+        variant: Optional[str] = None,
+        has_error: bool = False,
         **kwargs
     ) -> None:
         """
