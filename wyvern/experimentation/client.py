@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import traceback
 from typing import Optional
 
 from wyvern.config import settings
@@ -56,6 +57,10 @@ class ExperimentationClient:
         try:
             result = self.provider.get_result(experiment_id, entity_id, **kwargs)
         except Exception as e:
+            logger.exception(
+                f"Error getting experiment result. Experiment ID: {experiment_id}, Entity ID: {entity_id} | "
+                f"{traceback.format_exc()}",
+            )
             error_message = str(e)
 
         self.provider.log_result(
