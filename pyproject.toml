@@ -29,6 +29,7 @@ more-itertools = "^9.1.0"
 tqdm = "^4.65.0"
 nest-asyncio = "^1.5.7"
 eppo-server-sdk = "^1.2.2"
+scipy = "1.10.1"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -52,6 +53,7 @@ build-backend = "poetry.core.masonry.api"
 
 [[tool.mypy.overrides]]
 module=[
+    "scipy.spatial.distance.*",
     "setuptools.*",
     "ddtrace.*",
     "nest_asyncio.*",
