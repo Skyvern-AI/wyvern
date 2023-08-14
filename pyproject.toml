@@ -52,9 +52,6 @@ build-backend = "poetry.core.masonry.api"
 
 [[tool.mypy.overrides]]
 module=[
-    "sentence_transformers.*",
-    "scipy.spatial.distance.*",
-    "featureform.*",
     "setuptools.*",
     "ddtrace.*",
     "nest_asyncio.*",
