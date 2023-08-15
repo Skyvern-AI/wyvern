@@ -16,7 +16,6 @@ PROJECT_STRUCTURE = {
     "ci": ["deploy.py"],
     ".env": None,
     ".gitignore": None,
-    "pyproject.toml": None,
 }
 
 
