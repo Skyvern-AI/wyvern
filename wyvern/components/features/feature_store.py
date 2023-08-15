@@ -101,7 +101,6 @@ class FeatureStoreRetrievalComponent(
                 features=feature_data,
             )
 
-        logger.info(f"Joined feature maps: {feature_map}")
         return FeatureMap(feature_map=feature_map)
 
     @tracer.wrap(name="FeatureStoreRetrievalComponent.execute")
