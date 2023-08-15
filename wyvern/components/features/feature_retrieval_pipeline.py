@@ -50,6 +50,7 @@ class FeatureRetrievalPipeline(
         self,
         *upstreams: Component,
         name: str,
+        handle_exceptions: bool = False,
     ):
         self.real_time_features: List[
             RealtimeFeatureComponent
@@ -60,6 +61,7 @@ class FeatureRetrievalPipeline(
         self.feature_logger_component: FeatureEventLoggingComponent = (
             FeatureEventLoggingComponent()
         )
+        self.handle_exceptions = handle_exceptions
         super().__init__(
             feature_store_retrieval_component,
             self.feature_logger_component,
@@ -120,7 +122,9 @@ class FeatureRetrievalPipeline(
 
         feature_retrieval_response: FeatureMap = (
             await self.feature_retrieval_component.execute(
-                input=feature_retrieval_request, **kwargs
+                input=feature_retrieval_request,
+                handle_exceptions=self.handle_exceptions,
+                **kwargs,
             )
         )
 
