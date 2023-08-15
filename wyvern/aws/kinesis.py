@@ -64,9 +64,6 @@ class WyvernKinesisFirehose:
     ):
         if not records:
             return
-        logger.info(
-            f"Sending {len(records)} records to {stream_name.get_stream_name()}",
-        )
         dict_records = [{"Data": record.json()} for record in records]
 
         record_chunks = [
