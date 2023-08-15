@@ -1,12 +1,15 @@
 [tool.poetry]
 name = "wyvern-ai"
-version = "0.0.6"
+version = "0.0.7"
 description = ""
 authors = ["Wyvern AI <info@wyvern.ai>"]
 readme = "README.md"
 packages = [
     { include = "wyvern" },
 ]
+
+[tool.poetry.scripts]
+wyvern = "wyvern.cli.commands:app"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
