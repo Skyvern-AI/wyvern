@@ -30,7 +30,7 @@ class WyvernError(Exception):
 
         self.request_id = request_id
         if self.request_id:
-            self._error_string = f"{self._error_string} (Request ID: {self.request_id})"
+            self._error_string = f"[request_id={self.request_id}] {self._error_string}"
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}: {self._error_string}"
