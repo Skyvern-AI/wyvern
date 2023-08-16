@@ -21,7 +21,7 @@ class PipelineComponent(APIRouteComponent[REQUEST_ENTITY, RESPONSE_SCHEMA]):
         self,
         *upstreams: Component,
         name: Optional[str] = None,
-        handle_feature_store_exception: bool = False,
+        handle_feature_store_exceptions: bool = False,
     ) -> None:
         for upstream in upstreams:
             if isinstance(upstream, FeatureRetrievalPipeline):
@@ -31,7 +31,7 @@ class PipelineComponent(APIRouteComponent[REQUEST_ENTITY, RESPONSE_SCHEMA]):
 
         self.feature_retrieval_pipeline = FeatureRetrievalPipeline[REQUEST_ENTITY](
             name=f"{self.__class__.__name__}-feature_retrieval",
-            handle_exceptions=handle_feature_store_exception,
+            handle_exceptions=handle_feature_store_exceptions,
         )
         self.feature_names: Set[str] = set()
         super().__init__(*upstreams, self.feature_retrieval_pipeline, name=name)
