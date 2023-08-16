@@ -2,6 +2,8 @@
 from ddtrace import tracer
 from ddtrace.filters import FilterRequestsOnUrl
 
+from wyvern.config import settings
+
 
 def setup_tracing():
     tracer.configure(
@@ -11,3 +13,6 @@ def setup_tracing():
             ],
         },
     )
+
+    if settings.ENVIRONMENT == "development":
+        tracer.enabled = False
