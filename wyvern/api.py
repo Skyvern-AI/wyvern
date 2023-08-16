@@ -201,7 +201,7 @@ class WyvernAPI:
         self,
         response: Union[httpx.Response, requests.Response],
     ) -> None:
-        raise WyvernError(f"Request failed [{response.status_code}]: {response.json()}")
+        raise WyvernError(f"Request failed [{response.status_code}]: {response.text}")
 
     def _convert_online_features_to_df(
         self,
