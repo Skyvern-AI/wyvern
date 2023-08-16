@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import asyncio
 import logging
-from time import time
 from typing import Generic, List, Optional, Set, Type
 
 from ddtrace import tracer
@@ -89,8 +88,6 @@ class FeatureRetrievalPipeline(
     async def execute(
         self, input: FeatureRetrievalPipelineRequest[REQUEST_ENTITY], **kwargs
     ) -> FeatureMap:
-        time_start = time()
-
         # Only evaluate real-time features where the output feature names are in the requested feature names
         # Or the client wants to evaluate the feature
         # TODO (suchintan): We don't support "chained" real-time features yet.. hopefully soon
@@ -123,10 +120,6 @@ class FeatureRetrievalPipeline(
                 input=feature_retrieval_request, **kwargs
             )
         )
-
-        # TODO (suchintan): Remove all timer related code
-        logger.info(f"operation feature_retrieval took:{time()-time_start:2.4f} sec")
-        time_start = time()
 
         """
         TODO (suchintan):
