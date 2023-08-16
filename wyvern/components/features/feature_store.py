@@ -73,7 +73,9 @@ class FeatureStoreRetrievalComponent(
         )
 
         if response.status_code != 200:
-            logger.error(f"Error fetching features from feature store: {response}")
+            logger.error(
+                f"Error fetching features from feature store: [{response.status_code}] {response.json()}",
+            )
             raise WyvernFeatureStoreError(error=response.json())
 
         # TODO (suchintan): More graceful response handling here
