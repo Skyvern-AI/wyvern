@@ -39,6 +39,10 @@ class WyvernRouteRegistrationError(WyvernError):
     )
 
 
+class ComponentAlreadyDefinedInPipelineComponentError(WyvernError):
+    message = "'{component_type}' is already defined by the PipelineComponent. It cannot be passed as an upstream!"
+
+
 class WyvernFeatureStoreError(WyvernError):
     message = "Received error from feature store: {error}"
 

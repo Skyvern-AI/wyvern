@@ -12,6 +12,7 @@ from wyvern.components.features.feature_retrieval_pipeline import (
 from wyvern.components.features.realtime_features_component import (
     RealtimeFeatureComponent,
 )
+from wyvern.exceptions import ComponentAlreadyDefinedInPipelineComponentError
 from wyvern.wyvern_typing import REQUEST_ENTITY, RESPONSE_SCHEMA
 
 
@@ -22,7 +23,12 @@ class PipelineComponent(APIRouteComponent[REQUEST_ENTITY, RESPONSE_SCHEMA]):
         name: Optional[str] = None,
         handle_feature_store_exception: bool = False,
     ) -> None:
-        # TODO Kerem: if upstreams has the FeatureRetrievalPipeline, then the code is broken
+        for upstream in upstreams:
+            if isinstance(upstream, FeatureRetrievalPipeline):
+                raise ComponentAlreadyDefinedInPipelineComponentError(
+                    component_type="FeatureRetrievalPipeline",
+                )
+
         self.feature_retrieval_pipeline = FeatureRetrievalPipeline[REQUEST_ENTITY](
             name=f"{self.__class__.__name__}-feature_retrieval",
             handle_exceptions=handle_feature_store_exception,
