@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from typing import Optional
 
+from wyvern import request_context
+
 
 class WyvernError(Exception):
     message = "Wyvern error"
@@ -19,6 +21,16 @@ class WyvernError(Exception):
         except Exception:
             # at least get the core message out if something happened
             self._error_string = self.message
+        wyvern_request = request_context.current()
+        request_id = None
+        if wyvern_request and wyvern_request.request_id:
+            request_id = wyvern_request.request_id
+        elif "request_id" in kwargs:
+            request_id = kwargs["request_id"]
+
+        self.request_id = request_id
+        if self.request_id:
+            self._error_string = f"{self._error_string} (Request ID: {self.request_id})"
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}: {self._error_string}"
