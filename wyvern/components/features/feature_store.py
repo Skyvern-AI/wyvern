@@ -8,7 +8,11 @@ from pydantic import BaseModel
 from wyvern.components.component import Component
 from wyvern.config import settings
 from wyvern.core.httpx import httpx_client
-from wyvern.entities.feature_entities import FeatureData, FeatureMap
+from wyvern.entities.feature_entities import (
+    FeatureData,
+    FeatureMap,
+    build_empty_feature_map,
+)
 from wyvern.entities.identifier import Identifier
 from wyvern.exceptions import WyvernFeatureNameError, WyvernFeatureStoreError
 from wyvern.wyvern_typing import WyvernFeature
@@ -69,7 +73,9 @@ class FeatureStoreRetrievalComponent(
         )
 
         if response.status_code != 200:
-            logger.error(f"Error fetching features from feature store: {response}")
+            logger.error(
+                f"Error fetching features from feature store: [{response.status_code}] {response.json()}",
+            )
             raise WyvernFeatureStoreError(error=response.json())
 
         # TODO (suchintan): More graceful response handling here
@@ -105,15 +111,25 @@ class FeatureStoreRetrievalComponent(
 
     @tracer.wrap(name="FeatureStoreRetrievalComponent.execute")
     async def execute(
-        self, input: FeatureStoreRetrievalRequest, **kwargs
+        self,
+        input: FeatureStoreRetrievalRequest,
+        handle_exceptions: bool = False,
+        **kwargs,
     ) -> FeatureMap:
         # TODO (suchintan): Integrate this with Feature Store
 
-        response = await self.fetch_features_from_feature_store(
-            input.identifiers,
-            input.feature_names,
-        )
-        return response
+        try:
+            response = await self.fetch_features_from_feature_store(
+                input.identifiers,
+                input.feature_names,
+            )
+            return response
+        except WyvernFeatureStoreError as e:
+            if handle_exceptions:
+                # logging is handled where the exception is raised
+                return build_empty_feature_map(input.identifiers, input.feature_names)
+            else:
+                raise e
 
 
 # TODO (suchintan): IS this the right way to define a singleton?

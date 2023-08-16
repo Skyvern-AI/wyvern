@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from typing import Dict
+from typing import Dict, List
 
 from pydantic.main import BaseModel
 
@@ -22,3 +22,18 @@ class FeatureData(BaseModel, frozen=True):
 
 class FeatureMap(BaseModel, frozen=True):
     feature_map: Dict[Identifier, FeatureData]
+
+
+def build_empty_feature_map(
+    identifiers: List[Identifier],
+    feature_names: List[str],
+) -> FeatureMap:
+    return FeatureMap(
+        feature_map={
+            identifier: FeatureData(
+                identifier=identifier,
+                features={feature: None for feature in feature_names},
+            )
+            for identifier in identifiers
+        },
+    )
