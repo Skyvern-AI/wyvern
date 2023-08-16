@@ -3,7 +3,11 @@ from datetime import datetime
 from typing import Any, Callable, List
 
 from wyvern import request_context
-from wyvern.components.events.events import CustomEvent, EntityEventData, LoggedEvent
+from wyvern.components.events.events import (
+    ENTITY_EVENT_DATA_TYPE,
+    CustomEvent,
+    LoggedEvent,
+)
 
 
 def log_events(event_generator: Callable[[], List[LoggedEvent]]):
@@ -22,7 +26,7 @@ def get_logged_events_generator() -> List[Callable[[], List[LoggedEvent[Any]]]]:
     return request_context.ensure_current_request().events
 
 
-def log_custom_events(events: List[EntityEventData]) -> None:
+def log_custom_events(events: List[ENTITY_EVENT_DATA_TYPE]) -> None:
     request = request_context.ensure_current_request()
     api_source = request.url_path
     request_id = request.request_id
