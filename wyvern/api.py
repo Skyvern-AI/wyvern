@@ -2,7 +2,7 @@
 import asyncio
 from typing import Any, Dict, Hashable, List, Optional, Union
 
-import httpx
+import aiohttp
 import nest_asyncio
 import pandas as pd
 import requests
@@ -31,7 +31,9 @@ class WyvernAPI:
         self.headers = {"x-api-key": api_key}
         self.base_url = base_url or settings.WYVERN_BASE_URL
         self.batch_size = batch_size
-        self.async_client = httpx.AsyncClient(timeout=HTTP_TIMEOUT)
+        self.async_client = aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=HTTP_TIMEOUT),
+        )
 
     def get_online_features(
         self,
@@ -192,16 +194,23 @@ class WyvernAPI:
         url = f"{self.base_url}{api_path}"
         response = await self.async_client.post(url, headers=self.headers, json=data)
 
-        if response.status_code != 200:
-            self._handle_failed_request(response)
+        if response.status != 200:
+            await self._handle_failed_async_request(response)
 
-        return response.json()
+        return await response.json()
 
     def _handle_failed_request(
         self,
-        response: Union[httpx.Response, requests.Response],
+        response: requests.Response,
     ) -> None:
         raise WyvernError(f"Request failed [{response.status_code}]: {response.text}")
+
+    async def _handle_failed_async_request(
+        self,
+        response: aiohttp.ClientResponse,
+    ) -> None:
+        text = await response.text()
+        raise WyvernError(f"Request failed [{response.status}]: {text}")
 
     def _convert_online_features_to_df(
         self,

@@ -21,7 +21,7 @@ from wyvern.components.models.model_component import (
     ModelComponent,
 )
 from wyvern.config import settings
-from wyvern.core.httpx import httpx_client
+from wyvern.core.http import aiohttp_client
 from wyvern.entities.identifier import Identifier
 from wyvern.entities.identifier_entities import WyvernEntity
 from wyvern.entities.request import BaseWyvernRequest
@@ -109,7 +109,7 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
 
         # split requests into smaller batches and parallelize them
         futures = [
-            httpx_client().post(
+            aiohttp_client().post(
                 self._modelbit_url,
                 headers=self.headers,
                 json={"data": all_requests[i : i + settings.MODELBIT_BATCH_SIZE]},
