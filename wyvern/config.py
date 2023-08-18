@@ -47,7 +47,7 @@ class Settings(BaseSettings):
 
     # experimentation configurations
     EXPERIMENTATION_ENABLED: bool = False
-    EXPERIMENTATION_PROVIDER: str = ExperimentationProvider.EPPO
+    EXPERIMENTATION_PROVIDER: str = ExperimentationProvider.EPPO.value
     EPPO_API_KEY: str = ""
 
     class Config:

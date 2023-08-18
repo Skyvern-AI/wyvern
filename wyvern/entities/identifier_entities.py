@@ -194,7 +194,7 @@ class QueryEntity(WyvernEntity):
     def generate_identifier(self) -> Identifier:
         return Identifier(
             identifier=self.query,
-            identifier_type=SimpleIdentifierType.QUERY,
+            identifier_type=SimpleIdentifierType.QUERY.value,
         )
 
 
@@ -204,7 +204,7 @@ class ProductEntity(WyvernEntity):
     def generate_identifier(self) -> Identifier:
         return Identifier(
             identifier=self.product_id,
-            identifier_type=SimpleIdentifierType.PRODUCT,
+            identifier_type=SimpleIdentifierType.PRODUCT.value,
         )
 
 
@@ -214,5 +214,5 @@ class UserEntity(WyvernEntity):
     def generate_identifier(self) -> Identifier:
         return Identifier(
             identifier=self.user_id,
-            identifier_type=SimpleIdentifierType.USER,
+            identifier_type=SimpleIdentifierType.USER.value,
         )

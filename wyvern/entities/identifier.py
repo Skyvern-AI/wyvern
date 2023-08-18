@@ -14,7 +14,7 @@ COMPOSITE_SEPARATOR = ":"
 logger = logging.getLogger(__name__)
 
 
-class SimpleIdentifierType(str, Enum):
+class SimpleIdentifierType(Enum):
     PRODUCT = "product"
     QUERY = "query"
     BRAND = "brand"
@@ -23,15 +23,13 @@ class SimpleIdentifierType(str, Enum):
     REQUEST = "request"
 
 
-class CompositeIdentifierType(str, Enum):
+class CompositeIdentifierType(Enum):
     @staticmethod
     def composite(
         primary_identifier_type: SimpleIdentifierType,
         secondary_identifier_type: SimpleIdentifierType,
     ) -> str:
-        return (
-            f"{primary_identifier_type}{COMPOSITE_SEPARATOR}{secondary_identifier_type}"
-        )
+        return f"{primary_identifier_type.value}{COMPOSITE_SEPARATOR}{secondary_identifier_type.value}"
 
     PRODUCT_QUERY = composite(
         SimpleIdentifierType.PRODUCT,
@@ -112,7 +110,7 @@ class CompositeIdentifier(Identifier):
         )
         super().__init__(
             identifier=identifier,
-            identifier_type=identifier_type,
+            identifier_type=identifier_type.value,
             primary_identifier=primary_identifier,
             secondary_identifier=secondary_identifier,
             **kwargs,

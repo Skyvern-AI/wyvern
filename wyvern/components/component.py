@@ -15,7 +15,7 @@ from wyvern.wyvern_typing import INPUT_TYPE, OUTPUT_TYPE, WyvernFeature
 logger = logging.getLogger(__name__)
 
 
-class ComponentStatus(str, Enum):
+class ComponentStatus(Enum):
     created = "created"
     initialized = "initialized"
     failed = "failed"
