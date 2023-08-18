@@ -45,7 +45,7 @@ class EppoExperimentationClient(BaseExperimentationProvider):
             eppo_client.init(client_config)
         except Exception as e:
             raise ExperimentationClientInitializationError(
-                provider_name=ExperimentationProvider.EPPO,
+                provider_name=ExperimentationProvider.EPPO.value,
                 error=e,
             )
 
