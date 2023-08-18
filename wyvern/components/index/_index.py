@@ -64,11 +64,11 @@ class IndexUploadComponent(
         entity_ids = await wyvern_redis.bulk_index(
             entities,
             entity_key,
-            input.entity_type,
+            input.entity_type.value,
         )
 
         return IndexResponse(
-            entity_type=input.entity_type,
+            entity_type=input.entity_type.value,
             entity_ids=entity_ids,
         )
 
@@ -85,10 +85,10 @@ class IndexDeleteComponent(
         input: DeleteEntitiesRequest,
         **kwargs,
     ) -> DeleteEntitiesResponse:
-        await WyvernIndex.bulk_delete(input.entity_type, input.entity_ids)
+        await WyvernIndex.bulk_delete(input.entity_type.value, input.entity_ids)
         return DeleteEntitiesResponse(
             entity_ids=input.entity_ids,
-            entity_type=input.entity_type,
+            entity_type=input.entity_type.value,
         )
 
 
@@ -105,13 +105,13 @@ class IndexGetComponent(
         **kwargs,
     ) -> GetEntitiesResponse:
         entities = await WyvernEntityIndex.bulk_get(
-            entity_type=input.entity_type,
+            entity_type=input.entity_type.value,
             entity_ids=input.entity_ids,
         )
         if len(entities) != len(input.entity_ids):
             raise WyvernError("Unexpected Error")
         entity_map = {input.entity_ids[i]: entities[i] for i in range(len(entities))}
         return GetEntitiesResponse(
-            entity_type=input.entity_type,
+            entity_type=input.entity_type.value,
             entities=entity_map,
         )
