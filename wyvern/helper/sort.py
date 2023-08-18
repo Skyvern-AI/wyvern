@@ -4,7 +4,7 @@ from enum import Enum
 from pydantic import BaseModel
 
 
-class SortEnum(Enum):
+class SortEnum(str, Enum):
     asc = "asc"
     desc = "desc"
 

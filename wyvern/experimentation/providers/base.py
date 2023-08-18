@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Optional
 
 
-class ExperimentationProvider(Enum):
+class ExperimentationProvider(str, Enum):
     EPPO = "eppo"
 
 

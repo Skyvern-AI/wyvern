@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 CHUNK_SIZE = 100
 
 
-class KinesisFirehoseStream(Enum):
+class KinesisFirehoseStream(str, Enum):
     EVENT_STREAM = "event-stream"
 
     def get_stream_name(

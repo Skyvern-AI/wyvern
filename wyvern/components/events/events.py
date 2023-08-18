@@ -9,7 +9,7 @@ from pydantic.generics import GenericModel
 EVENT_DATA = TypeVar("EVENT_DATA", bound=BaseModel)
 
 
-class EventType(Enum):
+class EventType(str, Enum):
     BUSINESS_LOGIC = "BUSINESS_LOGIC"
     CANDIDATE = "CANDIDATE"
     FEATURE = "FEATURE"
