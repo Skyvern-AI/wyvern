@@ -36,7 +36,7 @@ class IndexUploadComponent(
         bulk index entities with redis pipeline
         """
 
-        entity_internal_key = f"{input.entity_type}_id"
+        entity_internal_key = f"{input.entity_type.value}_id"
         entity_key: str = input.entity_key or entity_internal_key
 
         entities: List[Dict[str, Any]] = []
