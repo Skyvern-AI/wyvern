@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-import json
 from functools import cached_property
 from typing import Any, Dict, List, Optional, Set
 
-import httpx
 import pytest
+import pytest_asyncio
+from aioresponses import aioresponses
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
 
@@ -19,7 +19,9 @@ from wyvern.components.models.model_component import (
     ModelOutput,
 )
 from wyvern.components.pipeline_component import PipelineComponent
+from wyvern.config import settings
 from wyvern.core.compression import wyvern_encode
+from wyvern.core.http import aiohttp_client
 from wyvern.entities.candidate_entities import CandidateSetEntity
 from wyvern.entities.feature_entities import FeatureData, FeatureMap
 from wyvern.entities.identifier import Identifier
@@ -95,24 +97,16 @@ ONLINE_FEATURE_RESPNOSE = {
 }
 
 
-@pytest.fixture
-def mock_httpx_post(mocker):
-    mocked_httpx_async_client = httpx.AsyncClient()
-    with mocker.patch.object(
-        mocked_httpx_async_client,
-        "post",
-        return_value=httpx.Response(
-            status_code=200,
-            content=json.dumps(ONLINE_FEATURE_RESPNOSE),
-            headers={},
-            json=ONLINE_FEATURE_RESPNOSE,
-        ),
-    ):
-        with mocker.patch(
-            "wyvern.components.features.feature_store.httpx_client",
-            return_value=mocked_httpx_async_client,
-        ):
-            yield
+@pytest_asyncio.fixture
+async def mock_http_post(mocker):
+    with aioresponses() as m:
+        aiohttp_client.start()
+        m.post(
+            f"{settings.WYVERN_FEATURE_STORE_URL}{settings.WYVERN_ONLINE_FEATURES_PATH}",
+            payload=ONLINE_FEATURE_RESPNOSE,
+        )
+        yield
+        await aiohttp_client.stop()
 
 
 @pytest.fixture
@@ -487,7 +481,7 @@ async def test_hydrate__duplicate_brand(mock_redis__duplicate_brand):
 
 
 @pytest.mark.asyncio
-async def test_end_to_end(mock_redis, mock_httpx_post, test_client):
+async def test_end_to_end(mock_redis, mock_http_post, test_client):
     response = test_client.post(
         "/api/v1/product-search-ranking",
         json={

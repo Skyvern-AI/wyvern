@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wyvern-ai"
-version = "0.0.7"
+version = "0.0.8"
 description = ""
 authors = ["Wyvern AI <info@wyvern.ai>"]
 readme = "README.md"
@@ -9,7 +9,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.8,<3.12"
 pydantic = "^1.10.4"
 fastapi = "^0.95.2"
 uvicorn = "^0.22.0"
@@ -19,7 +19,6 @@ pyhumps = "^3.8.0"
 python-dotenv = "^1.0.0"
 pandas = "1.5.3"
 feast = {extras = ["redis", "snowflake"], version = "^0.31.1"}
-httpx = "^0.24.1"
 snowflake-connector-python = "3.0.3"
 boto3 = "^1.26.146"
 ddtrace = "^1.14.0"
@@ -30,6 +29,7 @@ tqdm = "^4.65.0"
 nest-asyncio = "^1.5.7"
 eppo-server-sdk = "^1.2.2"
 scipy = "1.10.1"
+aiohttp = {extras = ["speedups"], version = "^3.8.5"}
 
 
 [tool.poetry.group.dev.dependencies]
@@ -46,6 +46,7 @@ types-boto3 = "^1.0.2"
 pyinstrument = "^4.4.0"
 pytest-dotenv = "^0.5.2"
 ipykernel = "^6.25.0"
+aioresponses = "^0.7.4"
 
 [build-system]
 requires = ["poetry-core"]

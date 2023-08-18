@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from wyvern.components.component import Component
 from wyvern.config import settings
-from wyvern.core.httpx import httpx_client
+from wyvern.core.http import aiohttp_client
 from wyvern.entities.feature_entities import (
     FeatureData,
     FeatureMap,
@@ -66,21 +66,22 @@ class FeatureStoreRetrievalComponent(
         }
         # TODO (suchintan) -- chunk + parallelize this
         # TODO (Suchintan): This is currently busted in local development
-        response = await httpx_client().post(
+        response = await aiohttp_client().post(
             f"{self.feature_store_host}{settings.WYVERN_ONLINE_FEATURES_PATH}",
             headers=self.request_headers,
             json=request_body,
         )
 
-        if response.status_code != 200:
+        if response.status != 200:
+            resp_text = await response.text()
             logger.error(
-                f"Error fetching features from feature store: [{response.status_code}] {response.json()}",
+                f"Error fetching features from feature store: [{response.status}] {resp_text}",
             )
-            raise WyvernFeatureStoreError(error=response.json())
+            raise WyvernFeatureStoreError(error=resp_text)
 
         # TODO (suchintan): More graceful response handling here
 
-        response_json = response.json()
+        response_json = await response.json()
         feature_names = response_json["metadata"]["feature_names"]
         feature_name_keys = [
             feature_name.replace("__", ":", 1) for feature_name in feature_names

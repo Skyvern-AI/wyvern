@@ -61,6 +61,7 @@ repos:
           - tqdm
           - types-tqdm
           - nest-asyncio
+          - aiohttp
         exclude: "^tests/"
 
   # Check for spelling
