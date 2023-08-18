@@ -45,6 +45,14 @@ class ModelOutput(GenericModel, Generic[MODEL_OUTPUT_DATA_TYPE]):
         return self.data.get(identifier)
 
 
+class SingleEntityInput(
+    GenericModel,
+    Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
+):
+    request: REQUEST_ENTITY
+    entity: GENERALIZED_WYVERN_ENTITY
+
+
 class ModelInput(GenericModel, Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY]):
     request: REQUEST_ENTITY
     entities: List[GENERALIZED_WYVERN_ENTITY] = []
