@@ -2,18 +2,7 @@
 import asyncio
 import logging
 from functools import cached_property
-from typing import (
-    Any,
-    Dict,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TypeAlias,
-    Union,
-    get_args,
-)
+from typing import Any, Dict, List, Optional, Set, Tuple, TypeAlias, Union
 
 from wyvern.components.models.model_component import (
     MODEL_INPUT,
@@ -53,10 +42,6 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
             "Content-Type": "application/json",
         }
 
-        # TODO shu: test out the model_input_type
-        self.model_input_type = self.get_type_args_simple(0)
-        self.model_output_type = self.get_type_args_simple(1)
-
         if not self._auth_token:
             raise WyvernModelbitTokenMissingError()
 
@@ -67,10 +52,6 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
     @cached_property
     def manifest_feature_names(self) -> Set[str]:
         return set(self.modelbit_features)
-
-    @classmethod
-    def get_type_args_simple(cls, index: int) -> Type:
-        return get_args(cls.__orig_bases__[0])[index]  # type: ignore
 
     async def build_requests(
         self,

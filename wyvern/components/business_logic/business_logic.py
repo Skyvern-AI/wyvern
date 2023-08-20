@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Generic, List
+from typing import Generic, List, Optional
 
 from ddtrace import tracer
 from pydantic.generics import GenericModel
@@ -86,7 +86,7 @@ class BusinessLogicPipeline(
     def __init__(
         self,
         *upstreams: BusinessLogicComponent[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
-        name: str,
+        name: Optional[str] = None,
     ):
         self.ordered_upstreams = upstreams
         self.sorting_component: SortingComponent = SortingComponent(
