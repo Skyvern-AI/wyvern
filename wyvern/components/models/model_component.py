@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime
 from functools import cached_property
-from typing import Dict, Generic, List, Optional, Set, TypeVar, Union
+from typing import Dict, Generic, List, Optional, Set, Type, TypeVar, Union, get_args
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
@@ -78,6 +78,19 @@ class ModelComponent(
         MODEL_OUTPUT,
     ],
 ):
+    def __init__(
+        self,
+        *upstreams,
+        name: Optional[str] = None,
+    ):
+        super().__init__(*upstreams, name=name)
+        self.model_input_type = self.get_type_args_simple(0)
+        self.model_output_type = self.get_type_args_simple(1)
+
+    @classmethod
+    def get_type_args_simple(cls, index: int) -> Type:
+        return get_args(cls.__orig_bases__[0])[index]  # type: ignore
+
     @cached_property
     def manifest_feature_names(self) -> Set[str]:
         """
