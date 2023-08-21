@@ -3,13 +3,12 @@ from typing import List, TypeVar, Union
 
 from pydantic import BaseModel
 
-from wyvern.entities.identifier_entities import ProductEntity, WyvernEntity
+from wyvern.entities.identifier_entities import WyvernEntity
 from wyvern.entities.request import BaseWyvernRequest
 
 T = TypeVar("T")
 REQUEST_ENTITY = TypeVar("REQUEST_ENTITY", bound=BaseWyvernRequest)
 WYVERN_ENTITY = TypeVar("WYVERN_ENTITY", bound=WyvernEntity)
-PRODUCT_ENTITY = TypeVar("PRODUCT_ENTITY", bound=ProductEntity)
 GENERALIZED_WYVERN_ENTITY = TypeVar(
     "GENERALIZED_WYVERN_ENTITY",
     bound=Union[WyvernEntity, BaseWyvernRequest],
