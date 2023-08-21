@@ -379,12 +379,12 @@ def generate_wyvern_store_app(
         )
 
         for feast_response in feast_responses:
-            if len(feast_response.IDENTIFIER) != len(df.REQUEST_ID):
+            if len(feast_response.IDENTIFIER) != len(df["request"]):
                 raise HTTPException(
                     status_code=400,
                     detail=(
                         f"Length of feature store response({len(feast_response.IDENTIFIER)}) "
-                        f"and request({len(df.REQUEST_ID)}) should be the same"
+                        f"and request({len(df['request'])}) should be the same"
                     ),
                 )
             new_columns = [
@@ -399,6 +399,7 @@ def generate_wyvern_store_app(
             key.upper() for key in composite_entities.keys() if key.upper() in df
         ]
         drop_columns = composite_keys + composite_keys_uppercase + ["REQUEST_ID"]
+        drop_columns = [column for column in drop_columns if column in df]
         df.drop(columns=drop_columns, inplace=True)
         final_df = df.replace({np.nan: None})
         final_df["timestamp"] = final_df["timestamp"].astype(str)
