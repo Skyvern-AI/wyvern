@@ -25,47 +25,47 @@ from wyvern.entities.candidate_entities import ScoredCandidate
 from wyvern.entities.identifier_entities import QueryEntity
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.event_logging import event_logger
-from wyvern.wyvern_typing import PRODUCT_ENTITY
+from wyvern.wyvern_typing import WYVERN_ENTITY
 
 
-class ProductRankingRequest(
+class RankingRequest(
     BaseWyvernRequest,
     PaginationFields,
-    Generic[PRODUCT_ENTITY],
+    Generic[WYVERN_ENTITY],
 ):
     request_id: str
     query: QueryEntity
-    candidates: List[PRODUCT_ENTITY]
+    candidates: List[WYVERN_ENTITY]
 
 
-class ResponseProduct(BaseModel):
-    product_id: str
+class ResponseCandidate(BaseModel):
+    candidate_id: str
     ranked_score: float
 
 
-class ProductRankingResponse(GenericModel, Generic[PRODUCT_ENTITY]):
-    ranked_products: List[ResponseProduct]
+class RankingResponse(GenericModel, Generic[WYVERN_ENTITY]):
+    ranked_candidates: List[ResponseCandidate]
     events: Optional[List[LoggedEvent[Any]]]
 
 
-class ProductRankingPipeline(
-    PipelineComponent[ProductRankingRequest, ProductRankingResponse],
-    Generic[PRODUCT_ENTITY],
+class RankingPipeline(
+    PipelineComponent[RankingRequest, RankingResponse],
+    Generic[WYVERN_ENTITY],
 ):
-    PATH: str = "/product-ranking"
+    PATH: str = "/ranking"
 
     def __init__(self, name: Optional[str] = None):
         self.pagination_component = PaginationComponent[
-            ScoredCandidate[PRODUCT_ENTITY]
+            ScoredCandidate[WYVERN_ENTITY]
         ]()
         self.ranking_model = self.model()
         self.candidate_logging_component = CandidateEventLoggingComponent[
-            PRODUCT_ENTITY,
-            ProductRankingRequest[PRODUCT_ENTITY],
+            WYVERN_ENTITY,
+            RankingRequest[WYVERN_ENTITY],
         ]()
         self.impression_logging_component = ImpressionEventLoggingComponent[
-            PRODUCT_ENTITY,
-            ProductRankingRequest[PRODUCT_ENTITY],
+            WYVERN_ENTITY,
+            RankingRequest[WYVERN_ENTITY],
         ]()
         upstream_components = [
             self.pagination_component,
@@ -97,12 +97,12 @@ class ProductRankingPipeline(
 
     async def execute(
         self,
-        input: ProductRankingRequest[PRODUCT_ENTITY],
+        input: RankingRequest[WYVERN_ENTITY],
         **kwargs,
-    ) -> ProductRankingResponse[PRODUCT_ENTITY]:
-        ranked_candidates = await self.rank_products(input)
+    ) -> RankingResponse[WYVERN_ENTITY]:
+        ranked_candidates = await self.rank_candidates(input)
 
-        pagination_request = PaginationRequest[ScoredCandidate[PRODUCT_ENTITY]](
+        pagination_request = PaginationRequest[ScoredCandidate[WYVERN_ENTITY]](
             pagination_fields=input,
             entities=ranked_candidates,
         )
@@ -112,34 +112,34 @@ class ProductRankingPipeline(
 
         # TODO (suchintan): This should be automatic  -- add this to the pipeline abstraction
         impression_logging_request = ImpressionEventLoggingRequest[
-            PRODUCT_ENTITY,
-            ProductRankingRequest[PRODUCT_ENTITY],
+            WYVERN_ENTITY,
+            RankingRequest[WYVERN_ENTITY],
         ](
             scored_impressions=paginated_candidates,
             request=input,
         )
         await self.impression_logging_component.execute(impression_logging_request)
 
-        ranked_products = [
-            ResponseProduct(
-                product_id=candidate.entity.product_id,
+        response_ranked_candidates = [
+            ResponseCandidate(
+                candidate_id=candidate.entity.identifier.identifier,
                 ranked_score=candidate.score,
             )
             for candidate in paginated_candidates
         ]
 
-        response = ProductRankingResponse[PRODUCT_ENTITY](
-            ranked_products=ranked_products,
+        response = RankingResponse[WYVERN_ENTITY](
+            ranked_candidates=response_ranked_candidates,
             events=event_logger.get_logged_events() if input.include_events else None,
         )
 
         return response
 
-    async def rank_products(
+    async def rank_candidates(
         self,
-        request: ProductRankingRequest[PRODUCT_ENTITY],
-    ) -> List[ScoredCandidate[PRODUCT_ENTITY]]:
-        model_input = ModelInput[PRODUCT_ENTITY, ProductRankingRequest[PRODUCT_ENTITY]](
+        request: RankingRequest[WYVERN_ENTITY],
+    ) -> List[ScoredCandidate[WYVERN_ENTITY]]:
+        model_input = ModelInput[WYVERN_ENTITY, RankingRequest[WYVERN_ENTITY]](
             request=request,
             entities=request.candidates,
         )
@@ -150,7 +150,7 @@ class ProductRankingPipeline(
             ScoredCandidate(
                 entity=candidate,
                 score=(
-                    model_outputs.get(candidate.product_id) or 0
+                    model_outputs.get(candidate.identifier.identifier) or 0
                 ),  # TODO (shu): what to do if model score is None?
             )
             for i, candidate in enumerate(request.candidates)
@@ -158,8 +158,8 @@ class ProductRankingPipeline(
 
         if self.business_logic_pipeline:
             business_logic_request = BusinessLogicRequest[
-                PRODUCT_ENTITY,
-                ProductRankingRequest[PRODUCT_ENTITY],
+                WYVERN_ENTITY,
+                RankingRequest[WYVERN_ENTITY],
             ](
                 request=request,
                 scored_candidates=scored_candidates,
