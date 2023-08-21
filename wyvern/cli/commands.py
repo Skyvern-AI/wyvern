@@ -30,41 +30,45 @@ def _replace_info(project: str, author: Optional[str] = None):
 
 @app.command()
 def init(
-    project: str = typer.Argument(..., help="Name and path to initialize the project"),
+    project: str = typer.Argument(..., help="Name of the project"),
 ):
     typer.echo("Initializing Wyvern application template code...")
+    # validate project name
+    if "/" in project:
+        typer.echo("Error: Invalid project name. Project name cannot contain '/'")
+        return
+
     if Path(project).exists():
         typer.echo(f"Error: Destination path '{project}' already exists.")
         return
 
     response = requests.get(WYVERN_TEMPLATE_URL)
 
-    if response.status_code == 200:
-        with open("temp.zip", "wb") as temp_zip:
-            temp_zip.write(response.content)
-
-        with zipfile.ZipFile("temp.zip", "r") as zip_ref:
-            zip_ref.extractall(project)
-
-        os.remove("temp.zip")
-        # Flatten the extracted content into the destination directory
-        extracted_dir = os.path.join(project, os.listdir(project)[0])
-        for item in os.listdir(extracted_dir):
-            item_path = os.path.join(extracted_dir, item)
-            if os.path.isfile(item_path):
-                shutil.move(item_path, os.path.join(project, item))
-            elif os.path.isdir(item_path):
-                shutil.move(item_path, os.path.join(project, item))
-        shutil.rmtree(extracted_dir)
-
-        # replace the project name in pyproject.toml
-        _replace_info(project)
-
-        typer.echo(
-            f"Successfully initialized Wyvern application template code in {project}",
-        )
-    else:
+    if response.status_code != 200:
         typer.echo(f"Error: Unable to download code from {WYVERN_TEMPLATE_URL}")
+        return
+
+    with open("temp.zip", "wb") as temp_zip:
+        temp_zip.write(response.content)
+
+    with zipfile.ZipFile("temp.zip", "r") as zip_ref:
+        zip_ref.extractall(project)
+
+    os.remove("temp.zip")
+    # Flatten the extracted content into the destination directory
+    extracted_dir = os.path.join(project, os.listdir(project)[0])
+    for item in os.listdir(extracted_dir):
+        item_path = os.path.join(extracted_dir, item)
+        if os.path.isfile(item_path) or os.path.isdir(item_path):
+            shutil.move(item_path, os.path.join(project, item))
+    shutil.rmtree(extracted_dir)
+
+    # replace the project name and author in pyproject.toml
+    _replace_info(project)
+
+    typer.echo(
+        f"Successfully initialized Wyvern application template code in {project}",
+    )
 
 
 @app.command()
