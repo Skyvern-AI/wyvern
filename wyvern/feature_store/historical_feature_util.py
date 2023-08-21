@@ -219,7 +219,7 @@ def build_historical_registry_feature_requests(
         request_entities: Dict[str, List[Any]]
         if len(entities) == 1:
             request_entities = {
-                "IDENTIFIER": entity_values[entities[0]],
+                "IDENTIFIER": [str(v) for v in entity_values[entities[0]]],
             }
         else:
             list1 = entity_values[entities[0]]
