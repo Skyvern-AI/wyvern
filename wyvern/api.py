@@ -24,7 +24,6 @@ RETRY_PER_BATCH = 2
 def ensure_async_client(func: Callable) -> Callable:
     @wraps(func)
     def wrapper(self: WyvernAPI, *args, **kwargs):
-        print("setting up async_client")
         if self.async_client.closed:
             self.async_client = aiohttp.ClientSession(
                 timeout=aiohttp.ClientTimeout(total=HTTP_TIMEOUT),
