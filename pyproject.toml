@@ -75,3 +75,6 @@ log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 env_files = [
     ".testing_env",
 ]
+
+[tool.poetry.scripts]
+wyvern = "wyvern.cli.commands:app"
