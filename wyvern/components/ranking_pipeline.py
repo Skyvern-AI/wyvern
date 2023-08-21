@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Generic, List, Optional, Type
+from typing import Any, Generic, List, Optional
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
@@ -58,7 +58,7 @@ class RankingPipeline(
         self.pagination_component = PaginationComponent[
             ScoredCandidate[WYVERN_ENTITY]
         ]()
-        self.ranking_model = self.model()
+        self.ranking_model = self.model
         self.candidate_logging_component = CandidateEventLoggingComponent[
             WYVERN_ENTITY,
             RankingRequest[WYVERN_ENTITY],
@@ -67,15 +67,21 @@ class RankingPipeline(
             WYVERN_ENTITY,
             RankingRequest[WYVERN_ENTITY],
         ]()
+
         upstream_components = [
             self.pagination_component,
             self.ranking_model,
             self.candidate_logging_component,
             self.impression_logging_component,
         ]
-        self.business_logic_pipeline: Optional[BusinessLogicPipeline] = None
+        self.business_logic_pipeline: BusinessLogicPipeline
         if self.business_logic:
-            self.business_logic_pipeline = self.business_logic()
+            self.business_logic_pipeline = self.business_logic
+        else:
+            self.business_logic_pipeline = BusinessLogicPipeline[
+                WYVERN_ENTITY,
+                RankingRequest[WYVERN_ENTITY],
+            ]()
             upstream_components.append(self.business_logic_pipeline)
 
         super().__init__(
@@ -84,15 +90,17 @@ class RankingPipeline(
         )
 
     @property
-    def model(self) -> Type[ModelComponent]:
+    def model(self) -> ModelComponent:
         """
-        The model component input type should be a subclass of ModelInput.
-        Its output type should be scored candidates
+        This is the ranking model.
+
+        The model input should be a subclass of ModelInput.
+        Its output should be scored candidates
         """
         raise NotImplementedError
 
     @property
-    def business_logic(self) -> Optional[Type[BusinessLogicPipeline]]:
+    def business_logic(self) -> Optional[BusinessLogicPipeline]:
         return None
 
     async def execute(
@@ -145,7 +153,6 @@ class RankingPipeline(
         )
         model_outputs = await self.ranking_model.execute(model_input)
 
-        # does the scored_candidates need to be sorted?
         scored_candidates: List[ScoredCandidate] = [
             ScoredCandidate(
                 entity=candidate,
@@ -156,17 +163,16 @@ class RankingPipeline(
             for i, candidate in enumerate(request.candidates)
         ]
 
-        if self.business_logic_pipeline:
-            business_logic_request = BusinessLogicRequest[
-                WYVERN_ENTITY,
-                RankingRequest[WYVERN_ENTITY],
-            ](
-                request=request,
-                scored_candidates=scored_candidates,
-            )
+        business_logic_request = BusinessLogicRequest[
+            WYVERN_ENTITY,
+            RankingRequest[WYVERN_ENTITY],
+        ](
+            request=request,
+            scored_candidates=scored_candidates,
+        )
 
-            business_logic_response = await self.business_logic_pipeline.execute(
-                business_logic_request,
-            )
-            return business_logic_response.adjusted_candidates
-        return scored_candidates
+        # business_logic makes sure the candidates are sorted
+        business_logic_response = await self.business_logic_pipeline.execute(
+            business_logic_request,
+        )
+        return business_logic_response.adjusted_candidates

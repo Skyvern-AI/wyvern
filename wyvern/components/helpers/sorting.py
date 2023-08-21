@@ -14,9 +14,6 @@ class SortingComponent(
         List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]],
     ],
 ):
-    def __init__(self, name: str):
-        super().__init__(name=name)
-
     async def execute(
         self,
         input: List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]],
