@@ -14,7 +14,7 @@ from wyvern import request_context
 from wyvern.aws.kinesis import KinesisFirehoseStream, wyvern_kinesis_firehose
 from wyvern.components.api_route_component import APIRouteComponent
 from wyvern.config import settings
-from wyvern.core.httpx import httpx_client
+from wyvern.core.http import aiohttp_client
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.event_logging import event_logger
 from wyvern.exceptions import WyvernError, WyvernRouteRegistrationError
@@ -39,10 +39,10 @@ def _massage_path(path: str) -> str:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        httpx_client.start()
+        aiohttp_client.start()
         yield
     finally:
-        await httpx_client.stop()
+        await aiohttp_client.stop()
 
 
 class WyvernFastapi:

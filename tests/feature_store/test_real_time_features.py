@@ -18,21 +18,19 @@ def mock_redis(mocker):
     """
     Mocks the redis call. Each entry under `return_value` corresponds to a single entity fetch from Redis
     """
-    with mocker.patch(
+    mocker.patch(
         "wyvern.redis.wyvern_redis.mget",
         return_value=[None, None, None, None, None],
-    ):
-        yield
+    )
 
 
 @pytest.fixture
 def mock_feature_store(mocker):
-    with mocker.patch.object(
+    mocker.patch.object(
         feature_store_retrieval_component,
         "fetch_features_from_feature_store",
         return_value=FeatureMap(feature_map={}),
-    ):
-        yield
+    )
 
 
 @pytest.fixture
@@ -188,11 +186,10 @@ def mock_redis__2(mocker):
     """
     Mocks the redis call. Each entry under `return_value` corresponds to a single entity fetch from Redis
     """
-    with mocker.patch(
+    mocker.patch(
         "wyvern.redis.wyvern_redis.mget",
         return_value=[None, None, None, None, None, None],
-    ):
-        yield
+    )
 
 
 @pytest.mark.asyncio

@@ -25,7 +25,7 @@ class ExperimentationClient:
             return
 
         self.enabled = True
-        if provider_name == ExperimentationProvider.EPPO:
+        if provider_name == ExperimentationProvider.EPPO.value:
             logger.info("Using EPPO experimentation provider")
             self.provider = EppoExperimentationClient(api_key=api_key)
         else:

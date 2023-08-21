@@ -126,7 +126,7 @@ class RealTimeNumberOfCandidatesFeature(
         return FeatureData(
             identifier=Identifier(
                 identifier=request.request.request_id,
-                identifier_type=SimpleIdentifierType.REQUEST,
+                identifier_type=SimpleIdentifierType.REQUEST.value,
             ),
             features={
                 "f_number_of_candidates": len(request.request.candidates),
