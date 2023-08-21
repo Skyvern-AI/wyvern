@@ -2,7 +2,6 @@
 from typing import Any, Generic, List, Optional
 
 from pydantic import BaseModel
-from pydantic.generics import GenericModel
 
 from wyvern.components.business_logic.business_logic import (
     BusinessLogicPipeline,
@@ -33,7 +32,6 @@ class RankingRequest(
     PaginationFields,
     Generic[WYVERN_ENTITY],
 ):
-    request_id: str
     query: QueryEntity
     candidates: List[WYVERN_ENTITY]
 
@@ -43,7 +41,7 @@ class ResponseCandidate(BaseModel):
     ranked_score: float
 
 
-class RankingResponse(GenericModel, Generic[WYVERN_ENTITY]):
+class RankingResponse(BaseModel):
     ranked_candidates: List[ResponseCandidate]
     events: Optional[List[LoggedEvent[Any]]]
 
@@ -107,7 +105,7 @@ class RankingPipeline(
         self,
         input: RankingRequest[WYVERN_ENTITY],
         **kwargs,
-    ) -> RankingResponse[WYVERN_ENTITY]:
+    ) -> RankingResponse:
         ranked_candidates = await self.rank_candidates(input)
 
         pagination_request = PaginationRequest[ScoredCandidate[WYVERN_ENTITY]](
@@ -136,7 +134,7 @@ class RankingPipeline(
             for candidate in paginated_candidates
         ]
 
-        response = RankingResponse[WYVERN_ENTITY](
+        response = RankingResponse(
             ranked_candidates=response_ranked_candidates,
             events=event_logger.get_logged_events() if input.include_events else None,
         )
@@ -157,7 +155,7 @@ class RankingPipeline(
             ScoredCandidate(
                 entity=candidate,
                 score=(
-                    model_outputs.get(candidate.identifier.identifier) or 0
+                    model_outputs.data.get(candidate.identifier) or 0
                 ),  # TODO (shu): what to do if model score is None?
             )
             for i, candidate in enumerate(request.candidates)
