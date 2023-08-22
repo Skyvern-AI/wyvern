@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     WYVERN_INDEX_VERSION: int = 1
 
     MODELBIT_BATCH_SIZE: int = 30
+    MODEL_BATCH_SIZE: int = 30
 
     # experimentation configurations
     EXPERIMENTATION_ENABLED: bool = False
