@@ -80,7 +80,7 @@ class RankingPipeline(
                 WYVERN_ENTITY,
                 RankingRequest[WYVERN_ENTITY],
             ]()
-            upstream_components.append(self.business_logic_pipeline)
+        upstream_components.append(self.business_logic_pipeline)
 
         super().__init__(
             *upstream_components,
