@@ -107,7 +107,10 @@ def start_redis():
 @app.command()
 def init(
     project: str = typer.Argument(..., help="Name of the project"),
-):
+) -> None:
+    """
+    Initializes Wyvern application template code
+    """
     typer.echo("Initializing Wyvern application template code...")
     # validate project name
     if "/" in project:
@@ -158,7 +161,10 @@ def run(
         int,
         typer.Option(help="Port to run the application on. Default port is 5001"),
     ] = 5001,
-):
+) -> None:
+    """
+    Starts Wyvern application server
+    """
     typer.echo("Running your ML application")
     # import the app from path
     try:
@@ -179,5 +185,5 @@ def run(
 
 @app.command()
 def redis() -> None:
-    """Starts Redis server."""
+    """Starts Redis server. This command will also install redis locally if it's not installed."""
     start_redis()
