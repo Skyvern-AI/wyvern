@@ -5,7 +5,6 @@ from contextlib import asynccontextmanager
 from typing import Dict, Type
 
 import uvicorn
-from ddtrace import tracer
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
@@ -103,17 +102,15 @@ class WyvernFastapi:
             path,
             response_model=root_component.RESPONSE_SCHEMA_CLASS,
             response_model_exclude_none=True,
+            name=root_component.api_name,
         )
         async def post(
+            data: root_component.REQUEST_SCHEMA_CLASS,  # type: ignore
             fastapi_request: Request,
             background_tasks: BackgroundTasks,
         ) -> root_component.RESPONSE_SCHEMA_CLASS:  # type: ignore
-            with tracer.trace("wyvern.get_json"):
-                json = await fastapi_request.json()
-
+            json = await fastapi_request.json()
             try:
-                with tracer.trace("wyvern.parse_json"):
-                    data = root_component.REQUEST_SCHEMA_CLASS(**json)
                 # from pyinstrument import Profiler
                 # profiler = Profiler(async_mode="enabled")
                 # profiler.start()
