@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import deque
-from typing import Deque, List, Tuple, Type
+from typing import Deque, List, Optional, Tuple, Type
 
 from ddtrace import tracer
 
@@ -22,6 +22,12 @@ class APIRouteComponent(Component[REQUEST_SCHEMA, RESPONSE_SCHEMA]):
     REQUEST_SCHEMA_CLASS: Type[REQUEST_SCHEMA]
     # this is the class of response schema represented by pydantic BaseModel
     RESPONSE_SCHEMA_CLASS: Type[RESPONSE_SCHEMA]
+
+    API_NAME: str = ""
+
+    def __init__(self, *upstreams: Component, name: Optional[str] = None) -> None:
+        super().__init__(*upstreams, name=name)
+        self.api_name = self.API_NAME or self.name
 
     async def warm_up(self, input: REQUEST_SCHEMA) -> None:
         # TODO shu: hydrate

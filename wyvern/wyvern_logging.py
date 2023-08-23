@@ -26,4 +26,4 @@ def setup_logging():
                 # logging.basicConfig(level=logging.INFO)
     else:
         logging.basicConfig(level=logging.INFO)
-        logger.warning("Failed to load configuration file. Using default configs")
+        logger.debug("Failed to load configuration file. Using default configs")

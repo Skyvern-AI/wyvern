@@ -72,10 +72,9 @@ class WyvernKinesisFirehose:
         ]
         for chunk in record_chunks:
             if settings.ENVIRONMENT == "development":
-                logger.info(
-                    "Not sending records to Kinesis Firehose in development mode.",
+                logger.debug(
+                    "Not sending records to Kinesis Firehose in development mode. Records: {chunk}",
                 )
-                logger.debug(f"Records: {chunk}")
             else:
                 try:
                     self.firehose_client.put_record_batch(

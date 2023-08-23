@@ -1,8 +1,20 @@
 # -*- coding: utf-8 -*-
+import asyncio
 import logging
 from datetime import datetime
 from functools import cached_property
-from typing import Dict, Generic, List, Optional, Set, TypeVar, Union
+from typing import (
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Type,
+    TypeVar,
+    Union,
+    get_args,
+)
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
@@ -10,7 +22,10 @@ from pydantic.generics import GenericModel
 from wyvern import request_context
 from wyvern.components.component import Component
 from wyvern.components.events.events import EventType, LoggedEvent
+from wyvern.config import settings
 from wyvern.entities.identifier import Identifier
+from wyvern.entities.identifier_entities import WyvernEntity
+from wyvern.entities.request import BaseWyvernRequest
 from wyvern.event_logging import event_logger
 from wyvern.exceptions import WyvernModelInputError
 from wyvern.wyvern_typing import GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY
@@ -70,6 +85,19 @@ class ModelComponent(
         MODEL_OUTPUT,
     ],
 ):
+    def __init__(
+        self,
+        *upstreams,
+        name: Optional[str] = None,
+    ):
+        super().__init__(*upstreams, name=name)
+        self.model_input_type = self.get_type_args_simple(0)
+        self.model_output_type = self.get_type_args_simple(1)
+
+    @classmethod
+    def get_type_args_simple(cls, index: int) -> Type:
+        return get_args(cls.__orig_bases__[0])[index]  # type: ignore
+
     @cached_property
     def manifest_feature_names(self) -> Set[str]:
         """
@@ -113,37 +141,57 @@ class ModelComponent(
 
         return model_output
 
+    async def batch_inference(
+        self,
+        request: BaseWyvernRequest,
+        entities: List[Union[WyvernEntity, BaseWyvernRequest]],
+    ) -> Sequence[Optional[Union[float, str, List[float]]]]:
+        """
+        Define your model inference in a batched manner so that it's easier to boost inference speed
+        """
+        raise NotImplementedError
+
     async def inference(
         self,
         input: MODEL_INPUT,
         **kwargs,
     ) -> MODEL_OUTPUT:
-        raise NotImplementedError
+        """
+        The inference function is the main entrance to model evaluation.
 
+        By default, the base ModelComponent slices entities into smaller batches and call batch_inference on each batch.
 
-# class EmbeddingModelComponent(
-#     ModelComponent[List[INPUT_TYPE], List[Embeddings], MODEL_OUTPUT],
-#     Generic[INPUT_TYPE, MODEL_OUTPUT],
-# ):
-#     async def execute(self, input: List[INPUT_TYPE], **kwargs) -> List[Embeddings]:
-#         return await self.batch_embed(inputs=input, **kwargs)
+        The default batch size is 30. You should be able to configure the MODEL_BATCH_SIZE env variable
+        to change the batch size.
 
-#     async def batch_embed(self, inputs: List[INPUT_TYPE], **kwargs) -> List[Embeddings]:
-#         """
-#         Implement this function to get your model to embed a batch of inputs
-#         You should implement this when it's more efficient to embed a batch of inputs at once
-#             compared to embedding them in a loop
-#         """
-#         tasks = [self.embed(input=input) for input in inputs]
+        In order to set up model inference, you only need to define a class that inherits ModelComponent and
+        implement batch_inference.
 
-#         task_results = await asyncio.gather(*tasks, return_exceptions=False)
+        You can also override this function if you want to customize the inference logic.
+        """
+        target_entities: List[
+            Union[WyvernEntity, BaseWyvernRequest]
+        ] = input.entities or [input.request]
 
-#         # TODO (suchintan): Handle exceptions in the task handler
-#         return list(task_results)
+        # split entities into batches and parallelize the inferences
+        batch_size = settings.MODEL_BATCH_SIZE
+        futures = [
+            self.batch_inference(
+                request=input.request,
+                entities=target_entities[i : i + batch_size],
+            )
+            for i in range(0, len(target_entities), batch_size)
+        ]
+        batch_outputs = await asyncio.gather(*futures)
 
-#     @abstractmethod
-#     async def embed(self, input: INPUT_TYPE, **kwargs) -> Embeddings:
-#         """
-#         Implement this function to get your model to embed a particular input
-#         """
-#         ...
+        output_data: Dict[Identifier, Optional[Union[float, str, List[float]]]] = {}
+        # map each entity.identifier to its output
+        for batch_idx, batch_output in enumerate(batch_outputs):
+            for entity_idx, output in enumerate(batch_output):
+                entity = target_entities[batch_idx * batch_size + entity_idx]
+                output_data[entity.identifier] = output
+
+        return self.model_output_type(
+            data=output_data,
+            model_name=self.name,
+        )

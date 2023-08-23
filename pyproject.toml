@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wyvern-ai"
-version = "0.0.9"
+version = "0.0.10"
 description = ""
 authors = ["Wyvern AI <info@wyvern.ai>"]
 readme = "README.md"
@@ -30,6 +30,8 @@ nest-asyncio = "^1.5.7"
 eppo-server-sdk = "^1.2.2"
 scipy = "1.10.1"
 aiohttp = {extras = ["speedups"], version = "^3.8.5"}
+requests = "^2.31.0"
+platformdirs = "^3.10.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -75,3 +77,6 @@ log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 env_files = [
     ".testing_env",
 ]
+
+[tool.poetry.scripts]
+wyvern = "wyvern.cli.commands:app"
