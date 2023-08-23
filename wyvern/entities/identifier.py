@@ -23,13 +23,14 @@ class SimpleIdentifierType(str, Enum):
     REQUEST = "request"
 
 
+def composite(
+    primary_identifier_type: SimpleIdentifierType,
+    secondary_identifier_type: SimpleIdentifierType,
+) -> str:
+    return f"{primary_identifier_type.value}{COMPOSITE_SEPARATOR}{secondary_identifier_type.value}"
+
+
 class CompositeIdentifierType(str, Enum):
-    @staticmethod
-    def composite(
-        primary_identifier_type: SimpleIdentifierType,
-        secondary_identifier_type: SimpleIdentifierType,
-    ) -> str:
-        return f"{primary_identifier_type.value}{COMPOSITE_SEPARATOR}{secondary_identifier_type.value}"
 
     PRODUCT_QUERY = composite(
         SimpleIdentifierType.PRODUCT,
