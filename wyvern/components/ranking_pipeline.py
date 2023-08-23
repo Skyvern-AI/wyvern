@@ -56,7 +56,7 @@ class RankingPipeline(
         self.pagination_component = PaginationComponent[
             ScoredCandidate[WYVERN_ENTITY]
         ]()
-        self.ranking_model = self.model
+        self.ranking_model = self.get_model()
         self.candidate_logging_component = CandidateEventLoggingComponent[
             WYVERN_ENTITY,
             RankingRequest[WYVERN_ENTITY],
@@ -73,8 +73,9 @@ class RankingPipeline(
             self.impression_logging_component,
         ]
         self.business_logic_pipeline: BusinessLogicPipeline
-        if self.business_logic:
-            self.business_logic_pipeline = self.business_logic
+        business_logic = self.get_business_logic()
+        if business_logic:
+            self.business_logic_pipeline = business_logic
         else:
             self.business_logic_pipeline = BusinessLogicPipeline[
                 WYVERN_ENTITY,
@@ -87,8 +88,7 @@ class RankingPipeline(
             name=name,
         )
 
-    @property
-    def model(self) -> ModelComponent:
+    def get_model(self) -> ModelComponent:
         """
         This is the ranking model.
 
@@ -97,8 +97,7 @@ class RankingPipeline(
         """
         raise NotImplementedError
 
-    @property
-    def business_logic(self) -> Optional[BusinessLogicPipeline]:
+    def get_business_logic(self) -> Optional[BusinessLogicPipeline]:
         return None
 
     async def execute(
