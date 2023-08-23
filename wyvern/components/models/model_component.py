@@ -157,7 +157,17 @@ class ModelComponent(
         **kwargs,
     ) -> MODEL_OUTPUT:
         """
-        Slice entities into smaller batches and call batch_inference on each batch
+        The inference function is the main entrance to model evaluation.
+
+        By default, the base ModelComponent slices entities into smaller batches and call batch_inference on each batch.
+
+        The default batch size is 30. You should be able to configure the MODEL_BATCH_SIZE env variable
+        to change the batch size.
+
+        In order to set up model inference, you only need to define a class that inherits ModelComponent and
+        implement batch_inference.
+
+        You can also override this function if you want to customize the inference logic.
         """
         target_entities: List[
             Union[WyvernEntity, BaseWyvernRequest]
@@ -173,7 +183,6 @@ class ModelComponent(
             for i in range(0, len(target_entities), batch_size)
         ]
         batch_outputs = await asyncio.gather(*futures)
-        # merge the outputs from each batch
 
         output_data: Dict[Identifier, Optional[Union[float, str, List[float]]]] = {}
         # map each entity.identifier to its output
