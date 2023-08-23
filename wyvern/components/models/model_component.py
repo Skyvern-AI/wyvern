@@ -3,7 +3,18 @@ import asyncio
 import logging
 from datetime import datetime
 from functools import cached_property
-from typing import Dict, Generic, List, Optional, Set, Type, TypeVar, Union, get_args
+from typing import (
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Type,
+    TypeVar,
+    Union,
+    get_args,
+)
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
@@ -130,40 +141,15 @@ class ModelComponent(
 
         return model_output
 
-    async def single_inference(
-        self,
-        request: BaseWyvernRequest,
-        entity: Union[WyvernEntity, BaseWyvernRequest],
-    ) -> Union[float, str, List[float]]:
-        """
-        Single inference for ranking model
-        """
-        raise NotImplementedError
-
     async def batch_inference(
         self,
         request: BaseWyvernRequest,
         entities: List[Union[WyvernEntity, BaseWyvernRequest]],
-    ) -> Dict[Identifier, Optional[Union[float, str, List[float]]]]:
+    ) -> Sequence[Optional[Union[float, str, List[float]]]]:
         """
-        This function should be implemented to perform the actual model inference.
-        For performance reason, batch_inference should always be prioritized over multiple single_inferences.
-
-        The default batch_inference function will call single_inference for each entity
+        Define your model inference in a batched manner so that it's easier to boost inference speed
         """
-        model_score_batches = await asyncio.gather(
-            *[
-                self.single_inference(
-                    entity=entity,
-                    request=request,
-                )
-                for entity in entities
-            ]
-        )
-        return {
-            entity.identifier: model_score_batches[i]
-            for i, entity in enumerate(entities)
-        }
+        raise NotImplementedError
 
     async def inference(
         self,
@@ -190,8 +176,11 @@ class ModelComponent(
         # merge the outputs from each batch
 
         output_data: Dict[Identifier, Optional[Union[float, str, List[float]]]] = {}
-        for batch_output in batch_outputs:
-            output_data.update(batch_output)
+        # map each entity.identifier to its output
+        for batch_idx, batch_output in enumerate(batch_outputs):
+            for entity_idx, output in enumerate(batch_output):
+                entity = target_entities[batch_idx * batch_size + entity_idx]
+                output_data[entity.identifier] = output
 
         return self.model_output_type(
             data=output_data,
