@@ -32,6 +32,7 @@ scipy = "1.10.1"
 aiohttp = {extras = ["speedups"], version = "^3.8.5"}
 requests = "^2.31.0"
 platformdirs = "^3.10.0"
+posthog = "^3.0.2"
 
 
 [tool.poetry.group.dev.dependencies]
