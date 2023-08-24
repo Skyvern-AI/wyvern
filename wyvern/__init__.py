@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from wyvern.components.pipeline_component import PipelineComponent
+from wyvern.service import WyvernService
 from wyvern.wyvern_logging import setup_logging
 from wyvern.wyvern_tracing import setup_tracing
 
@@ -9,4 +10,5 @@ setup_tracing()
 
 __all__ = [
     "PipelineComponent",
+    "WyvernService",
 ]
