@@ -1,17 +1,14 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<h1 align="center">Wyvern</h1>
 
-- [Setup](#setup)
-  - [Set up PyEnv](#set-up-pyenv)
-  - [Set up Poetry env](#set-up-poetry-env)
-    - [1. Install Poetry](#1-install-poetry)
-    - [2. Set up Poetry to create virtual envs in the local directory](#2-set-up-poetry-to-create-virtual-envs-in-the-local-directory)
-    - [3. Python Version](#3-python-version)
-    - [4. Set up the virtual environment](#4-set-up-the-virtual-environment)
-    - [(Optional) 5. Set up auto-poetry shell spawning](#optional-5-set-up-auto-poetry-shell-spawning)
-  - [Set up Pre-commit](#set-up-pre-commit)
+<div align="center">
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+**[Wyvern](https://docs.wyvern.ai) is an open source Machine Learning platform for marketplaces**
+
+</div>
+
+<div align="center">
+  <img src="/docs/wyvern_logo.jpg" width="180px" alt="bentoml" />
+</div>
 
 # Setup
 
