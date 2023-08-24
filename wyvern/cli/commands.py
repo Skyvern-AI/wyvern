@@ -15,6 +15,8 @@ import uvicorn
 from platformdirs import user_data_dir
 from typing_extensions import Annotated
 
+from wyvern import tracking
+
 REDIS_VERSION = "redis-6.2.9"
 app = typer.Typer()
 WYVERN_TEMPLATE_URL = "https://codeload.github.com/Wyvern-AI/wyvern-starter/zip/main"
@@ -92,18 +94,6 @@ def try_install_redis():
     )
 
 
-def start_redis():
-    try_install_redis()
-
-    if is_redis_running():
-        typer.echo("Redis is already running.")
-        return
-
-    typer.echo("Starting Redis...")
-
-    subprocess.run([REDIS_BIN])
-
-
 @app.command()
 def init(
     project: str = typer.Argument(..., help="Name of the project"),
@@ -111,7 +101,9 @@ def init(
     """
     Initializes Wyvern application template code
     """
+    tracking.capture(event="oss_init_start")
     typer.echo("Initializing Wyvern application template code...")
+
     # validate project name
     if "/" in project:
         typer.echo("Error: Invalid project name. Project name cannot contain '/'")
@@ -145,6 +137,7 @@ def init(
     # replace the project name and author in pyproject.toml
     _replace_info(project)
 
+    tracking.capture(event="oss_init_succeed")
     typer.echo(
         f"Successfully initialized Wyvern application template code in {project}",
     )
@@ -165,12 +158,14 @@ def run(
     """
     Starts Wyvern application server
     """
+    tracking.capture(event="oss_run_start")
     typer.echo("Running your ML application")
     # import the app from path
     try:
         module_path, app_name = path.split(":")
         module = importlib.import_module(module_path)
     except ImportError:
+        tracking.capture(event="oss_run_failed_import")
         typer.echo(f"Failed to import {path}")
         raise
     fastapi_app = getattr(module, app_name)
@@ -180,10 +175,20 @@ def run(
         port=port,
     )
     uvicorn_server = uvicorn.Server(config=config)
+    tracking.capture(event="oss_run_succeed")
     uvicorn_server.run()
 
 
 @app.command()
 def redis() -> None:
     """Starts Redis server. This command will also install redis locally if it's not installed."""
-    start_redis()
+    tracking.capture(event="oss_redis_start")
+    try_install_redis()
+
+    if is_redis_running():
+        typer.echo("Redis is already running.")
+        return
+
+    typer.echo("Starting Redis...")
+    tracking.capture(event="oss_redis_succeed")
+    subprocess.run([REDIS_BIN])
