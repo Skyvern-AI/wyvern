@@ -13,6 +13,7 @@ from wyvern.clients.snowflake import generate_snowflake_ctx
 from wyvern.components.features.realtime_features_component import (
     RealtimeFeatureComponent,
 )
+from wyvern.config import settings
 from wyvern.exceptions import EntityColumnMissingError
 from wyvern.feature_store.constants import (
     FULL_FEATURE_NAME_SEPARATOR,
@@ -133,7 +134,7 @@ def process_historical_real_time_features_request(
         REQUEST_ID,
         FEATURE_IDENTIFIER AS {entity_identifier_type},
         {",".join(case_when_statements)}
-    from FEATURE_LOGS_PROD
+    from {settings.SNOWFLAKE_REALTIME_FEATURE_LOG_TABLE}
     where
         REQUEST_ID in ({','.join(['%s'] * len(request.request_ids))}) and
         FEATURE_IDENTIFIER in ({','.join(['%s'] * len(request.entity_identifiers))})
