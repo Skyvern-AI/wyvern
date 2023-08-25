@@ -10,10 +10,14 @@
   <img src="/docs/wyvern_logo.jpg" width="180px" alt="bentoml" />
 </div>
 
+<div align="center">
+  <a href="https://github.com/Wyvern-AI/wyvern/blob/main/LICENSE"><img src="https://badgen.net/badge/License/Elv2/green?icon=github"/></a>
+</div>
+
+## Refer [Wyvern's Official Doc](https://docs.wyvern.ai) For more
+
 ## Install Wyvern
 
 ```
 pip install wyvern-ai
 ```
-
-Please see check out [Wyvern's official doc](https://docs.wyvern.ai) for more.
