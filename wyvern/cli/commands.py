@@ -134,9 +134,6 @@ def init(
             shutil.move(item_path, os.path.join(project, item))
     shutil.rmtree(extracted_dir)
 
-    # replace the project name and author in pyproject.toml
-    _replace_info(project)
-
     tracking.capture(event="oss_init_succeed")
     typer.echo(
         f"Successfully initialized Wyvern application template code in {project}",
