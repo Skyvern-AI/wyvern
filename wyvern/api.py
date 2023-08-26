@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from functools import wraps
 from typing import Any, Callable, Dict, Hashable, List, Optional, Union
 
@@ -19,6 +20,7 @@ BATCH_SIZE = 15000
 HTTP_TIMEOUT = 180
 BATCH_SIZE_PER_GATHER = 4
 RETRY_PER_BATCH = 2
+RETRY_INTERVAL = 60
 
 
 def ensure_async_client(func: Callable) -> Callable:
@@ -156,6 +158,7 @@ class WyvernAPI:
                         )
                     break
                 except Exception as e:
+                    time.sleep(RETRY_INTERVAL)
                     retry_count += 1
                     if retry_count == RETRY_PER_BATCH:
                         raise e
