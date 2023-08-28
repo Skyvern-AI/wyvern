@@ -29,7 +29,13 @@ def separate_real_time_features(
     full_feature_names: Optional[List[str]],
 ) -> Tuple[List[str], List[str]]:
     """
-    Given a list of full feature names, separate real-time features and other features
+    Given a list of full feature names, separate real-time features and other features.
+
+    Args:
+        full_feature_names: a list of full feature names.
+
+    Returns:
+        Real time feature names and other feature names in two lists respectively.
     """
     if full_feature_names is None:
         return [], []
@@ -52,6 +58,17 @@ def build_historical_real_time_feature_requests(
     request_ids: List[str],
     entities: Dict[str, List[Any]],
 ) -> Dict[str, RequestEntityIdentifierObjects]:
+    """
+    Build historical real-time feature requests grouped by entity types so that we can process them in parallel.
+
+    Args:
+        full_feature_names: a list of full feature names.
+        request_ids: a list of request ids.
+        entities: a dictionary of entity names and their values.
+
+    Returns:
+        A dictionary of entity types and their corresponding requests.
+    """
     features_grouped_by_entity = group_realtime_features_by_entity_type(
         full_feature_names=full_feature_names,
     )
@@ -92,6 +109,15 @@ def build_historical_real_time_feature_requests(
 def process_historical_real_time_features_requests(
     requests: Dict[str, RequestEntityIdentifierObjects],
 ) -> Dict[str, pd.DataFrame]:
+    """
+    Given a dictionary of historical real-time feature requests, process them and return the results.
+
+    Args:
+        requests: a dictionary of entity types and their corresponding requests.
+
+    Returns:
+        A dictionary of entity types and their corresponding results in pandas dataframes.
+    """
     result: Dict[str, pd.DataFrame] = {}
     with generate_snowflake_ctx() as context:
         for entity_identifier_type, request in requests.items():
@@ -111,7 +137,15 @@ def process_historical_real_time_features_request(
     context: SnowflakeConnection,
 ) -> pd.DataFrame:
     """
-    entity_identifier_type: "product__query"
+    Given a historical real-time feature request, process it and return the results.
+
+    Args:
+        entity_identifier_type: the entity type of the request. E.g. "product__query"
+        request: the request object.
+        context: the snowflake connection context.
+
+    Returns:
+        The result in pandas dataframe.
     """
     case_when_statements = [
         f"MAX(CASE WHEN FEATURE_NAME = '{feature_name}' THEN FEATURE_VALUE END) AS {feature_name.replace(':', '__')}"
@@ -140,6 +174,12 @@ def group_realtime_features_by_entity_type(
 ) -> Dict[str, List[str]]:
     """
     Given a list of feature names, group them by their entity_identifier_type
+
+    Args:
+        full_feature_names: a list of full feature names.
+
+    Returns:
+        A dictionary of entity types and their corresponding feature names.
     """
     feature_entity_mapping: Dict[str, str] = {}
     for full_feature_name in full_feature_names:
@@ -167,6 +207,16 @@ def group_registry_features_by_entities(
     full_feature_names: List[str],
     store: FeatureStore,
 ) -> Dict[str, List[str]]:
+    """
+    Given a list of feature names, group them by their entity name.
+
+    Args:
+        full_feature_names: a list of full feature names.
+        store: the feast feature store.
+
+    Returns:
+        A dictionary of entity names and their corresponding feature names.
+    """
     entity_feature_mapping: Dict[str, List[str]] = defaultdict(list)
 
     # Precompute registry feature views and entity name mapping
@@ -193,6 +243,18 @@ def build_historical_registry_feature_requests(
     entity_values: Dict[str, List[Any]],
     timestamps: List[datetime],
 ) -> List[GetFeastHistoricalFeaturesRequest]:
+    """
+    Build historical feature requests grouped by entity names so that we can process them in parallel.
+
+    Args:
+        store: the feast feature store.
+        feature_names: a list of feature names.
+        entity_values: a dictionary of entity names and their values.
+        timestamps: a list of timestamps for getting historical features at those timestamps.
+
+    Returns:
+        A list of historical feature requests.
+    """
     features_grouped_by_entities = group_registry_features_by_entities(
         feature_names,
         store=store,
@@ -249,6 +311,13 @@ def process_historical_registry_features_requests(
 ) -> List[pd.DataFrame]:
     """
     Given a list of historical feature requests, process them and return the results
+
+    Args:
+        store: the feast feature store.
+        requests: a list of historical feature requests.
+
+    Returns:
+        A list of results in pandas dataframes.
     """
     results = []
     for request in requests:
@@ -263,6 +332,13 @@ def process_historical_registry_features_request(
 ) -> pd.DataFrame:
     """
     Given a historical feature request, process it and return the results
+
+    Args:
+        store: the feast feature store.
+        request: a historical feature request.
+
+    Returns:
+        The result in pandas dataframe.
     """
     entity_df = pd.DataFrame(request.entities)
     # no timezone is allowed in the timestamp

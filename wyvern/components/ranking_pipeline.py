@@ -32,16 +32,40 @@ class RankingRequest(
     PaginationFields,
     Generic[WYVERN_ENTITY],
 ):
+    """
+    This is the request for the ranking pipeline.
+
+    Attributes:
+        query: the query entity
+        candidates: the list of candidate entities
+    """
+
     query: QueryEntity
     candidates: List[WYVERN_ENTITY]
 
 
 class ResponseCandidate(BaseModel):
+    """
+    This is the response candidate.
+
+    Attributes:
+        candidate_id: the identifier of the candidate
+        ranked_score: the ranked score of the candidate
+    """
+
     candidate_id: str
     ranked_score: float
 
 
 class RankingResponse(BaseModel):
+    """
+    This is the response for the ranking pipeline.
+
+    Attributes:
+        ranked_candidates: the list of ranked candidates
+        events: the list of logged events
+    """
+
     ranked_candidates: List[ResponseCandidate]
     events: Optional[List[LoggedEvent[Any]]]
 
@@ -50,6 +74,13 @@ class RankingPipeline(
     PipelineComponent[RankingRequest, RankingResponse],
     Generic[WYVERN_ENTITY],
 ):
+    """
+    This is the ranking pipeline.
+
+    Attributes:
+        PATH: the path of the API. This is used in the API routing. The default value is "/ranking".
+    """
+
     PATH: str = "/ranking"
 
     def __init__(self, name: Optional[str] = None):
@@ -98,6 +129,16 @@ class RankingPipeline(
         raise NotImplementedError
 
     def get_business_logic(self) -> Optional[BusinessLogicPipeline]:
+        """
+        This is the business logic pipeline. It is optional. If not provided, the ranking pipeline will not
+        apply any business logic.
+
+        The business logic pipeline should be a subclass of BusinessLogicPipeline. Some examples of business logic
+        for ranking pipeline are:
+        1. Deduplication
+        2. Filtering
+        3. (De)boosting
+        """
         return None
 
     async def execute(
@@ -144,6 +185,19 @@ class RankingPipeline(
         self,
         request: RankingRequest[WYVERN_ENTITY],
     ) -> List[ScoredCandidate[WYVERN_ENTITY]]:
+        """
+        This function ranks the candidates.
+
+        1. It first calls the ranking model to get the model scores for the candidates.
+        2. It then calls the business logic pipeline to adjust the model scores.
+        3. It returns the adjusted candidates.
+
+        Args:
+            request: the ranking request
+
+        Returns:
+            A list of ScoredCandidate
+        """
         model_input = ModelInput[WYVERN_ENTITY, RankingRequest[WYVERN_ENTITY]](
             request=request,
             entities=request.candidates,

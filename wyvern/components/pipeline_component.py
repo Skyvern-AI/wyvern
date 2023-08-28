@@ -17,6 +17,12 @@ from wyvern.wyvern_typing import REQUEST_ENTITY, RESPONSE_SCHEMA
 
 
 class PipelineComponent(APIRouteComponent[REQUEST_ENTITY, RESPONSE_SCHEMA]):
+    """
+    PipelineComponent is the base class for all the pipeline components in Wyvern. It is a Component that
+    takes in a request entity and a response schema, and it is responsible for hydrating the request
+    data with Wyvern Index data, and then pass the hydrated data to the next component in the pipeline.
+    """
+
     def __init__(
         self,
         *upstreams: Component,

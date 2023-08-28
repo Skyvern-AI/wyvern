@@ -24,6 +24,17 @@ logger = logging.getLogger(__name__)
 
 
 class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
+    """
+    ModelbitComponent is a base class for all modelbit model components. It provides a common interface to implement
+    all modelbit models.
+
+    ModelbitComponent is a subclass of ModelComponent.
+
+    Attributes:
+        AUTH_TOKEN: A class variable that stores the auth token for Modelbit.
+        URL: A class variable that stores the url for Modelbit.
+    """
+
     AUTH_TOKEN: str = ""
     URL: str = ""
 
@@ -34,6 +45,16 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
         auth_token: Optional[str] = None,
         url: Optional[str] = None,
     ) -> None:
+        """
+        Args:
+            *upstreams: A list of upstream components.
+            name: A string that represents the name of the model.
+            auth_token: A string that represents the auth token for Modelbit.
+            url: A string that represents the url for Modelbit.
+
+        Raises:
+            WyvernModelbitTokenMissingError: If the auth token is not provided.
+        """
         super().__init__(*upstreams, name=name)
         self._auth_token = auth_token or self.AUTH_TOKEN
         self._modelbit_url = url or self.URL
@@ -47,10 +68,18 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
 
     @cached_property
     def modelbit_features(self) -> List[str]:
+        """
+        This is a cached property that returns a list of modelbit features. This method should be implemented by the
+        subclass.
+        """
         return []
 
     @cached_property
     def manifest_feature_names(self) -> Set[str]:
+        """
+        This is a cached property that returns a set of manifest feature names. This method wraps around the
+        modelbit_features property.
+        """
         return set(self.modelbit_features)
 
     async def build_requests(
@@ -78,6 +107,9 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
         return target_identifiers, all_requests
 
     async def inference(self, input: MODEL_INPUT, **kwargs) -> MODEL_OUTPUT:
+        """
+        This method sends a request to Modelbit and returns the output.
+        """
         # TODO shu: currently we don't support modelbit inference just for request if the input contains entities
 
         target_identifiers, all_requests = await self.build_requests(input)

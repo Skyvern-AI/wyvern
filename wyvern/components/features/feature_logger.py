@@ -14,6 +14,15 @@ from wyvern.wyvern_typing import REQUEST_ENTITY, WyvernFeature
 
 
 class FeatureLogEventData(BaseModel):
+    """Data for a feature event.
+
+    Attributes:
+        feature_identifier: The identifier of the feature.
+        feature_identifier_type: The type of the feature identifier.
+        feature_name: The name of the feature.
+        feature_value: The value of the feature.
+    """
+
     feature_identifier: str
     feature_identifier_type: str
     feature_name: str
@@ -21,6 +30,12 @@ class FeatureLogEventData(BaseModel):
 
 
 class FeatureEvent(LoggedEvent[FeatureLogEventData]):
+    """A feature event.
+
+    Attributes:
+        event_type: The type of the event. Defaults to EventType.FEATURE.
+    """
+
     event_type: EventType = EventType.FEATURE
 
 
@@ -28,6 +43,13 @@ class FeatureEventLoggingRequest(
     GenericModel,
     Generic[REQUEST_ENTITY],
 ):
+    """A request to log feature events.
+
+    Attributes:
+        request: The request to log feature events for.
+        feature_map: The feature map to log.
+    """
+
     request: REQUEST_ENTITY
     feature_map: FeatureMap
 
@@ -36,12 +58,20 @@ class FeatureEventLoggingComponent(
     Component[FeatureEventLoggingRequest[REQUEST_ENTITY], None],
     Generic[REQUEST_ENTITY],
 ):
+    """A component that logs feature events."""
+
     async def execute(
         self, input: FeatureEventLoggingRequest[REQUEST_ENTITY], **kwargs
     ) -> None:
+        """Logs feature events."""
         url_path = request_context.ensure_current_request().url_path
 
         def feature_event_generator():
+            """Generates feature events. This is a generator function that's called by the event logger. It's never called directly.
+
+            Returns:
+                A list of feature events.
+            """
             timestamp = datetime.utcnow()
             return [
                 FeatureEvent(

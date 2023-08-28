@@ -21,6 +21,15 @@ logger = logging.getLogger(__name__)
 
 
 class FeatureStoreRetrievalRequest(BaseModel):
+    """
+    Request to retrieve features from the feature store.
+
+    Attributes:
+        identifiers: List of identifiers for which features are to be retrieved.
+        feature_names: List of feature names to be retrieved. Feature names are of the form
+            `<feature_view_name>:<feature_name>`.
+    """
+
     identifiers: List[Identifier]
     # TODO (suchintan): Feature names are currently linked to feature views..
     #  we need to make that coupling more explicit
@@ -30,6 +39,20 @@ class FeatureStoreRetrievalRequest(BaseModel):
 class FeatureStoreRetrievalComponent(
     Component[FeatureStoreRetrievalRequest, FeatureMap],
 ):
+    """
+    Component to retrieve features from the feature store. This component is responsible for fetching features from
+    the feature store and returning them in the form of a FeatureMap. The FeatureMap is a mapping from identifiers to
+    FeatureData. The FeatureData contains the identifier and a mapping from feature names to feature values. The
+    feature names are of the form `<feature_view_name>:<feature_name>`. The feature values are of type WyvernFeature
+    which is a union of all the possible feature types. The feature types are defined in `wyvern/wyvern_typing.py`.
+    The FeatureStoreRetrievalComponent is a singleton and can be accessed via `feature_store_retrieval_component`.
+
+    The FeatureStoreRetrievalComponent is configured via the following environment variables:
+    - WYVERN_API_KEY
+    - WYVERN_FEATURE_STORE_URL
+    - WYVERN_ONLINE_FEATURES_PATH
+    """
+
     def __init__(
         self,
         feature_store_host: Optional[str] = None,
@@ -48,6 +71,16 @@ class FeatureStoreRetrievalComponent(
         identifiers: List[Identifier],
         feature_names: List[str],
     ) -> FeatureMap:
+        """
+        Fetches features from the feature store for the given identifiers and feature names.
+
+        Args:
+            identifiers: List of identifiers for which features are to be retrieved.
+            feature_names: List of feature names to be retrieved.
+
+        Returns:
+            FeatureMap containing the features for the given identifiers and feature names.
+        """
         if not feature_names:
             return FeatureMap(feature_map={})
 
@@ -117,6 +150,11 @@ class FeatureStoreRetrievalComponent(
         handle_exceptions: bool = False,
         **kwargs,
     ) -> FeatureMap:
+        """
+        Fetches features from the feature store for the given identifiers and feature names. This method is a wrapper
+        around `fetch_features_from_feature_store` which handles exceptions and returns an empty FeatureMap in case of
+        an exception.
+        """
         # TODO (suchintan): Integrate this with Feature Store
 
         try:
@@ -134,4 +172,7 @@ class FeatureStoreRetrievalComponent(
 
 
 # TODO (suchintan): IS this the right way to define a singleton?
+"""
+Singleton instance of FeatureStoreRetrievalComponent. This can be accessed via `feature_store_retrieval_component`.
+"""
 feature_store_retrieval_component = FeatureStoreRetrievalComponent()

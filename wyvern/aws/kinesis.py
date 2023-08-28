@@ -16,6 +16,15 @@ CHUNK_SIZE = 100
 
 
 class KinesisFirehoseStream(str, Enum):
+    """
+    Enum for Kinesis Firehose stream names
+
+    Usage:
+    ```
+    >>> KinesisFirehoseStream.EVENT_STREAM.get_stream_name()
+    ```
+    """
+
     EVENT_STREAM = "event-stream"
 
     def get_stream_name(
@@ -23,12 +32,21 @@ class KinesisFirehoseStream(str, Enum):
         customer_specific: bool = True,
         env_specific: bool = True,
     ) -> str:
+        """
+        Returns the stream name for the given stream
+
+        Args:
+            customer_specific: Whether the stream name should be customer specific
+            env_specific: Whether the stream name should be environment specific
+
+        Returns:
+            The stream name
+        """
         stream_name = self.value
         if customer_specific:
             stream_name = f"{settings.PROJECT_NAME}-{stream_name}"
 
         if env_specific:
-            # env_name = "production" if settings.ENVIRONMENT == "development" else settings.ENVIRONMENT
             env_name = settings.ENVIRONMENT
             stream_name = f"{stream_name}-{env_name}"
 
@@ -36,6 +54,10 @@ class KinesisFirehoseStream(str, Enum):
 
 
 class WyvernKinesisFirehose:
+    """
+    Wrapper around boto3 Kinesis Firehose client
+    """
+
     def __init__(self):
         self.firehose_client = boto3.client(
             "firehose",
@@ -49,6 +71,17 @@ class WyvernKinesisFirehose:
         stream_name: KinesisFirehoseStream,
         record_generator: List[Callable[[], List[BaseModel]]],
     ):
+        """
+        Puts records to the given stream. This is a callable that can be used with FastAPI's BackgroundTasks. This
+        way events can be logged asynchronously after the response is sent to the client.
+
+        Args:
+            stream_name (KinesisFirehoseStream): The stream to put records to
+            record_generator (List[Callable[[], List[BaseModel]]]): A list of functions that return a list of records
+
+        Returns:
+            None
+        """
         with tracer.trace("flush_records_to_kinesis_firehose"):
             records = [
                 record
@@ -62,6 +95,16 @@ class WyvernKinesisFirehose:
         stream_name: KinesisFirehoseStream,
         records: List[BaseModel],
     ):
+        """
+        Puts records to the given stream
+
+        Args:
+            stream_name (KinesisFirehoseStream): The stream to put records to
+            records (List[BaseModel]): A list of records
+
+        Returns:
+            None
+        """
         if not records:
             return
         dict_records = [{"Data": record.json()} for record in records]

@@ -21,3 +21,4 @@ REQUEST_SCHEMA = TypeVar("REQUEST_SCHEMA", bound=BaseModel)
 RESPONSE_SCHEMA = TypeVar("RESPONSE_SCHEMA", bound=BaseModel)
 
 WyvernFeature = Union[float, str, List[float], None]
+"""A WyvernFeature defines the type of a feature in Wyvern. It can be a float, a string, a list of floats, or None."""

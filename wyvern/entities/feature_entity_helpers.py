@@ -6,12 +6,18 @@ from wyvern.entities.identifier import Identifier
 
 
 def feature_map_join(*feature_maps: FeatureMap) -> FeatureMap:
+    """
+    Joins multiple feature maps into a single feature map. Used to join feature maps from different sources.
+    """
     return feature_map_create(
         *[value for map in feature_maps for value in map.feature_map.values()]
     )
 
 
 def feature_map_create(*feature_data: Optional[FeatureData]) -> FeatureMap:
+    """
+    Creates a feature map from a list of feature data. Used to create feature maps from different sources.
+    """
     feature_map: Dict[Identifier, FeatureData] = {}
     for data in feature_data:
         if data is None:

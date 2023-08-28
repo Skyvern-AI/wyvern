@@ -11,6 +11,7 @@ timeout = aiohttp.ClientTimeout(total=DEFAULT_REQUEST_TIMEOUT)
 
 
 class AiohttpClientWrapper:
+    """AiohttpClientWrapper is a singleton wrapper around aiohttp.ClientSession."""
 
     async_client = None
 
@@ -36,3 +37,12 @@ class AiohttpClientWrapper:
 
 
 aiohttp_client = AiohttpClientWrapper()
+"""
+The aiohttp client singleton. Use this to make requests.
+
+Example:
+    ```python
+    from wyvern.core.http import aiohttp_client
+    aiohttp_client().get("https://www.wyvern.ai")
+    ```
+"""

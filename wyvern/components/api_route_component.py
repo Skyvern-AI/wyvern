@@ -13,6 +13,23 @@ from wyvern.wyvern_typing import REQUEST_SCHEMA, RESPONSE_SCHEMA
 
 
 class APIRouteComponent(Component[REQUEST_SCHEMA, RESPONSE_SCHEMA]):
+    """
+    APIRouteComponent is the base class for all the API routes in Wyvern. It is a Component that
+    takes in a request schema and a response schema, and it is responsible for hydrating the request
+    data with Wyvern Index data, and then pass the hydrated data to the next component in the pipeline.
+
+    The APIRouteComponent is also responsible for the API routing, which means it is responsible for
+    the API versioning and the API path.
+
+    Attributes:
+        API_VERSION: the version of the API. This is used in the API routing. The default value is "v1".
+        PATH: the path of the API. This is used in the API routing.
+        REQUEST_SCHEMA_CLASS: the class of the request schema. This is used to validate the request data.
+        RESPONSE_SCHEMA_CLASS: the class of the response schema. This is used to validate the response data.
+        API_NAME: the name of the API. This is used in the API routing. If not provided, the name of the
+            APIRouteComponent will be used.
+    """
+
     # this is the api version
     API_VERSION: str = "v1"
 
@@ -30,6 +47,9 @@ class APIRouteComponent(Component[REQUEST_SCHEMA, RESPONSE_SCHEMA]):
         self.api_name = self.API_NAME or self.name
 
     async def warm_up(self, input: REQUEST_SCHEMA) -> None:
+        """
+        This is the warm-up function that is called before the API route is called.
+        """
         # TODO shu: hydrate
         await self.hydrate(input)
         return
@@ -55,6 +75,16 @@ class APIRouteComponent(Component[REQUEST_SCHEMA, RESPONSE_SCHEMA]):
         identifiers: List[Identifier],
         queue: Deque[WyvernDataModel],
     ) -> Tuple[List[Identifier], Deque[WyvernDataModel]]:
+        """
+        This is a helper function for hydrate. It does a BFS on the input WyvernDataModel and hydrate the data.
+
+        Args:
+            identifiers: a list of identifiers that need to be hydrated
+            queue: a queue of WyvernDataModel that need to be hydrated
+
+        Returns:
+            The next level identifiers and the next level queue
+        """
         current_request = request_context.ensure_current_request()
 
         # load all the entities from Wyvern Index to self.entity_store

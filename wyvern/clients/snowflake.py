@@ -5,6 +5,9 @@ from wyvern.config import settings
 
 
 def generate_snowflake_ctx() -> snowflake.connector.SnowflakeConnection:
+    """
+    Generate a Snowflake context from the settings
+    """
     return snowflake.connector.connect(
         user=settings.SNOWFLAKE_USER,
         password=settings.SNOWFLAKE_PASSWORD,

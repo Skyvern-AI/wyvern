@@ -17,6 +17,14 @@ from wyvern.wyvern_typing import REQUEST_ENTITY
 
 
 class CandidateEventData(EntityEventData):
+    """
+    Event data for a candidate event
+
+    Attributes:
+        candidate_score: The score of the candidate
+        candidate_order: The order of the candidate in the list of candidates
+    """
+
     candidate_score: float
     candidate_order: int
 

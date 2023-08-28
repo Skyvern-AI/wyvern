@@ -23,10 +23,16 @@ logger = logging.getLogger(__name__)
 
 
 def _dedupe_slash(path: str) -> str:
+    """
+    Remove duplicate slashes from a path.
+    """
     return path.replace("//", "/")
 
 
 def _massage_path(path: str) -> str:
+    """
+    Massage a path to be suitable for use in a URL.
+    """
     massaged_path = _dedupe_slash(path)
     if massaged_path and massaged_path[0] != "/":
         massaged_path = "/" + massaged_path
@@ -37,6 +43,9 @@ def _massage_path(path: str) -> str:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    A context manager that starts and stops with the app. This is used to start and stop the aiohttp client.
+    """
     try:
         aiohttp_client.start()
         yield
@@ -46,6 +55,12 @@ async def lifespan(app: FastAPI):
 
 class WyvernFastapi:
     """
+    A wrapper around FastAPI that provides a few additional features:
+    - A healthcheck endpoint
+    - A request middleware that logs the request and response payloads
+    - A request middleware that sets the WyvernRequest in the request context
+    - Auto registration of routes from APIRouteComponent subclasses
+
     endpoint input:
         the built WyvernPipeline
         the request input schema
@@ -89,7 +104,13 @@ class WyvernFastapi:
         route_component: Type[APIRouteComponent],
     ) -> None:
         """
-        Support post request
+        Register a route component. This will register the route with FastAPI and also initialize the route component.
+
+        Args:
+            route_component: The route component to register.
+
+        Raises:
+            WyvernRouteRegistrationError: If the route component is not a subclass of APIRouteComponent.
         """
         if not issubclass(route_component, APIRouteComponent):
             raise WyvernRouteRegistrationError(component=route_component)
@@ -109,6 +130,19 @@ class WyvernFastapi:
             fastapi_request: Request,
             background_tasks: BackgroundTasks,
         ) -> root_component.RESPONSE_SCHEMA_CLASS:  # type: ignore
+            """
+            The main entrypoint for the route component. This will parse the request payload, set the WyvernRequest in
+            the request context, warm up the route component, execute the route component, and log the events to
+            Kinesis Firehose in the background.
+
+            Args:
+                data: The request payload.
+                fastapi_request: The FastAPI request object.
+                background_tasks: The FastAPI background tasks object.
+
+            Returns:
+                The response payload.
+            """
             json = await fastapi_request.json()
             try:
                 # from pyinstrument import Profiler
