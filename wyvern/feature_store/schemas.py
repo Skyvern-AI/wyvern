@@ -13,7 +13,8 @@ class GetOnlineFeaturesRequest(BaseModel):
         entities: A dictionary of entity name to entity value.
         features: A list of feature names.
         full_feature_names: A boolean indicating whether to return full feature names. If True, the feature names will
-        be returned in the format `<feature_view_name>__<feature_name>`. If False, only the feature names will be returned
+        be returned in the format `<feature_view_name>__<feature_name>`. If False, only the feature names will be
+        returned.
     """
 
     entities: Dict[str, Any] = {}
