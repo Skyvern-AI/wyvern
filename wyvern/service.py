@@ -23,9 +23,9 @@ class WyvernService:
     """
     The class to define, generate and run a Wyvern service
 
-    Args:
-        host (str, optional): The host to run the service on. Defaults to localhost.
-        port (int, optional): The port to run the service on. Defaults to 5000.
+    Attributes:
+        host: The host to run the service on. Defaults to localhost.
+        port: The port to run the service on. Defaults to 5000.
     """
 
     def __init__(
@@ -46,7 +46,7 @@ class WyvernService:
         Register the routes for the Wyvern service
 
         Args:
-            route_components (List[Type[APIRouteComponent]]): The list of route components to register
+            route_components: The list of route components to register
 
         Returns:
             None
