@@ -315,10 +315,20 @@ class FeatureRetrievalPipeline(
             current_request.extend_feature_map(real_time_feature_responses)
 
         with tracer.trace("FeatureRetrievalPipeline.create_feature_response"):
+            features_to_log = real_time_feature_responses
+            if input.request.include_events:
+                features_to_log = feature_map_create(
+                    *real_time_request_no_entity_features,
+                    *real_time_request_features,
+                    *real_time_request_combination_features,
+                    *real_time_candidate_features,
+                    *real_time_candidate_combination_features,
+                    *feature_retrieval_response.feature_map.values(),
+                )
             await self.feature_logger_component.execute(
                 FeatureEventLoggingRequest(
                     request=input.request,
-                    feature_map=real_time_feature_responses,
+                    feature_map=features_to_log,
                 ),
             )
 
