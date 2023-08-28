@@ -410,6 +410,7 @@ def generate_wyvern_store_app(
                 right_on=["REQUEST_ID", entity_identifier_type.upper()],
                 how="left",
             )
+            df.drop(columns=["REQUEST_ID"], inplace=True)
 
         feast_requests = build_historical_registry_feature_requests(
             store=store,

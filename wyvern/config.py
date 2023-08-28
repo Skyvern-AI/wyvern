@@ -69,6 +69,7 @@ class Settings(BaseSettings):
     SNOWFLAKE_WAREHOUSE: str = ""
     SNOWFLAKE_DATABASE: str = ""
     SNOWFLAKE_OFFLINE_STORE_SCHEMA: str = "PUBLIC"
+    SNOWFLAKE_REALTIME_FEATURE_LOG_TABLE: str = "FEATURE_LOGS"
 
     # NOTE: aws configs are used for feature logging with AWS firehose
     AWS_ACCESS_KEY_ID: str = ""

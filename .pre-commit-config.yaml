@@ -102,10 +102,6 @@ repos:
             ^\.pre-commit-config.yaml$ |
             poetry.lock$
           )
-  - repo: https://github.com/thlorenz/doctoc
-    rev: v2.2.0
-    hooks:
-      - id: doctoc
   - repo: https://github.com/pycqa/isort
     rev: 5.12.0
     hooks:

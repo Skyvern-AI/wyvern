@@ -150,3 +150,7 @@ class ExperimentationClientInitializationError(WyvernError):
     """
 
     message = "Failed to initialize experimentation client for provider: {provider_name}, {error}"
+
+
+class EntityColumnMissingError(WyvernError):
+    message = "Entity column {entity} is missing in the entity data"

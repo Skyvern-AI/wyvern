@@ -13,6 +13,8 @@ from wyvern.clients.snowflake import generate_snowflake_ctx
 from wyvern.components.features.realtime_features_component import (
     RealtimeFeatureComponent,
 )
+from wyvern.config import settings
+from wyvern.exceptions import EntityColumnMissingError
 from wyvern.feature_store.constants import (
     FULL_FEATURE_NAME_SEPARATOR,
     SQL_COLUMN_SEPARATOR,
@@ -85,6 +87,15 @@ def build_historical_real_time_feature_requests(
         curr_feature_names,
     ) in features_grouped_by_entity.items():
         entity_list = entity_identifier_type.split(SQL_COLUMN_SEPARATOR)
+
+        # validate entity_list
+        for entity in entity_list:
+            if entity not in entities:
+                raise EntityColumnMissingError(entity=entity)
+
+        if len(entity_list) > 2:
+            return result_dict
+
         if len(entity_list) == 1:
             # could just get all the entity_identifiers from the entities dict right away
             result_dict[entity_identifier_type] = RequestEntityIdentifierObjects(
@@ -157,7 +168,7 @@ def process_historical_real_time_features_request(
         REQUEST_ID,
         FEATURE_IDENTIFIER AS {entity_identifier_type},
         {",".join(case_when_statements)}
-    from FEATURE_LOGS_PROD
+    from {settings.SNOWFLAKE_REALTIME_FEATURE_LOG_TABLE}
     where
         REQUEST_ID in ({','.join(['%s'] * len(request.request_ids))}) and
         FEATURE_IDENTIFIER in ({','.join(['%s'] * len(request.entity_identifiers))})
