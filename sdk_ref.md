@@ -12,7 +12,7 @@
 
 <a id="wyvern.clients.snowflake.generate_snowflake_ctx"></a>
 
-#### generate_snowflake_ctx
+#### generate\_snowflake\_ctx
 
 ```python
 def generate_snowflake_ctx() -> snowflake.connector.SnowflakeConnection
@@ -41,7 +41,7 @@ The class to define, generate and run a Wyvern service
 
 <a id="wyvern.service.WyvernService.register_routes"></a>
 
-#### register_routes
+#### register\_routes
 
 ```python
 async def register_routes(
@@ -53,10 +53,11 @@ Register the routes for the Wyvern service
 **Arguments**:
 
 - `route_components` - The list of route components to register
+  
 
 **Returns**:
 
-None
+  None
 
 <a id="wyvern.service.WyvernService.generate"></a>
 
@@ -80,6 +81,7 @@ Generate a Wyvern service
 - `realtime_feature_components` - The list of realtime feature components to register. Defaults to None.
 - `host` - The host to run the service on. Defaults to localhost.
 - `port` - The port to run the service on. Defaults to 5000.
+  
 
 **Returns**:
 
@@ -107,14 +109,15 @@ Generate and run a Wyvern service
 - `realtime_feature_components` - The list of realtime feature components to register. Defaults to None.
 - `host` - The host to run the service on. Defaults to localhost.
 - `port` - The port to run the service on. Defaults to 5000.
+  
 
 **Returns**:
 
-None
+  None
 
 <a id="wyvern.service.WyvernService.generate_app"></a>
 
-#### generate_app
+#### generate\_app
 
 ```python
 @staticmethod
@@ -135,6 +138,7 @@ Generate a Wyvern service and return the FastAPI app
 - `realtime_feature_components` - The list of realtime feature components to register. Defaults to None.
 - `host` _str, optional_ - The host to run the service on. Defaults to localhost.
 - `port` _int, optional_ - The port to run the service on. Defaults to 5000.
+  
 
 **Returns**:
 
@@ -163,13 +167,13 @@ in production for secrets you do not wish to save in code
 - `PROJECT_NAME` - The name of the project
 - `REDIS_HOST` - The host of the redis instance
 - `REDIS_PORT` - The port of the redis instance
-
+  
 - `WYVERN_API_KEY` - The API key for the Wyvern API
 - `WYVERN_BASE_URL` - The base url of the Wyvern API
 - `WYVERN_ONLINE_FEATURES_PATH` - The path to the online features endpoint
 - `WYVERN_HISTORICAL_FEATURES_PATH` - The path to the historical features endpoint
 - `WYVERN_FEATURE_STORE_URL` - The url of the Wyvern feature store
-
+  
 - `SNOWFLAKE_ACCOUNT` - The account name of the Snowflake instance
 - `SNOWFLAKE_USER` - The username of the Snowflake instance
 - `SNOWFLAKE_PASSWORD` - The password of the Snowflake instance
@@ -177,18 +181,18 @@ in production for secrets you do not wish to save in code
 - `SNOWFLAKE_WAREHOUSE` - The warehouse of the Snowflake instance
 - `SNOWFLAKE_DATABASE` - The database of the Snowflake instance
 - `SNOWFLAKE_OFFLINE_STORE_SCHEMA` - The schema of the Snowflake instance
-
+  
 - `AWS_ACCESS_KEY_ID` - The access key id for the AWS instance
 - `AWS_SECRET_ACCESS_KEY` - The secret access key for the AWS instance
 - `AWS_REGION_NAME` - The region name for the AWS instance
-
+  
 - `FEATURE_STORE_TIMEOUT` - The timeout for the feature store
 - `SERVER_TIMEOUT` - The timeout for the server
-
+  
 - `REDIS_BATCH_SIZE` - The batch size for the redis instance
 - `WYVERN_INDEX_VERSION` - The version of the Wyvern index
 - `MODELBIT_BATCH_SIZE` - The batch size for the modelbit
-
+  
 - `EXPERIMENTATION_ENABLED` - Whether experimentation is enabled
 - `EXPERIMENTATION_PROVIDER` - The experimentation provider
 - `EPPO_API_KEY` - The API key for EPPO (an experimentation provider)
@@ -199,7 +203,7 @@ in production for secrets you do not wish to save in code
 
 <a id="wyvern.core.compression.wyvern_encode"></a>
 
-#### wyvern_encode
+#### wyvern\_encode
 
 ```python
 def wyvern_encode(data: Dict[str, Any]) -> bytes
@@ -209,7 +213,7 @@ encode a dict to compressed bytes using lz4.frame
 
 <a id="wyvern.core.compression.wyvern_decode"></a>
 
-#### wyvern_decode
+#### wyvern\_decode
 
 ```python
 def wyvern_decode(data: Union[bytes, str]) -> Dict[str, Any]
@@ -267,7 +271,7 @@ Calling the instantiated AiohttpClientWrapper returns the wrapped singleton.
 
 <a id="wyvern.core.http.aiohttp_client"></a>
 
-#### aiohttp_client
+#### aiohttp\_client
 
 The aiohttp client singleton. Use this to make requests.
 
@@ -280,7 +284,7 @@ The aiohttp client singleton. Use this to make requests.
 
 <a id="wyvern.experimentation.experimentation_logging"></a>
 
-# wyvern.experimentation.experimentation_logging
+# wyvern.experimentation.experimentation\_logging
 
 <a id="wyvern.experimentation.experimentation_logging.ExperimentationEventData"></a>
 
@@ -321,7 +325,7 @@ Event class for ExperimentationEvent.
 
 <a id="wyvern.experimentation.providers.eppo_provider"></a>
 
-# wyvern.experimentation.providers.eppo_provider
+# wyvern.experimentation.providers.eppo\_provider
 
 <a id="wyvern.experimentation.providers.eppo_provider.EppoExperimentationClient"></a>
 
@@ -337,13 +341,13 @@ Extends the BaseExperimentationProvider to provide functionality using the Eppo 
 
 **Methods**:
 
-- **init**() -> None
-- get_result(experiment_id: str, entity_id: str, \*\*kwargs) -> str
-- log_result(experiment_id: str, entity_id: str, variant: str) -> None
+  - __init__() -> None
+  - get_result(experiment_id: str, entity_id: str, **kwargs) -> str
+  - log_result(experiment_id: str, entity_id: str, variant: str) -> None
 
 <a id="wyvern.experimentation.providers.eppo_provider.EppoExperimentationClient.get_result"></a>
 
-#### get_result
+#### get\_result
 
 ```python
 def get_result(experiment_id: str, entity_id: str, **kwargs) -> str
@@ -353,17 +357,18 @@ Fetches the variant for a given experiment and entity from the Eppo client.
 
 **Arguments**:
 
-- experiment_id (str): The unique ID of the experiment.
-- entity_id (str): The unique ID of the entity (e.g., user or other subject).
-- \*\*kwargs: Additional arguments to be passed to the Eppo client's get_assignment method.
+  - experiment_id (str): The unique ID of the experiment.
+  - entity_id (str): The unique ID of the entity (e.g., user or other subject).
+  - **kwargs: Additional arguments to be passed to the Eppo client's get_assignment method.
+  
 
 **Returns**:
 
-- str: The assigned variant for the given experiment and entity.
+  - str: The assigned variant for the given experiment and entity.
 
 <a id="wyvern.experimentation.providers.eppo_provider.EppoExperimentationClient.log_result"></a>
 
-#### log_result
+#### log\_result
 
 ```python
 def log_result(experiment_id: str,
@@ -377,10 +382,10 @@ Logs the result for a given experiment and entity.
 
 **Arguments**:
 
-- experiment_id (str): The unique ID of the experiment.
-- entity_id (str): The unique ID of the entity.
-- variant (str): The assigned variant for the given experiment and entity.
-
+  - experiment_id (str): The unique ID of the experiment.
+  - entity_id (str): The unique ID of the entity.
+  - variant (str): The assigned variant for the given experiment and entity.
+  
 - `Note` - This method is overridden to do nothing because the assignment logger we set in Eppo already
   handles result logging upon assignment.
 
@@ -411,7 +416,7 @@ All providers should inherit from this and implement the necessary methods.
 
 <a id="wyvern.experimentation.providers.base.BaseExperimentationProvider.get_result"></a>
 
-#### get_result
+#### get\_result
 
 ```python
 @abstractmethod
@@ -422,17 +427,18 @@ Get the result (variant) for a given experiment and entity.
 
 **Arguments**:
 
-- experiment_id (str): The unique ID of the experiment.
-- entity_id (str): The unique ID of the entity.
-- kwargs (dict): Any additional arguments to pass to the provider for targeting.
+  - experiment_id (str): The unique ID of the experiment.
+  - entity_id (str): The unique ID of the entity.
+  - kwargs (dict): Any additional arguments to pass to the provider for targeting.
+  
 
 **Returns**:
 
-- str: The result (variant) assigned to the entity for the specified experiment.
+  - str: The result (variant) assigned to the entity for the specified experiment.
 
 <a id="wyvern.experimentation.providers.base.BaseExperimentationProvider.log_result"></a>
 
-#### log_result
+#### log\_result
 
 ```python
 @abstractmethod
@@ -447,14 +453,15 @@ Log the result (variant) for a given experiment and entity.
 
 **Arguments**:
 
-- experiment_id (str): The unique ID of the experiment.
-- entity_id (str): The unique ID of the entity.
-- variant (str): The result (variant) assigned to the entity for the specified experiment.
-- kwargs (dict): Any additional arguments to pass to the provider for targeting.
+  - experiment_id (str): The unique ID of the experiment.
+  - entity_id (str): The unique ID of the entity.
+  - variant (str): The result (variant) assigned to the entity for the specified experiment.
+  - kwargs (dict): Any additional arguments to pass to the provider for targeting.
+  
 
 **Returns**:
 
-- None
+  - None
 
 <a id="wyvern.experimentation.client"></a>
 
@@ -482,11 +489,11 @@ Initializes the ExperimentationClient with a specified provider.
 
 **Arguments**:
 
-- provider_name (str): The name of the experimentation provider (e.g., "eppo").
+  - provider_name (str): The name of the experimentation provider (e.g., "eppo").
 
 <a id="wyvern.experimentation.client.ExperimentationClient.get_experiment_result"></a>
 
-#### get_experiment_result
+#### get\_experiment\_result
 
 ```python
 def get_experiment_result(experiment_id: str, entity_id: str,
@@ -497,13 +504,14 @@ Get the result (variant) for a given experiment and entity using the chosen prov
 
 **Arguments**:
 
-- experiment_id (str): The unique ID of the experiment.
-- entity_id (str): The unique ID of the entity.
-- kwargs (dict): Any additional arguments to pass to the provider for targeting.
+  - experiment_id (str): The unique ID of the experiment.
+  - entity_id (str): The unique ID of the entity.
+  - kwargs (dict): Any additional arguments to pass to the provider for targeting.
+  
 
 **Returns**:
 
-- str: The result (variant) assigned to the entity for the specified experiment.
+  - str: The result (variant) assigned to the entity for the specified experiment.
 
 <a id="wyvern.experimentation"></a>
 
@@ -515,7 +523,7 @@ Get the result (variant) for a given experiment and entity using the chosen prov
 
 <a id="wyvern.request_context"></a>
 
-# wyvern.request_context
+# wyvern.request\_context
 
 <a id="wyvern.request_context.current"></a>
 
@@ -529,11 +537,11 @@ Get the current request context
 
 **Returns**:
 
-The current request context, or None if there is none
+  The current request context, or None if there is none
 
 <a id="wyvern.request_context.ensure_current_request"></a>
 
-#### ensure_current_request
+#### ensure\_current\_request
 
 ```python
 def ensure_current_request() -> WyvernRequest
@@ -543,7 +551,8 @@ Get the current request context, or raise an error if there is none
 
 **Returns**:
 
-The current request context if there is one
+  The current request context if there is one
+  
 
 **Raises**:
 
@@ -562,10 +571,11 @@ Set the current request context
 **Arguments**:
 
 - `request` - The request context to set
+  
 
 **Returns**:
 
-None
+  None
 
 <a id="wyvern.request_context.reset"></a>
 
@@ -579,11 +589,11 @@ Reset the current request context
 
 **Returns**:
 
-None
+  None
 
 <a id="wyvern.wyvern_typing"></a>
 
-# wyvern.wyvern_typing
+# wyvern.wyvern\_typing
 
 <a id="wyvern.wyvern_typing.WyvernFeature"></a>
 
@@ -646,7 +656,7 @@ Starts Redis server. This command will also install redis locally if it's not in
 
 <a id="wyvern.api.ensure_async_client"></a>
 
-#### ensure_async_client
+#### ensure\_async\_client
 
 ```python
 def ensure_async_client(func: Callable) -> Callable
@@ -657,10 +667,11 @@ Ensure that the async client is open before calling the function and close it af
 **Arguments**:
 
 - `func` - The function to be wrapped
+  
 
 **Returns**:
 
-The wrapped function
+  The wrapped function
 
 <a id="wyvern.components.candidates"></a>
 
@@ -668,7 +679,7 @@ The wrapped function
 
 <a id="wyvern.components.candidates.candidate_logger"></a>
 
-# wyvern.components.candidates.candidate_logger
+# wyvern.components.candidates.candidate\_logger
 
 <a id="wyvern.components.candidates.candidate_logger.CandidateEventData"></a>
 
@@ -687,7 +698,7 @@ Event data for a candidate event
 
 <a id="wyvern.components.pagination.pagination_component"></a>
 
-# wyvern.components.pagination.pagination_component
+# wyvern.components.pagination.pagination\_component
 
 <a id="wyvern.components.pagination.pagination_component.PaginationRequest"></a>
 
@@ -726,7 +737,6 @@ async def execute(input: PaginationRequest[T], **kwargs) -> List[T]
 This method paginates the entities based on the pagination fields.
 
 Validations:
-
 1. The ranking page should be greater than or equal to 0.
 2. The candidate page should be greater than or equal to 0.
 3. The candidate page size should be less than or equal to 1000.
@@ -738,7 +748,7 @@ Validations:
 
 **Returns**:
 
-The paginated entities.
+  The paginated entities.
 
 <a id="wyvern.components.pagination"></a>
 
@@ -746,7 +756,7 @@ The paginated entities.
 
 <a id="wyvern.components.pagination.pagination_fields"></a>
 
-# wyvern.components.pagination.pagination_fields
+# wyvern.components.pagination.pagination\_fields
 
 <a id="wyvern.components.pagination.pagination_fields.PaginationFields"></a>
 
@@ -767,18 +777,18 @@ Pagination fields for requests. This is a mixin class that can be used in any re
 
 <a id="wyvern.components.features.realtime_features_component"></a>
 
-# wyvern.components.features.realtime_features_component
+# wyvern.components.features.realtime\_features\_component
 
 <a id="wyvern.components.features.realtime_features_component.PRIMARY_ENTITY"></a>
 
-#### PRIMARY_ENTITY
+#### PRIMARY\_ENTITY
 
 The primary entity is the entity that is the main entity for the feature. For example, if we are computing
 the feature for a user, the primary entity would be the user.
 
 <a id="wyvern.components.features.realtime_features_component.SECONDARY_ENTITY"></a>
 
-#### SECONDARY_ENTITY
+#### SECONDARY\_ENTITY
 
 The secondary entity is the entity that is the secondary entity for the feature. For example, if we are computing
 the feature for a user and a product, the secondary entity would be the product. If we are computing the feature
@@ -858,7 +868,7 @@ def __init__(*upstreams: Component,
 
 <a id="wyvern.components.features.realtime_features_component.RealtimeFeatureComponent.get_type_args_simple"></a>
 
-#### get_type_args_simple
+#### get\_type\_args\_simple
 
 ```python
 @classmethod
@@ -870,7 +880,7 @@ entity type, and request entity type.
 
 <a id="wyvern.components.features.realtime_features_component.RealtimeFeatureComponent.get_entity_names"></a>
 
-#### get_entity_names
+#### get\_entity\_names
 
 ```python
 @classmethod
@@ -879,11 +889,11 @@ def get_entity_names(cls, full_feature_name: str) -> Optional[List[str]]
 
 Get the entity identifier type, which will be used as sql column name
 
-full_feature_name is of the form <component_name>:<feature_name>
+full_feature_name is of the form `<component_name>:<feature_name>`
 
 <a id="wyvern.components.features.realtime_features_component.RealtimeFeatureComponent.get_entity_type_column"></a>
 
-#### get_entity_type_column
+#### get\_entity\_type\_column
 
 ```python
 @classmethod
@@ -892,11 +902,11 @@ def get_entity_type_column(cls, full_feature_name: str) -> Optional[str]
 
 Get the entity identifier type, which will be used as sql column name
 
-full_feature_name is of the form <component_name>:<feature_name>
+full_feature_name is of the form `<component_name>:<feature_name>`
 
 <a id="wyvern.components.features.realtime_features_component.RealtimeFeatureComponent.can_execute_on"></a>
 
-#### can_execute_on
+#### can\_execute\_on
 
 ```python
 def can_execute_on(request: REQUEST_ENTITY,
@@ -908,7 +918,7 @@ Checks if the input matches the entity type, so we can execute on it
 
 <a id="wyvern.components.features.realtime_features_component.RealtimeFeatureComponent.set_full_feature_name"></a>
 
-#### set_full_feature_name
+#### set\_full\_feature\_name
 
 ```python
 def set_full_feature_name(
@@ -919,7 +929,7 @@ Sets the full feature name for the feature data
 
 <a id="wyvern.components.features.feature_store"></a>
 
-# wyvern.components.features.feature_store
+# wyvern.components.features.feature\_store
 
 <a id="wyvern.components.features.feature_store.FeatureStoreRetrievalRequest"></a>
 
@@ -954,14 +964,13 @@ which is a union of all the possible feature types. The feature types are define
 The FeatureStoreRetrievalComponent is a singleton and can be accessed via `feature_store_retrieval_component`.
 
 The FeatureStoreRetrievalComponent is configured via the following environment variables:
-
 - WYVERN_API_KEY
 - WYVERN_FEATURE_STORE_URL
 - WYVERN_ONLINE_FEATURES_PATH
 
 <a id="wyvern.components.features.feature_store.FeatureStoreRetrievalComponent.fetch_features_from_feature_store"></a>
 
-#### fetch_features_from_feature_store
+#### fetch\_features\_from\_feature\_store
 
 ```python
 async def fetch_features_from_feature_store(
@@ -974,10 +983,11 @@ Fetches features from the feature store for the given identifiers and feature na
 
 - `identifiers` - List of identifiers for which features are to be retrieved.
 - `feature_names` - List of feature names to be retrieved.
+  
 
 **Returns**:
 
-FeatureMap containing the features for the given identifiers and feature names.
+  FeatureMap containing the features for the given identifiers and feature names.
 
 <a id="wyvern.components.features.feature_store.FeatureStoreRetrievalComponent.execute"></a>
 
@@ -996,7 +1006,7 @@ an exception.
 
 <a id="wyvern.components.features.feature_retrieval_pipeline"></a>
 
-# wyvern.components.features.feature_retrieval_pipeline
+# wyvern.components.features.feature\_retrieval\_pipeline
 
 <a id="wyvern.components.features.feature_retrieval_pipeline.FeatureRetrievalPipelineRequest"></a>
 
@@ -1027,7 +1037,10 @@ class FeatureRetrievalPipeline(
                   FeatureMap], Generic[REQUEST_ENTITY])
 ```
 
-This component is used to retrieve features for a given request. It is composed of the following components: 1. FeatureStoreRetrievalComponent: This component is used to retrieve features from the feature store. 2. RealtimeFeatureComponent: This component is used to compute real-time features. 3. FeatureEventLoggingComponent: This component is used to log feature events.
+This component is used to retrieve features for a given request. It is composed of the following components:
+    1. FeatureStoreRetrievalComponent: This component is used to retrieve features from the feature store.
+    2. RealtimeFeatureComponent: This component is used to compute real-time features.
+    3. FeatureEventLoggingComponent: This component is used to log feature events.
 
 <a id="wyvern.components.features.feature_retrieval_pipeline.FeatureRetrievalPipeline.__init__"></a>
 
@@ -1059,7 +1072,12 @@ async def execute(input: FeatureRetrievalPipelineRequest[REQUEST_ENTITY],
 
 This method is used to retrieve features for a given request.
 
-It is composed of the following steps: 0. Figure out which features are real-time features and which features are feature store features. 1. Retrieve features from the feature store. 2. Compute real-time features. 3. Combine the feature store features and real-time features into one FeatureMap. 4. Log the feature values to the feature event logging component.
+It is composed of the following steps:
+    0. Figure out which features are real-time features and which features are feature store features.
+    1. Retrieve features from the feature store.
+    2. Compute real-time features.
+    3. Combine the feature store features and real-time features into one FeatureMap.
+    4. Log the feature values to the feature event logging component.
 
 <a id="wyvern.components.features"></a>
 
@@ -1067,7 +1085,7 @@ It is composed of the following steps: 0. Figure out which features are real-tim
 
 <a id="wyvern.components.features.feature_logger"></a>
 
-# wyvern.components.features.feature_logger
+# wyvern.components.features.feature\_logger
 
 <a id="wyvern.components.features.feature_logger.FeatureLogEventData"></a>
 
@@ -1144,11 +1162,11 @@ Logs feature events.
 
 <a id="wyvern.components.models.model_component"></a>
 
-# wyvern.components.models.model_component
+# wyvern.components.models.model\_component
 
 <a id="wyvern.components.models.model_component.MODEL_OUTPUT_DATA_TYPE"></a>
 
-#### MODEL_OUTPUT_DATA_TYPE
+#### MODEL\_OUTPUT\_DATA\_TYPE
 
 MODEL_OUTPUT_DATA_TYPE is the type of the output of the model. It can be a float, a string, or a list of floats
 (e.g. a list of probabilities, embeddings, etc.)
@@ -1202,7 +1220,7 @@ This class defines the output of a model.
 
 <a id="wyvern.components.models.model_component.ModelOutput.get_entity_output"></a>
 
-#### get_entity_output
+#### get\_entity\_output
 
 ```python
 def get_entity_output(
@@ -1214,10 +1232,11 @@ Get the model output for a given entity identifier.
 **Arguments**:
 
 - `identifier` - The identifier of the entity.
+  
 
 **Returns**:
 
-The model output for the given entity identifier. This can also be None if the model output is None.
+  The model output for the given entity identifier. This can also be None if the model output is None.
 
 <a id="wyvern.components.models.model_component.ModelInput"></a>
 
@@ -1237,7 +1256,7 @@ This class defines the input to a model.
 
 <a id="wyvern.components.models.model_component.ModelInput.first_entity"></a>
 
-#### first_entity
+#### first\_entity
 
 ```python
 @property
@@ -1248,11 +1267,11 @@ Get the first entity in the list of entities. This is useful when you know that 
 
 **Returns**:
 
-The first entity in the list of entities.
+  The first entity in the list of entities.
 
 <a id="wyvern.components.models.model_component.ModelInput.first_identifier"></a>
 
-#### first_identifier
+#### first\_identifier
 
 ```python
 @property
@@ -1264,7 +1283,7 @@ one entity.
 
 **Returns**:
 
-The identifier of the first entity in the list of entities.
+  The identifier of the first entity in the list of entities.
 
 <a id="wyvern.components.models.model_component.ModelComponent"></a>
 
@@ -1283,7 +1302,7 @@ The model outputs can also be None if the model output is None for a given entit
 
 <a id="wyvern.components.models.model_component.ModelComponent.get_type_args_simple"></a>
 
-#### get_type_args_simple
+#### get\_type\_args\_simple
 
 ```python
 @classmethod
@@ -1294,7 +1313,7 @@ Get the type argument at the given index. This is used to get the model input an
 
 <a id="wyvern.components.models.model_component.ModelComponent.manifest_feature_names"></a>
 
-#### manifest_feature_names
+#### manifest\_feature\_names
 
 ```python
 @cached_property
@@ -1304,7 +1323,7 @@ def manifest_feature_names() -> Set[str]
 This function defines which features are necessary for model evaluation
 
 Our system will automatically fetch the required features from the feature store
-to make this model evaluation possible
+    to make this model evaluation possible
 
 <a id="wyvern.components.models.model_component.ModelComponent.execute"></a>
 
@@ -1318,7 +1337,7 @@ The model_name and model_score will be automatically logged
 
 <a id="wyvern.components.models.model_component.ModelComponent.batch_inference"></a>
 
-#### batch_inference
+#### batch\_inference
 
 ```python
 async def batch_inference(
@@ -1355,7 +1374,7 @@ You can also override this function if you want to customize the inference logic
 
 <a id="wyvern.components.models.modelbit_component"></a>
 
-# wyvern.components.models.modelbit_component
+# wyvern.components.models.modelbit\_component
 
 <a id="wyvern.components.models.modelbit_component.ModelbitComponent"></a>
 
@@ -1392,6 +1411,7 @@ def __init__(*upstreams,
 - `name` - A string that represents the name of the model.
 - `auth_token` - A string that represents the auth token for Modelbit.
 - `url` - A string that represents the url for Modelbit.
+  
 
 **Raises**:
 
@@ -1399,7 +1419,7 @@ def __init__(*upstreams,
 
 <a id="wyvern.components.models.modelbit_component.ModelbitComponent.modelbit_features"></a>
 
-#### modelbit_features
+#### modelbit\_features
 
 ```python
 @cached_property
@@ -1411,7 +1431,7 @@ subclass.
 
 <a id="wyvern.components.models.modelbit_component.ModelbitComponent.manifest_feature_names"></a>
 
-#### manifest_feature_names
+#### manifest\_feature\_names
 
 ```python
 @cached_property
@@ -1423,7 +1443,7 @@ modelbit_features property.
 
 <a id="wyvern.components.models.modelbit_component.ModelbitComponent.build_requests"></a>
 
-#### build_requests
+#### build\_requests
 
 ```python
 async def build_requests(
@@ -1431,7 +1451,7 @@ async def build_requests(
 ```
 
 Please refer to modlebit batch inference API:
-https://doc.modelbit.com/deployments/rest-api/
+    https://doc.modelbit.com/deployments/rest-api/
 
 <a id="wyvern.components.models.modelbit_component.ModelbitComponent.inference"></a>
 
@@ -1445,7 +1465,7 @@ This method sends a request to Modelbit and returns the output.
 
 <a id="wyvern.components.api_route_component"></a>
 
-# wyvern.components.api_route_component
+# wyvern.components.api\_route\_component
 
 <a id="wyvern.components.api_route_component.APIRouteComponent"></a>
 
@@ -1473,7 +1493,7 @@ the API versioning and the API path.
 
 <a id="wyvern.components.api_route_component.APIRouteComponent.warm_up"></a>
 
-#### warm_up
+#### warm\_up
 
 ```python
 async def warm_up(input: REQUEST_SCHEMA) -> None
@@ -1496,7 +1516,7 @@ TODO: this function could be moved to a global place
 
 <a id="wyvern.components.business_logic.boosting_business_logic"></a>
 
-# wyvern.components.business_logic.boosting_business_logic
+# wyvern.components.business\_logic.boosting\_business\_logic
 
 <a id="wyvern.components.business_logic.boosting_business_logic.BoostingBusinessLogicComponent"></a>
 
@@ -1540,10 +1560,11 @@ Boosts the score of each candidate by a certain factor
 - `entity_key_mapping` - A lambda function that takes in a candidate entity and
   returns the field we should apply the boost to
 - `multiplicative` - Whether to apply the boost with multiplication or addition
+  
 
 **Returns**:
 
-The list of scored candidates with the boost applied
+  The list of scored candidates with the boost applied
 
 <a id="wyvern.components.business_logic.boosting_business_logic.CSVBoostingBusinessLogicComponent"></a>
 
@@ -1578,7 +1599,7 @@ Reads the CSV file and populates the lookup table
 
 <a id="wyvern.components.business_logic.boosting_business_logic.CSVBoostingBusinessLogicComponent.extract_keys_from_csv_row"></a>
 
-#### extract_keys_from_csv_row
+#### extract\_keys\_from\_csv\_row
 
 ```python
 @abstractmethod
@@ -1588,13 +1609,13 @@ async def extract_keys_from_csv_row(row: Series) -> str
 Given a CSV row, generate the unique combinations that would apply a boost
 
 Example, in a file that has the following:
-product_id, query, boost
+    product_id, query, boost
 
 The method would return a unique concatenation (ie product_id:query)
 
 <a id="wyvern.components.business_logic.boosting_business_logic.CSVBoostingBusinessLogicComponent.extract_boost_value_from_csv_row"></a>
 
-#### extract_boost_value_from_csv_row
+#### extract\_boost\_value\_from\_csv\_row
 
 ```python
 @abstractmethod
@@ -1604,13 +1625,13 @@ async def extract_boost_value_from_csv_row(row: Series) -> float
 Given a CSV row, generate the unique combinations that would apply a boost
 
 Example, in a file that has the following:
-product_id, query, boost
+    product_id, query, boost
 
 The method would return the boost value
 
 <a id="wyvern.components.business_logic.boosting_business_logic.CSVBoostingBusinessLogicComponent.extract_key_from_request_entity"></a>
 
-#### extract_key_from_request_entity
+#### extract\_key\_from\_request\_entity
 
 ```python
 @abstractmethod
@@ -1636,11 +1657,11 @@ Boosts the score of each candidate by a certain factor
 
 <a id="wyvern.components.business_logic"></a>
 
-# wyvern.components.business_logic
+# wyvern.components.business\_logic
 
 <a id="wyvern.components.business_logic.business_logic"></a>
 
-# wyvern.components.business_logic.business_logic
+# wyvern.components.business\_logic.business\_logic
 
 <a id="wyvern.components.business_logic.business_logic.BusinessLogicEventData"></a>
 
@@ -1730,7 +1751,7 @@ class BusinessLogicPipeline(Component[
 Steps through a series of business logic components and returns the final output
 
 This operation is fully chained, meaning that the output of each business logic component is passed
-as an input to the next business logic component
+    as an input to the next business logic component
 
 <a id="wyvern.components.business_logic.business_logic.BusinessLogicPipeline.execute"></a>
 
@@ -1749,14 +1770,15 @@ Executes the business logic pipeline on the inputted candidates
 **Arguments**:
 
 - `input` - The input to the business logic pipeline
+  
 
 **Returns**:
 
-The output of the business logic pipeline
+  The output of the business logic pipeline
 
 <a id="wyvern.components.business_logic.business_logic.BusinessLogicPipeline.extract_business_logic_events"></a>
 
-#### extract_business_logic_events
+#### extract\_business\_logic\_events
 
 ```python
 def extract_business_logic_events(
@@ -1774,14 +1796,15 @@ Extracts the business logic events from the output of a business logic component
 - `upstream_name` - The name of the business logic component
 - `request_id` - The request id of the request that the business logic component was called in
 - `old_scores` - The old scores of the candidates that the business logic component was called on
+  
 
 **Returns**:
 
-The business logic events that were extracted from the output of the business logic component
+  The business logic events that were extracted from the output of the business logic component
 
 <a id="wyvern.components.business_logic.pinning_business_logic"></a>
 
-# wyvern.components.business_logic.pinning_business_logic
+# wyvern.components.business\_logic.pinning\_business\_logic
 
 <a id="wyvern.components.business_logic.pinning_business_logic.PinningBusinessLogicComponent"></a>
 
@@ -1822,14 +1845,15 @@ Pins the supplied entity to the specific position
 - `entity_key_mapping` - A lambda function that takes in a candidate entity and
   returns the field we should apply the pin to
 - `allow_down_ranking` - Whether to allow down-ranking of candidates that are not pinned
+  
 
 **Returns**:
 
-The list of scored candidates with the pinned entities
+  The list of scored candidates with the pinned entities
 
 <a id="wyvern.components.ranking_pipeline"></a>
 
-# wyvern.components.ranking_pipeline
+# wyvern.components.ranking\_pipeline
 
 <a id="wyvern.components.ranking_pipeline.RankingRequest"></a>
 
@@ -1894,7 +1918,7 @@ This is the ranking pipeline.
 
 <a id="wyvern.components.ranking_pipeline.RankingPipeline.get_model"></a>
 
-#### get_model
+#### get\_model
 
 ```python
 def get_model() -> ModelComponent
@@ -1907,7 +1931,7 @@ Its output should be scored candidates
 
 <a id="wyvern.components.ranking_pipeline.RankingPipeline.get_business_logic"></a>
 
-#### get_business_logic
+#### get\_business\_logic
 
 ```python
 def get_business_logic() -> Optional[BusinessLogicPipeline]
@@ -1918,14 +1942,13 @@ apply any business logic.
 
 The business logic pipeline should be a subclass of BusinessLogicPipeline. Some examples of business logic
 for ranking pipeline are:
-
 1. Deduplication
 2. Filtering
 3. (De)boosting
 
 <a id="wyvern.components.ranking_pipeline.RankingPipeline.rank_candidates"></a>
 
-#### rank_candidates
+#### rank\_candidates
 
 ```python
 async def rank_candidates(
@@ -1942,10 +1965,11 @@ This function ranks the candidates.
 **Arguments**:
 
 - `request` - the ranking request
+  
 
 **Returns**:
 
-A list of ScoredCandidate
+  A list of ScoredCandidate
 
 <a id="wyvern.components.index._index"></a>
 
@@ -1979,7 +2003,7 @@ bulk index entities with redis pipeline
 
 <a id="wyvern.components.impressions.impression_logger"></a>
 
-# wyvern.components.impressions.impression_logger
+# wyvern.components.impressions.impression\_logger
 
 <a id="wyvern.components.impressions.impression_logger.ImpressionEventData"></a>
 
@@ -2057,10 +2081,11 @@ Logs impression events.
 **Arguments**:
 
 - `input` - The input to the component. This contains the request and the scored impressions.
+  
 
 **Returns**:
 
-None
+  None
 
 <a id="wyvern.components.events.events"></a>
 
@@ -2152,7 +2177,9 @@ class Component(Generic[INPUT_TYPE, OUTPUT_TYPE])
 Component is the base class for all the components in Wyvern. It is a generic class that takes in
 the input type and the output type of the component.
 
-It is responsible for: 1. Initializing the component 2. Initializing the upstream components
+It is responsible for:
+    1. Initializing the component
+    2. Initializing the upstream components
 
 <a id="wyvern.components.component.Component.initialize"></a>
 
@@ -2169,7 +2196,7 @@ which is needed for your component to work
 
 <a id="wyvern.components.component.Component.initialize_wrapper"></a>
 
-#### initialize_wrapper
+#### initialize\_wrapper
 
 ```python
 async def initialize_wrapper() -> None
@@ -2193,13 +2220,13 @@ The actual meat of the component.
 Custom component has to implement
 
 If your component has to complex input data structure, make sure to override this method in order to
-construct your input data with upstream components' output data
+    construct your input data with upstream components' output data
 
 upstream_outputs contains data that was parsed by upstreams
 
 <a id="wyvern.components.component.Component.manifest_feature_names"></a>
 
-#### manifest_feature_names
+#### manifest\_feature\_names
 
 ```python
 @cached_property
@@ -2209,11 +2236,11 @@ def manifest_feature_names() -> Set[str]
 This function defines which features are required for this component to work
 
 Our system will automatically fetch the required features from the feature store
-to make this model evaluation possible
+    to make this model evaluation possible
 
 <a id="wyvern.components.component.Component.get_feature"></a>
 
-#### get_feature
+#### get\_feature
 
 ```python
 def get_feature(identifier: Identifier, feature_name: str) -> WyvernFeature
@@ -2223,15 +2250,15 @@ This function gets the feature value for the given identifier
 The features are cached once fetched/evaluated.
 
 The feature that lives in the feature store should be
-just using the feature name without the "feature_view:" prefix
-For example, if your you have a feature view "fv" and a feature "wyvern_feature",
-then you would have defined "fv:wyvern_feature" in manifest_feature_names.
-However, when you fetch the feature value with this function,
-you just have to pass in feature_name="wyvern_feature".
+  just using the feature name without the "feature_view:" prefix
+  For example, if your you have a feature view "fv" and a feature "wyvern_feature",
+    then you would have defined "fv:wyvern_feature" in manifest_feature_names.
+    However, when you fetch the feature value with this function,
+    you just have to pass in feature_name="wyvern_feature".
 
 <a id="wyvern.components.component.Component.get_all_features"></a>
 
-#### get_all_features
+#### get\_all\_features
 
 ```python
 def get_all_features(identifier: Identifier) -> Dict[str, WyvernFeature]
@@ -2242,7 +2269,7 @@ The features are cached once fetched/evaluated.
 
 <a id="wyvern.components.pipeline_component"></a>
 
-# wyvern.components.pipeline_component
+# wyvern.components.pipeline\_component
 
 <a id="wyvern.components.pipeline_component.PipelineComponent"></a>
 
@@ -2258,7 +2285,7 @@ data with Wyvern Index data, and then pass the hydrated data to the next compone
 
 <a id="wyvern.components.pipeline_component.PipelineComponent.realtime_features_overrides"></a>
 
-#### realtime_features_overrides
+#### realtime\_features\_overrides
 
 ```python
 @cached_property
@@ -2267,12 +2294,12 @@ def realtime_features_overrides() -> Set[Type[RealtimeFeatureComponent]]
 
 This function defines the set of RealtimeFeatureComponents that generates features
 with non-deterministic feature names.
-For example, feature names like matched*query_brand.
-That feature is defined like matched_query*{input.query.matched_query}, so it can refer to 10 or 20 features
+For example, feature names like matched_query_brand.
+That feature is defined like matched_query_{input.query.matched_query}, so it can refer to 10 or 20 features
 
 <a id="wyvern.components.pipeline_component.PipelineComponent.retrieve_features"></a>
 
-#### retrieve_features
+#### retrieve\_features
 
 ```python
 async def retrieve_features(request: REQUEST_ENTITY) -> None
@@ -2282,7 +2309,7 @@ TODO shu: it doesn't support feature overrides. Write code to support that
 
 <a id="wyvern.components.helpers.linear_algebra"></a>
 
-# wyvern.components.helpers.linear_algebra
+# wyvern.components.helpers.linear\_algebra
 
 <a id="wyvern.components.helpers.linear_algebra.CosineSimilarityComponent"></a>
 
@@ -2310,14 +2337,15 @@ Computes cosine similarity in parallel for all pairs of embeddings.
 **Arguments**:
 
 - `input` - List of tuples of embeddings to compute cosine similarity for.
+  
 
 **Returns**:
 
-List of cosine similarities.
+  List of cosine similarities.
 
 <a id="wyvern.components.helpers.linear_algebra.CosineSimilarityComponent.cosine_similarity"></a>
 
-#### cosine_similarity
+#### cosine\_similarity
 
 ```python
 async def cosine_similarity(embedding_1: List[float],
@@ -2360,10 +2388,11 @@ Sorts a list of candidates based on a score.
 
 - `input` - A list of candidates to be sorted. Each candidate must have a score.
 - `descending` - Whether to sort in descending order. Defaults to True.
+  
 
 **Returns**:
 
-A sorted list of candidates.
+  A sorted list of candidates.
 
 <a id="wyvern.components.helpers"></a>
 
@@ -2397,7 +2426,7 @@ scope is used to prefix the redis key. You can use the environment variable PROJ
 
 <a id="wyvern.redis.WyvernRedis.get_entity"></a>
 
-#### get_entity
+#### get\_entity
 
 ```python
 async def get_entity(entity_type: str,
@@ -2408,7 +2437,7 @@ get entity from redis
 
 <a id="wyvern.redis.WyvernRedis.get_entities"></a>
 
-#### get_entities
+#### get\_entities
 
 ```python
 async def get_entities(
@@ -2420,7 +2449,7 @@ get entity from redis
 
 <a id="wyvern.redis.WyvernRedis.delete_entity"></a>
 
-#### delete_entity
+#### delete\_entity
 
 ```python
 async def delete_entity(entity_type: str, entity_id: str) -> None
@@ -2430,7 +2459,7 @@ delete entity from redis
 
 <a id="wyvern.redis.WyvernRedis.delete_entities"></a>
 
-#### delete_entities
+#### delete\_entities
 
 ```python
 async def delete_entities(entity_type: str, entity_ids: Sequence[str]) -> None
@@ -2444,11 +2473,11 @@ delete entities from redis
 
 <a id="wyvern.wyvern_tracing"></a>
 
-# wyvern.wyvern_tracing
+# wyvern.wyvern\_tracing
 
 <a id="wyvern.wyvern_tracing.setup_tracing"></a>
 
-#### setup_tracing
+#### setup\_tracing
 
 ```python
 def setup_tracing()
@@ -2458,11 +2487,11 @@ Setup tracing for Wyvern service. Tracing is disabled in development mode and fo
 
 <a id="wyvern.wyvern_logging"></a>
 
-# wyvern.wyvern_logging
+# wyvern.wyvern\_logging
 
 <a id="wyvern.wyvern_logging.setup_logging"></a>
 
-#### setup_logging
+#### setup\_logging
 
 ```python
 def setup_logging()
@@ -2625,14 +2654,13 @@ class KinesisFirehoseStream(str, Enum)
 Enum for Kinesis Firehose stream names
 
 Usage:
-
 ```
 >>> KinesisFirehoseStream.EVENT_STREAM.get_stream_name()
 ```
 
 <a id="wyvern.aws.kinesis.KinesisFirehoseStream.get_stream_name"></a>
 
-#### get_stream_name
+#### get\_stream\_name
 
 ```python
 def get_stream_name(customer_specific: bool = True,
@@ -2645,10 +2673,11 @@ Returns the stream name for the given stream
 
 - `customer_specific` - Whether the stream name should be customer specific
 - `env_specific` - Whether the stream name should be environment specific
+  
 
 **Returns**:
 
-The stream name
+  The stream name
 
 <a id="wyvern.aws.kinesis.WyvernKinesisFirehose"></a>
 
@@ -2662,7 +2691,7 @@ Wrapper around boto3 Kinesis Firehose client
 
 <a id="wyvern.aws.kinesis.WyvernKinesisFirehose.put_record_batch_callable"></a>
 
-#### put_record_batch_callable
+#### put\_record\_batch\_callable
 
 ```python
 def put_record_batch_callable(
@@ -2677,14 +2706,15 @@ way events can be logged asynchronously after the response is sent to the client
 
 - `stream_name` _KinesisFirehoseStream_ - The stream to put records to
 - `record_generator` _List[Callable[[], List[BaseModel]]]_ - A list of functions that return a list of records
+  
 
 **Returns**:
 
-None
+  None
 
 <a id="wyvern.aws.kinesis.WyvernKinesisFirehose.put_record_batch"></a>
 
-#### put_record_batch
+#### put\_record\_batch
 
 ```python
 def put_record_batch(stream_name: KinesisFirehoseStream,
@@ -2697,10 +2727,11 @@ Puts records to the given stream
 
 - `stream_name` _KinesisFirehoseStream_ - The stream to put records to
 - `records` _List[BaseModel]_ - A list of records
+  
 
 **Returns**:
 
-None
+  None
 
 <a id="wyvern.aws"></a>
 
@@ -2708,15 +2739,15 @@ None
 
 <a id="wyvern.event_logging"></a>
 
-# wyvern.event_logging
+# wyvern.event\_logging
 
 <a id="wyvern.event_logging.event_logger"></a>
 
-# wyvern.event_logging.event_logger
+# wyvern.event\_logging.event\_logger
 
 <a id="wyvern.event_logging.event_logger.log_events"></a>
 
-#### log_events
+#### log\_events
 
 ```python
 def log_events(event_generator: Callable[[], List[LoggedEvent]])
@@ -2730,7 +2761,7 @@ Logs events to the current request context.
 
 <a id="wyvern.event_logging.event_logger.get_logged_events"></a>
 
-#### get_logged_events
+#### get\_logged\_events
 
 ```python
 def get_logged_events() -> List[LoggedEvent[Any]]
@@ -2738,11 +2769,11 @@ def get_logged_events() -> List[LoggedEvent[Any]]
 
 **Returns**:
 
-A list of all the events logged in the current request context.
+  A list of all the events logged in the current request context.
 
 <a id="wyvern.event_logging.event_logger.get_logged_events_generator"></a>
 
-#### get_logged_events_generator
+#### get\_logged\_events\_generator
 
 ```python
 def get_logged_events_generator(
@@ -2751,11 +2782,11 @@ def get_logged_events_generator(
 
 **Returns**:
 
-A list of all the event generators logged in the current request context.
+  A list of all the event generators logged in the current request context.
 
 <a id="wyvern.event_logging.event_logger.log_custom_events"></a>
 
-#### log_custom_events
+#### log\_custom\_events
 
 ```python
 def log_custom_events(events: List[ENTITY_EVENT_DATA_TYPE]) -> None
@@ -2769,7 +2800,7 @@ Logs custom events to the current request context.
 
 <a id="wyvern.web_frameworks.fastapi"></a>
 
-# wyvern.web_frameworks.fastapi
+# wyvern.web\_frameworks.fastapi
 
 <a id="wyvern.web_frameworks.fastapi.lifespan"></a>
 
@@ -2791,20 +2822,19 @@ class WyvernFastapi()
 ```
 
 A wrapper around FastAPI that provides a few additional features:
-
 - A healthcheck endpoint
 - A request middleware that logs the request and response payloads
 - A request middleware that sets the WyvernRequest in the request context
 - Auto registration of routes from APIRouteComponent subclasses
 
 endpoint input:
-the built WyvernPipeline
-the request input schema
-the request output schema
+    the built WyvernPipeline
+    the request input schema
+    the request output schema
 
 <a id="wyvern.web_frameworks.fastapi.WyvernFastapi.register_route"></a>
 
-#### register_route
+#### register\_route
 
 ```python
 async def register_route(route_component: Type[APIRouteComponent]) -> None
@@ -2815,6 +2845,7 @@ Register a route component. This will register the route with FastAPI and also i
 **Arguments**:
 
 - `route_component` - The route component to register.
+  
 
 **Raises**:
 
@@ -2822,11 +2853,11 @@ Register a route component. This will register the route with FastAPI and also i
 
 <a id="wyvern.web_frameworks"></a>
 
-# wyvern.web_frameworks
+# wyvern.web\_frameworks
 
 <a id="wyvern.wyvern_request"></a>
 
-# wyvern.wyvern_request
+# wyvern.wyvern\_request
 
 <a id="wyvern.wyvern_request.WyvernRequest"></a>
 
@@ -2855,7 +2886,7 @@ information between the various components of the Wyvern service.
 
 <a id="wyvern.wyvern_request.WyvernRequest.parse_fastapi_request"></a>
 
-#### parse_fastapi_request
+#### parse\_fastapi\_request
 
 ```python
 @classmethod
@@ -2872,10 +2903,11 @@ Parses a FastAPI request into a WyvernRequest
 - `json` - The JSON body of the request
 - `req` - The FastAPI request
 - `request_id` - The request ID of the request
+  
 
 **Returns**:
 
-A WyvernRequest
+  A WyvernRequest
 
 <a id="wyvern.tracking"></a>
 
@@ -2883,15 +2915,15 @@ A WyvernRequest
 
 <a id="wyvern.feature_store.constants"></a>
 
-# wyvern.feature_store.constants
+# wyvern.feature\_store.constants
 
 <a id="wyvern.feature_store"></a>
 
-# wyvern.feature_store
+# wyvern.feature\_store
 
 <a id="wyvern.feature_store.schemas"></a>
 
-# wyvern.feature_store.schemas
+# wyvern.feature\_store.schemas
 
 <a id="wyvern.feature_store.schemas.GetOnlineFeaturesRequest"></a>
 
@@ -2908,7 +2940,7 @@ Request object for getting online features.
 - `entities` - A dictionary of entity name to entity value.
 - `features` - A list of feature names.
 - `full_feature_names` - A boolean indicating whether to return full feature names. If True, the feature names will
-  be returned in the format <feature_view_name>\_\_<feature_name>. If False, only the feature names will be returned
+  be returned in the format `<feature_view_name>__<feature_name>`. If False, only the feature names will be returned
 
 <a id="wyvern.feature_store.schemas.GetHistoricalFeaturesRequest"></a>
 
@@ -2940,7 +2972,7 @@ Request object for getting historical features from Feast.
 **Attributes**:
 
 - `full_feature_names` - A boolean indicating whether to return full feature names. If True, the feature names will
-  be returned in the format <feature_view_name>\_\_<feature_name>. If False, only the feature names will be
+  be returned in the format `<feature_view_name>__<feature_name>`. If False, only the feature names will be
   returned.
 - `entities` - A dictionary of entity name to entity value.
 - `features` - A list of feature names.
@@ -2995,23 +3027,23 @@ Request object for getting entity identifier objects.
 
 <a id="wyvern.feature_store.feature_server"></a>
 
-# wyvern.feature_store.feature_server
+# wyvern.feature\_store.feature\_server
 
 <a id="wyvern.feature_store.feature_server.CRONJOB_INTERVAL_SECONDS"></a>
 
-#### CRONJOB_INTERVAL_SECONDS
+#### CRONJOB\_INTERVAL\_SECONDS
 
 5 minutes
 
 <a id="wyvern.feature_store.feature_server.CRONJOB_LOOKBACK_MINUTES"></a>
 
-#### CRONJOB_LOOKBACK_MINUTES
+#### CRONJOB\_LOOKBACK\_MINUTES
 
 12 mins
 
 <a id="wyvern.feature_store.feature_server.generate_wyvern_store_app"></a>
 
-#### generate_wyvern_store_app
+#### generate\_wyvern\_store\_app
 
 ```python
 def generate_wyvern_store_app(path: str) -> FastAPI
@@ -3022,14 +3054,15 @@ Generate a FastAPI app for Wyvern feature store.
 **Arguments**:
 
 - `path` - Path to the feature store repo.
+  
 
 **Returns**:
 
-FastAPI app.
+  FastAPI app.
 
 <a id="wyvern.feature_store.feature_server.start_wyvern_store"></a>
 
-#### start_wyvern_store
+#### start\_wyvern\_store
 
 ```python
 def start_wyvern_store(path: str, host: str, port: int)
@@ -3045,11 +3078,11 @@ Start the Wyvern feature store.
 
 <a id="wyvern.feature_store.historical_feature_util"></a>
 
-# wyvern.feature_store.historical_feature_util
+# wyvern.feature\_store.historical\_feature\_util
 
 <a id="wyvern.feature_store.historical_feature_util.separate_real_time_features"></a>
 
-#### separate_real_time_features
+#### separate\_real\_time\_features
 
 ```python
 def separate_real_time_features(
@@ -3062,14 +3095,15 @@ Given a list of full feature names, separate real-time features and other featur
 **Arguments**:
 
 - `full_feature_names` - a list of full feature names.
+  
 
 **Returns**:
 
-Real time feature names and other feature names in two lists respectively.
+  Real time feature names and other feature names in two lists respectively.
 
 <a id="wyvern.feature_store.historical_feature_util.build_historical_real_time_feature_requests"></a>
 
-#### build_historical_real_time_feature_requests
+#### build\_historical\_real\_time\_feature\_requests
 
 ```python
 def build_historical_real_time_feature_requests(
@@ -3085,14 +3119,15 @@ Build historical real-time feature requests grouped by entity types so that we c
 - `full_feature_names` - a list of full feature names.
 - `request_ids` - a list of request ids.
 - `entities` - a dictionary of entity names and their values.
+  
 
 **Returns**:
 
-A dictionary of entity types and their corresponding requests.
+  A dictionary of entity types and their corresponding requests.
 
 <a id="wyvern.feature_store.historical_feature_util.process_historical_real_time_features_requests"></a>
 
-#### process_historical_real_time_features_requests
+#### process\_historical\_real\_time\_features\_requests
 
 ```python
 def process_historical_real_time_features_requests(
@@ -3105,14 +3140,15 @@ Given a dictionary of historical real-time feature requests, process them and re
 **Arguments**:
 
 - `requests` - a dictionary of entity types and their corresponding requests.
+  
 
 **Returns**:
 
-A dictionary of entity types and their corresponding results in pandas dataframes.
+  A dictionary of entity types and their corresponding results in pandas dataframes.
 
 <a id="wyvern.feature_store.historical_feature_util.process_historical_real_time_features_request"></a>
 
-#### process_historical_real_time_features_request
+#### process\_historical\_real\_time\_features\_request
 
 ```python
 def process_historical_real_time_features_request(
@@ -3124,17 +3160,18 @@ Given a historical real-time feature request, process it and return the results.
 
 **Arguments**:
 
-- `entity_identifier_type` - the entity type of the request. E.g. "product\_\_query"
+- `entity_identifier_type` - the entity type of the request. E.g. "product__query"
 - `request` - the request object.
 - `context` - the snowflake connection context.
+  
 
 **Returns**:
 
-The result in pandas dataframe.
+  The result in pandas dataframe.
 
 <a id="wyvern.feature_store.historical_feature_util.group_realtime_features_by_entity_type"></a>
 
-#### group_realtime_features_by_entity_type
+#### group\_realtime\_features\_by\_entity\_type
 
 ```python
 def group_realtime_features_by_entity_type(
@@ -3146,14 +3183,15 @@ Given a list of feature names, group them by their entity_identifier_type
 **Arguments**:
 
 - `full_feature_names` - a list of full feature names.
+  
 
 **Returns**:
 
-A dictionary of entity types and their corresponding feature names.
+  A dictionary of entity types and their corresponding feature names.
 
 <a id="wyvern.feature_store.historical_feature_util.group_registry_features_by_entities"></a>
 
-#### group_registry_features_by_entities
+#### group\_registry\_features\_by\_entities
 
 ```python
 def group_registry_features_by_entities(
@@ -3167,14 +3205,15 @@ Given a list of feature names, group them by their entity name.
 
 - `full_feature_names` - a list of full feature names.
 - `store` - the feast feature store.
+  
 
 **Returns**:
 
-A dictionary of entity names and their corresponding feature names.
+  A dictionary of entity names and their corresponding feature names.
 
 <a id="wyvern.feature_store.historical_feature_util.build_historical_registry_feature_requests"></a>
 
-#### build_historical_registry_feature_requests
+#### build\_historical\_registry\_feature\_requests
 
 ```python
 def build_historical_registry_feature_requests(
@@ -3191,14 +3230,15 @@ Build historical feature requests grouped by entity names so that we can process
 - `feature_names` - a list of feature names.
 - `entity_values` - a dictionary of entity names and their values.
 - `timestamps` - a list of timestamps for getting historical features at those timestamps.
+  
 
 **Returns**:
 
-A list of historical feature requests.
+  A list of historical feature requests.
 
 <a id="wyvern.feature_store.historical_feature_util.process_historical_registry_features_requests"></a>
 
-#### process_historical_registry_features_requests
+#### process\_historical\_registry\_features\_requests
 
 ```python
 def process_historical_registry_features_requests(
@@ -3212,14 +3252,15 @@ Given a list of historical feature requests, process them and return the results
 
 - `store` - the feast feature store.
 - `requests` - a list of historical feature requests.
+  
 
 **Returns**:
 
-A list of results in pandas dataframes.
+  A list of results in pandas dataframes.
 
 <a id="wyvern.feature_store.historical_feature_util.process_historical_registry_features_request"></a>
 
-#### process_historical_registry_features_request
+#### process\_historical\_registry\_features\_request
 
 ```python
 def process_historical_registry_features_request(
@@ -3233,10 +3274,11 @@ Given a historical feature request, process it and return the results
 
 - `store` - the feast feature store.
 - `request` - a historical feature request.
+  
 
 **Returns**:
 
-The result in pandas dataframe.
+  The result in pandas dataframe.
 
 <a id="wyvern.helper.sort"></a>
 
@@ -3274,11 +3316,11 @@ Sort class for sorting the results.
 
 <a id="wyvern.entities.feature_entity_helpers"></a>
 
-# wyvern.entities.feature_entity_helpers
+# wyvern.entities.feature\_entity\_helpers
 
 <a id="wyvern.entities.feature_entity_helpers.feature_map_join"></a>
 
-#### feature_map_join
+#### feature\_map\_join
 
 ```python
 def feature_map_join(*feature_maps: FeatureMap) -> FeatureMap
@@ -3288,7 +3330,7 @@ Joins multiple feature maps into a single feature map. Used to join feature maps
 
 <a id="wyvern.entities.feature_entity_helpers.feature_map_create"></a>
 
-#### feature_map_create
+#### feature\_map\_create
 
 ```python
 def feature_map_create(*feature_data: Optional[FeatureData]) -> FeatureMap
@@ -3298,11 +3340,11 @@ Creates a feature map from a list of feature data. Used to create feature maps f
 
 <a id="wyvern.entities.index_entities"></a>
 
-# wyvern.entities.index_entities
+# wyvern.entities.index\_entities
 
 <a id="wyvern.entities.identifier_entities"></a>
 
-# wyvern.entities.identifier_entities
+# wyvern.entities.identifier\_entities
 
 <a id="wyvern.entities.identifier_entities.WyvernDataModel"></a>
 
@@ -3321,7 +3363,7 @@ WyvernDataModel is a base class for all data models that could be hydrated from 
 
 <a id="wyvern.entities.identifier_entities.WyvernDataModel.index_fields"></a>
 
-#### index_fields
+#### index\_fields
 
 ```python
 def index_fields() -> List[str]
@@ -3331,7 +3373,7 @@ This method returns a list of fields that contains indexable data
 
 <a id="wyvern.entities.identifier_entities.WyvernDataModel.get_all_entities"></a>
 
-#### get_all_entities
+#### get\_all\_entities
 
 ```python
 def get_all_entities(cached: bool = True) -> List[WyvernEntity]
@@ -3343,7 +3385,7 @@ If cached is True, all the nodes under the tree will be cached
 
 <a id="wyvern.entities.identifier_entities.WyvernDataModel.get_all_identifiers"></a>
 
-#### get_all_identifiers
+#### get\_all\_identifiers
 
 ```python
 def get_all_identifiers(cached: bool = True) -> List[Identifier]
@@ -3365,7 +3407,7 @@ entities within it, it itself may not be an entity
 
 <a id="wyvern.entities.identifier_entities.WyvernDataModel.nested_hydration"></a>
 
-#### nested_hydration
+#### nested\_hydration
 
 ```python
 def nested_hydration() -> Dict[str, str]
@@ -3386,12 +3428,14 @@ class WyvernEntity(WyvernDataModel)
 
 WyvernEntity is a base class for all entities that have primary identifier
 TODO:
-we want to design a way to so that 1. the primary key of the entity could map to the name of the entity 2. it's easy to define the relation
+    we want to design a way to so that
+    1. the primary key of the entity could map to the name of the entity
+    2. it's easy to define the relation
 
 example:
-have a @wyvern_entity decorator that could be used to define the primary key name
-and identifier type
-@wyvenr_entity(key="product_id", type="product")
+    have a @wyvern_entity decorator that could be used to define the primary key name
+    and identifier type
+    @wyvenr_entity(key="product_id", type="product")
 
 <a id="wyvern.entities.identifier_entities.WyvernEntity.identifier"></a>
 
@@ -3406,7 +3450,7 @@ This method returns the identifier for this entity
 
 <a id="wyvern.entities.identifier_entities.WyvernEntity.load_fields"></a>
 
-#### load_fields
+#### load\_fields
 
 ```python
 def load_fields(data: Dict[str, Any]) -> None
@@ -3416,10 +3460,10 @@ This method load the entity with the given data.
 The return data is the nested entities that need to be further hydrated
 
 For example:
-if a Product contains these two fields: `brand_id: Optional[str]` and `brand: Optional[Brand]`,
-as the hydrated entity. We fetch the brand_id for the product from Wyvern Index,
-as the first hydration step for Product entity, then we fetch brand entity from Wyvern Index,
-as the second hydration step
+    if a Product contains these two fields: `brand_id: Optional[str]` and `brand: Optional[Brand]`,
+    as the hydrated entity. We fetch the brand_id for the product from Wyvern Index,
+    as the first hydration step for Product entity, then we fetch brand entity from Wyvern Index,
+    as the second hydration step
 
 <a id="wyvern.entities.identifier_entities.QueryEntity"></a>
 
@@ -3437,7 +3481,7 @@ QueryEntity is a base class for all entities that have query as an identifier.
 
 <a id="wyvern.entities.identifier_entities.QueryEntity.generate_identifier"></a>
 
-#### generate_identifier
+#### generate\_identifier
 
 ```python
 def generate_identifier() -> Identifier
@@ -3465,7 +3509,7 @@ ProductEntity is a base class for all entities that have product_id as an identi
 
 <a id="wyvern.entities.identifier_entities.ProductEntity.generate_identifier"></a>
 
-#### generate_identifier
+#### generate\_identifier
 
 ```python
 def generate_identifier() -> Identifier
@@ -3493,7 +3537,7 @@ UserEntity is a base class for all entities that have user_id as an identifier.
 
 <a id="wyvern.entities.identifier_entities.UserEntity.generate_identifier"></a>
 
-#### generate_identifier
+#### generate\_identifier
 
 ```python
 def generate_identifier() -> Identifier
@@ -3526,7 +3570,7 @@ Base class for all Wyvern requests. This class is used to generate an identifier
 
 <a id="wyvern.entities.request.BaseWyvernRequest.generate_identifier"></a>
 
-#### generate_identifier
+#### generate\_identifier
 
 ```python
 def generate_identifier() -> Identifier
@@ -3544,7 +3588,7 @@ Generates an identifier for the request.
 
 <a id="wyvern.entities.feature_entities"></a>
 
-# wyvern.entities.feature_entities
+# wyvern.entities.feature\_entities
 
 <a id="wyvern.entities.feature_entities.FeatureData"></a>
 
@@ -3572,11 +3616,11 @@ class FeatureMap(BaseModel)
 A class to represent a map of identifiers to feature data.
 
 TODO (kerem): Fix the data duplication between this class and the FeatureData class. The identifier field in the
-FeatureData class is redundant.
+    FeatureData class is redundant.
 
 <a id="wyvern.entities.feature_entities.build_empty_feature_map"></a>
 
-#### build_empty_feature_map
+#### build\_empty\_feature\_map
 
 ```python
 def build_empty_feature_map(identifiers: List[Identifier],
@@ -3636,8 +3680,8 @@ Identifiers exist to represent a unique entity through their unique id and their
 For example: a product with id p_1234 and type "product" or a user with id u_1234 and type "user"
 
 Composite identifiers are also possible, for example:
-a product with id p_1234 and type "product"
-a user with id u_1234 and type "user"
+    a product with id p_1234 and type "product"
+    a user with id u_1234 and type "user"
 
     The composite identifier would be "p_1234:u_1234",
         and the composite identifier_type would be "product:user"
@@ -3652,14 +3696,14 @@ class CompositeIdentifier(Identifier)
 
 Composite identifiers exist to represent a unique entity through their unique id and their type. At most, they
 can have two identifiers and two identifier types. For example:
-a product with id p_1234 and type "product"
-a user with id u_1234 and type "user"
+    a product with id p_1234 and type "product"
+    a user with id u_1234 and type "user"
 
     The composite identifier would be "p_1234:u_1234", and the composite identifier_type would be "product:user".
 
 <a id="wyvern.entities.candidate_entities"></a>
 
-# wyvern.entities.candidate_entities
+# wyvern.entities.candidate\_entities
 
 <a id="wyvern.entities.candidate_entities.ScoredCandidate"></a>
 
@@ -3697,7 +3741,7 @@ A set of candidate entities. This is a generic model that can be used to represe
 
 <a id="examples.feature_store_main"></a>
 
-# examples.feature_store_main
+# examples.feature\_store\_main
 
 <a id="examples.feature_store_main.run"></a>
 
@@ -3712,11 +3756,11 @@ Run your wyvern service
 
 <a id="examples.example_business_logic"></a>
 
-# examples.example_business_logic
+# examples.example\_business\_logic
 
 <a id="examples.example_business_logic.sample_product_query_ranking_request"></a>
 
-#### sample_product_query_ranking_request
+#### sample\_product\_query\_ranking\_request
 
 ```python
 async def sample_product_query_ranking_request() -> None
@@ -3725,7 +3769,6 @@ async def sample_product_query_ranking_request() -> None
 How to run this: `python wyvern/examples/example_business_logic.py`
 
 Json representation of the request:
-
 ```
 {
     "request_id": "rrr",
@@ -3744,7 +3787,7 @@ Json representation of the request:
 
 <a id="examples.real_time_features_main"></a>
 
-# examples.real_time_features_main
+# examples.real\_time\_features\_main
 
 <a id="examples.real_time_features_main.run"></a>
 
@@ -3756,3 +3799,4 @@ def run(host: str = "127.0.0.1", port: int = 8000) -> None
 ```
 
 Run your wyvern service
+

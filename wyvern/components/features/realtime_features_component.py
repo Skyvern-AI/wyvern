@@ -181,7 +181,7 @@ class RealtimeFeatureComponent(
         """
         Get the entity identifier type, which will be used as sql column name
 
-        full_feature_name is of the form <component_name>:<feature_name>
+        full_feature_name is of the form `<component_name>:<feature_name>`
         """
         split_feature = full_feature_name.split(FULL_FEATURE_NAME_SEPARATOR)
         if len(split_feature) != 2:
@@ -202,7 +202,7 @@ class RealtimeFeatureComponent(
         """
         Get the entity identifier type, which will be used as sql column name
 
-        full_feature_name is of the form <component_name>:<feature_name>
+        full_feature_name is of the form `<component_name>:<feature_name>`
         """
         split_feature = full_feature_name.split(FULL_FEATURE_NAME_SEPARATOR)
         if len(split_feature) != 2:
