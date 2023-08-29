@@ -251,6 +251,9 @@ def generate_wyvern_store_app(
     @app.post("/feature/materialize", status_code=201)
     async def materialize(data: MaterializeRequest) -> None:
         try:
+            # refresh registry before materialization
+            store.refresh_registry()
+
             logger.info(f"materialize called: {data}")
             if data.start_date:
                 # materialize from start to end
