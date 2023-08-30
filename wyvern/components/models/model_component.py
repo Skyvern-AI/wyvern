@@ -34,11 +34,26 @@ MODEL_OUTPUT_DATA_TYPE = TypeVar(
     "MODEL_OUTPUT_DATA_TYPE",
     bound=Union[float, str, List[float]],
 )
+"""
+MODEL_OUTPUT_DATA_TYPE is the type of the output of the model. It can be a float, a string, or a list of floats
+(e.g. a list of probabilities, embeddings, etc.)
+"""
 
 logger = logging.getLogger(__name__)
 
 
 class ModelEventData(BaseModel):
+    """
+    This class defines the data that will be logged for each model event.
+
+    Args:
+        model_name: The name of the model
+        model_output: The output of the model
+        entity_identifier: The identifier of the entity that was used to generate the model output. This is optional.
+        entity_identifier_type: The type of the identifier of the entity that was used to generate the model output.
+            This is optional.
+    """
+
     model_name: str
     model_output: str
     entity_identifier: Optional[str] = None
@@ -46,10 +61,25 @@ class ModelEventData(BaseModel):
 
 
 class ModelEvent(LoggedEvent[ModelEventData]):
+    """
+    Model event. This is the event that is logged when a model is evaluated.
+
+    Args:
+        event_type: The type of the event. This is always EventType.MODEL.
+    """
+
     event_type: EventType = EventType.MODEL
 
 
 class ModelOutput(GenericModel, Generic[MODEL_OUTPUT_DATA_TYPE]):
+    """
+    This class defines the output of a model.
+
+    Args:
+        data: A dictionary mapping entity identifiers to model outputs. The model outputs can also be None.
+        model_name: The name of the model. This is optional.
+    """
+
     data: Dict[Identifier, Optional[MODEL_OUTPUT_DATA_TYPE]]
     model_name: Optional[str] = None
 
@@ -57,21 +87,51 @@ class ModelOutput(GenericModel, Generic[MODEL_OUTPUT_DATA_TYPE]):
         self,
         identifier: Identifier,
     ) -> Optional[MODEL_OUTPUT_DATA_TYPE]:
+        """
+        Get the model output for a given entity identifier.
+
+        Args:
+            identifier: The identifier of the entity.
+
+        Returns:
+            The model output for the given entity identifier. This can also be None if the model output is None.
+        """
         return self.data.get(identifier)
 
 
 class ModelInput(GenericModel, Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY]):
+    """
+    This class defines the input to a model.
+
+    Args:
+        request: The request that will be used to generate the model input.
+        entities: A list of entities that will be used to generate the model input.
+    """
+
     request: REQUEST_ENTITY
     entities: List[GENERALIZED_WYVERN_ENTITY] = []
 
     @property
     def first_entity(self) -> GENERALIZED_WYVERN_ENTITY:
+        """
+        Get the first entity in the list of entities. This is useful when you know that there is only one entity.
+
+        Returns:
+            The first entity in the list of entities.
+        """
         if not self.entities:
             raise WyvernModelInputError(model_input=self)
         return self.entities[0]
 
     @property
     def first_identifier(self) -> Identifier:
+        """
+        Get the identifier of the first entity in the list of entities. This is useful when you know that there is only
+        one entity.
+
+        Returns:
+            The identifier of the first entity in the list of entities.
+        """
         return self.first_entity.identifier
 
 
@@ -85,6 +145,12 @@ class ModelComponent(
         MODEL_OUTPUT,
     ],
 ):
+    """
+    This class defines a model component. A model component is a component that takes in a request and a list of
+    entities and outputs a model output. The model output is a dictionary mapping entity identifiers to model outputs.
+    The model outputs can also be None if the model output is None for a given entity.
+    """
+
     def __init__(
         self,
         *upstreams,
@@ -96,6 +162,9 @@ class ModelComponent(
 
     @classmethod
     def get_type_args_simple(cls, index: int) -> Type:
+        """
+        Get the type argument at the given index. This is used to get the model input and model output types.
+        """
         return get_args(cls.__orig_bases__[0])[index]  # type: ignore
 
     @cached_property

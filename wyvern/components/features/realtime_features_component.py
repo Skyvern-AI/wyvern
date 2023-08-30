@@ -29,15 +29,33 @@ from wyvern.wyvern_typing import REQUEST_ENTITY
 logger = logging.getLogger(__name__)
 
 PRIMARY_ENTITY = TypeVar("PRIMARY_ENTITY", bound=WyvernEntity)
+"""
+The primary entity is the entity that is the main entity for the feature. For example, if we are computing
+the feature for a user, the primary entity would be the user.
+"""
 SECONDARY_ENTITY = TypeVar("SECONDARY_ENTITY", bound=WyvernEntity)
+"""
+The secondary entity is the entity that is the secondary entity for the feature. For example, if we are computing
+the feature for a user and a product, the secondary entity would be the product. If we are computing the feature
+for a user, the secondary entity would be None.
+"""
 
 
 class RealtimeFeatureRequest(GenericModel, Generic[REQUEST_ENTITY]):
+    """
+    This is the request that is passed into the realtime feature component.
+    """
+
     request: REQUEST_ENTITY
     feature_retrieval_response: FeatureMap
 
 
 class RealtimeFeatureEntity(GenericModel, Generic[PRIMARY_ENTITY, SECONDARY_ENTITY]):
+    """
+    This is the entity that is passed into the realtime feature component. It contains the primary entity and
+    the secondary entity. If the feature is only for the primary entity, the secondary entity will be None.
+    """
+
     # Can pass in multiple WYVERN_ENTITIES here as well
     primary_entity: Optional[PRIMARY_ENTITY]
     secondary_entity: Optional[SECONDARY_ENTITY]
@@ -53,6 +71,27 @@ class RealtimeFeatureComponent(
     ],
     Generic[PRIMARY_ENTITY, SECONDARY_ENTITY, REQUEST_ENTITY],
 ):
+    """
+    This is the base class for all realtime feature components. It contains the logic for computing the realtime
+    feature. The realtime feature component can be used to compute features for a single entity, two entities, or
+    a request. The realtime feature component can also be used to compute composite features for two entities.
+
+    The realtime feature component is a generic class that takes in the primary entity, secondary entity, and request
+    entity as type parameters. The primary entity is the entity that is the main entity for the feature. For example,
+    if we are computing the feature for a user, the primary entity would be the user. The secondary entity is the
+    entity that is the secondary entity for the feature. For example, if we are computing the feature for a user and
+    a product, the secondary entity would be the product. If we are computing the feature for a user, the secondary
+    entity would be None. The request entity is the request that is passed into the realtime feature component. We can
+    use the request entity to compute features for a request. For example, if we are computing the realtime features for
+    a ranking request, the request entity would be the ranking request. We can combine the primary entity, secondary
+    entity, and request entity to compute composite features.
+
+    Attributes:
+        NAME: The name of the realtime feature component. This is used to identify the realtime feature component.
+        real_time_features: A list of all the realtime feature components.
+        component_registry: A dictionary that maps the name of the realtime feature component to the realtime feature
+    """
+
     NAME: str = ""
 
     real_time_features: List[RealtimeFeatureComponent] = []
@@ -128,6 +167,10 @@ class RealtimeFeatureComponent(
 
     @classmethod
     def get_type_args_simple(cls, index: int) -> Type:
+        """
+        Get the type argument at the given index for the class. This is used to get the primary entity type, secondary
+        entity type, and request entity type.
+        """
         return get_args(cls.__orig_bases__[0])[index]  # type: ignore
 
     @classmethod
@@ -136,9 +179,9 @@ class RealtimeFeatureComponent(
         full_feature_name: str,
     ) -> Optional[List[str]]:
         """
-        Get the the entity identifier type, which will be used as sql column name
+        Get the entity identifier type, which will be used as sql column name
 
-        full_feature_name is of the form <component_name>:<feature_name>
+        full_feature_name is of the form `<component_name>:<feature_name>`
         """
         split_feature = full_feature_name.split(FULL_FEATURE_NAME_SEPARATOR)
         if len(split_feature) != 2:
@@ -157,9 +200,9 @@ class RealtimeFeatureComponent(
         full_feature_name: str,
     ) -> Optional[str]:
         """
-        Get the the entity identifier type, which will be used as sql column name
+        Get the entity identifier type, which will be used as sql column name
 
-        full_feature_name is of the form <component_name>:<feature_name>
+        full_feature_name is of the form `<component_name>:<feature_name>`
         """
         split_feature = full_feature_name.split(FULL_FEATURE_NAME_SEPARATOR)
         if len(split_feature) != 2:
@@ -179,7 +222,7 @@ class RealtimeFeatureComponent(
         secondary_entity: Optional[SECONDARY_ENTITY],
     ) -> bool:
         """
-        Checks if the input matches the entity type so we can execute on it
+        Checks if the input matches the entity type, so we can execute on it
         """
         type_matches = True
         if self.primary_entity_type is not Any:

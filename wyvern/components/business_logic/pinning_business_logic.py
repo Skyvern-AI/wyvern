@@ -39,13 +39,16 @@ class PinningBusinessLogicComponent(
         """
         Pins the supplied entity to the specific position
 
-        :param scored_candidates: The list of scored candidates
-        :param entity_pins: The map of entity keys (unique identifiers) to pin, and their pinning position
-        :param entity_key_mapping: A lambda function that takes in a candidate entity and
-            returns the field we should apply the pin to
-        :param allow_down_ranking: Whether to allow down-ranking of candidates that are not pinned
-        """
+        Args:
+            scored_candidates: The list of scored candidates
+            entity_pins: The map of entity keys (unique identifiers) to pin, and their pinning position
+            entity_key_mapping: A lambda function that takes in a candidate entity and
+                returns the field we should apply the pin to
+            allow_down_ranking: Whether to allow down-ranking of candidates that are not pinned
 
+        Returns:
+            The list of scored candidates with the pinned entities
+        """
         applied_pins_score: Dict[int, float] = {}
         re_scored_candidates: List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]] = []
         for index, candidate in enumerate(scored_candidates):
@@ -87,10 +90,18 @@ class PinningBusinessLogicComponent(
 
     def _update_applied_pins_score(
         self,
-        applied_pins_score,
-        current_position,
-        new_score,
+        applied_pins_score: Dict[int, float],
+        current_position: int,
+        new_score: float,
     ):
+        """
+        Updates the applied pins score dictionary with the new score for the given position
+
+        Args:
+            applied_pins_score: The dictionary of applied pins score
+            current_position: The current position to update
+            new_score: The new score to apply
+        """
         if current_position in applied_pins_score:
             # This means this position already had a pin applied to it.. so we need to update the position
             existing_pin_score = applied_pins_score[current_position]
@@ -113,11 +124,23 @@ class PinningBusinessLogicComponent(
 
     def _get_pinned_score(
         self,
-        applied_pins_score,
-        candidate,
-        pin_candidate_new_position,
-        scored_candidates,
-    ):
+        applied_pins_score: Dict[int, float],
+        candidate: ScoredCandidate[GENERALIZED_WYVERN_ENTITY],
+        pin_candidate_new_position: int,
+        scored_candidates: List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]],
+    ) -> float:
+        """
+        Gets the score for the pinned candidate
+
+        Args:
+            applied_pins_score: The dictionary of applied pins score
+            candidate: The candidate to pin
+            pin_candidate_new_position: The new position to pin the candidate to
+            scored_candidates: The list of scored candidates
+
+        Returns:
+            The score for the pinned candidate
+        """
         if pin_candidate_new_position >= len(scored_candidates) - 1:
             # Pinned position is outside or at the bottom of the candidate set,
             #   subtract current score from the lowest score

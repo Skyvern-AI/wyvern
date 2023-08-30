@@ -12,6 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 class ExperimentationClient:
+    """
+    A client for interacting with experimentation providers.
+    """
+
     def __init__(self, provider_name: str, api_key: Optional[str] = None):
         """
         Initializes the ExperimentationClient with a specified provider.

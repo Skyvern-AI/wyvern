@@ -6,6 +6,9 @@ from wyvern.config import settings
 
 
 def setup_tracing():
+    """
+    Setup tracing for Wyvern service. Tracing is disabled in development mode and for healthcheck requests.
+    """
     tracer.configure(
         settings={
             "FILTERS": [

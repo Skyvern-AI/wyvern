@@ -31,9 +31,15 @@ logger = logging.getLogger(__name__)
 
 class FeatureRetrievalPipelineRequest(GenericModel, Generic[REQUEST_ENTITY]):
     """
-    request_feature_names includes the feature views that are needed to compute the features
+    This is the input to the FeatureRetrievalPipeline component that is used to retrieve features.
 
-    ie: product_fv:FEATURE_PRODUCT_AMOUNT_PAID_LAST_15_DAYS
+    Attributes:
+        request: The request that is used to retrieve features. This is used to retrieve the entities and
+            identifiers that are needed to compute the features.
+        requested_feature_names: The feature names that are
+            requested. This is used to filter out the real-time features that are calculated instead of
+            retrieved from the feature store. ie: `product_fv:FEATURE_PRODUCT_AMOUNT_PAID_LAST_15_DAYS`
+        feature_overrides: This is used to override the default real-time features.
     """
 
     request: REQUEST_ENTITY
@@ -45,12 +51,28 @@ class FeatureRetrievalPipeline(
     Component[FeatureRetrievalPipelineRequest[REQUEST_ENTITY], FeatureMap],
     Generic[REQUEST_ENTITY],
 ):
+    """
+    This component is used to retrieve features for a given request. It is composed of the following components:
+        1. FeatureStoreRetrievalComponent: This component is used to retrieve features from the feature store.
+        2. RealtimeFeatureComponent: This component is used to compute real-time features.
+        3. FeatureEventLoggingComponent: This component is used to log feature events.
+
+    """
+
     def __init__(
         self,
         *upstreams: Component,
         name: str,
         handle_exceptions: bool = False,
     ):
+        """
+        Args:
+            *upstreams: The upstream components to this component.
+            name: The name of this component.
+            handle_exceptions: Whether to handle feature store exceptions. Defaults to False.
+                If True, missing feature values will be None instead of raising exceptions.
+                If False, exceptions will be raised.
+        """
         self.real_time_features: List[
             RealtimeFeatureComponent
         ] = RealtimeFeatureComponent.real_time_features
@@ -90,6 +112,16 @@ class FeatureRetrievalPipeline(
     async def execute(
         self, input: FeatureRetrievalPipelineRequest[REQUEST_ENTITY], **kwargs
     ) -> FeatureMap:
+        """
+        This method is used to retrieve features for a given request.
+
+        It is composed of the following steps:
+            0. Figure out which features are real-time features and which features are feature store features.
+            1. Retrieve features from the feature store.
+            2. Compute real-time features.
+            3. Combine the feature store features and real-time features into one FeatureMap.
+            4. Log the feature values to the feature event logging component.
+        """
         # Only evaluate real-time features where the output feature names are in the requested feature names
         # Or the client wants to evaluate the feature
         # TODO (suchintan): We don't support "chained" real-time features yet.. hopefully soon

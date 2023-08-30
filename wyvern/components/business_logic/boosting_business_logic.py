@@ -27,7 +27,8 @@ class BoostingBusinessLogicComponent(
     Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
 ):
     """
-    A component that performs boosting on an entity with a set of candidates
+    A component that performs boosting on an entity with a set of candidates. The boosting can be multiplicative
+    or additive.
 
     The request itself could contain more than just entities, for example it may contain a query and so on
     """
@@ -49,12 +50,17 @@ class BoostingBusinessLogicComponent(
         """
         Boosts the score of each candidate by a certain factor
 
-        :param scored_candidates: The list of scored candidates
-        :param entity_keys: The set of entity keys (unique identifiers) to boost
-        :param boost: The boost factor
-        :param entity_key_mapping: A lambda function that takes in a candidate entity and
-            returns the field we should apply the boost to
-        :param multiplicative: Whether to apply the boost multiplicatively or additively
+        Args:
+            scored_candidates: The list of scored candidates
+            entity_keys: The set of entity keys (unique identifiers) to boost
+            boost: The boost factor
+            entity_key_mapping: A lambda function that takes in a candidate entity and
+                returns the field we should apply the boost to
+            multiplicative: Whether to apply the boost with multiplication or addition  - true indicates it is
+                multiplication and false indicates it is addition
+
+        Returns:
+            The list of scored candidates with the boost applied
         """
 
         return [
@@ -76,6 +82,21 @@ class BoostingBusinessLogicComponent(
         entity_keys: Set[str],
         multiplicative: bool,
     ) -> ScoredCandidate[GENERALIZED_WYVERN_ENTITY]:
+        """
+        Applies the boost to the candidate if the entity key is in the set of entity keys
+
+        Args:
+            boost: The boost factor
+            candidate: The candidate to apply the boost to
+            entity_key_mapping: A lambda function that takes in a candidate entity and
+                returns the field we should apply the boost to
+            entity_keys: The set of entity keys (unique identifiers) to boost
+            multiplicative: Whether to apply the boost with multiplication or addition  - true indicates it is
+                multiplication and false indicates it is addition
+
+        Returns:
+            The candidate with the boost applied
+        """
         if entity_key_mapping(candidate.entity) in entity_keys:
             # TODO (suchintan): Should this be done in-place instead?
             new_score = (
@@ -95,13 +116,19 @@ class CSVBoostingBusinessLogicComponent(
     BoostingBusinessLogicComponent[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
     Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
 ):
-    def __init__(self, *upstreams, csv_file: str, multiplicative: bool = False):
-        """
-        This component reads a csv file and applies the boost based on
-            specific column name, entity key, and score combinations
+    """
+    This component reads a csv file and applies the boost based on specific column name, entity key, and score
+    combinations
 
-        Methods to define: Given a CSV row, generate the entity key and boost value
-        """
+    Methods to define: Given a CSV row, generate the entity key and boost value
+
+    Parameters:
+        csv_file: The path to the CSV file
+        multiplicative: Whether to apply the boost with multiplication or addition  - true indicates it is
+                multiplication and false indicates it is addition
+    """
+
+    def __init__(self, *upstreams, csv_file: str, multiplicative: bool = False):
         self.csv_file = csv_file
         self.parsed_file: DataFrame = pd.DataFrame()
         self.lookup: Dict[str, float] = {}
@@ -110,7 +137,7 @@ class CSVBoostingBusinessLogicComponent(
 
     async def initialize(self) -> None:
         """
-        Initialize the component
+        Reads the CSV file and populates the lookup table
         """
         self.parsed_file = pd.read_csv(self.csv_file)
 

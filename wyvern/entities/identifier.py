@@ -15,6 +15,10 @@ logger = logging.getLogger(__name__)
 
 
 class SimpleIdentifierType(str, Enum):
+    """
+    Simple identifier types are those that are not composite.
+    """
+
     PRODUCT = "product"
     QUERY = "query"
     BRAND = "brand"
@@ -27,10 +31,20 @@ def composite(
     primary_identifier_type: SimpleIdentifierType,
     secondary_identifier_type: SimpleIdentifierType,
 ) -> str:
+    """
+    Composite identifier types are those that are composite. For example, a product with id p_1234 and type "product"
+    a user with id u_1234 and type "user" would have a composite identifier of "p_1234:u_1234", and a composite
+    identifier_type of "product:user". This is useful for indexing and searching for composite entities.
+    """
     return f"{primary_identifier_type.value}{COMPOSITE_SEPARATOR}{secondary_identifier_type.value}"
 
 
 class CompositeIdentifierType(str, Enum):
+    """
+    Composite identifier types are those that are composite. For example, a composite identifier type of
+    "product:user" would be a composite identifier type for a product and a user. This is useful for indexing and
+    searching for composite entities.
+    """
 
     PRODUCT_QUERY = composite(
         SimpleIdentifierType.PRODUCT,
@@ -97,6 +111,15 @@ class Identifier(BaseModel):
 
 
 class CompositeIdentifier(Identifier):
+    """
+    Composite identifiers exist to represent a unique entity through their unique id and their type. At most, they
+    can have two identifiers and two identifier types. For example:
+        a product with id p_1234 and type "product"
+        a user with id u_1234 and type "user"
+
+        The composite identifier would be "p_1234:u_1234", and the composite identifier_type would be "product:user".
+    """
+
     primary_identifier: Identifier
     secondary_identifier: Identifier
 

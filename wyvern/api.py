@@ -22,6 +22,16 @@ RETRY_PER_BATCH = 2
 
 
 def ensure_async_client(func: Callable) -> Callable:
+    """
+    Ensure that the async client is open before calling the function and close it after calling the function
+
+    Args:
+        func: The function to be wrapped
+
+    Returns:
+        The wrapped function
+    """
+
     @wraps(func)
     def wrapper(self: WyvernAPI, *args, **kwargs):
         if self.async_client.closed:

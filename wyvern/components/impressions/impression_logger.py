@@ -17,11 +17,26 @@ from wyvern.wyvern_typing import REQUEST_ENTITY
 
 
 class ImpressionEventData(EntityEventData):
+    """
+    Impression event data. This is the data that is logged for each impression.
+
+    Args:
+        impression_score: The score of the impression.
+        impression_order: The order of the impression.
+    """
+
     impression_score: float
     impression_order: int
 
 
 class ImpressionEvent(LoggedEvent[ImpressionEventData]):
+    """
+    Impression event. This is the event that is logged for each impression.
+
+    Args:
+        event_type: The type of the event. This is always EventType.IMPRESSION.
+    """
+
     event_type: EventType = EventType.IMPRESSION
 
 
@@ -29,6 +44,15 @@ class ImpressionEventLoggingRequest(
     GenericModel,
     Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
 ):
+    """
+    Impression event logging request.
+
+    Args:
+        request: The request that was made.
+        scored_impressions: The scored impressions. This is a list of scored candidates.
+            Each scored candidate has an entity and a score.
+    """
+
     request: REQUEST_ENTITY
     scored_impressions: List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]]
 
@@ -40,12 +64,25 @@ class ImpressionEventLoggingComponent(
     ],
     Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
 ):
+    """
+    Impression event logging component. This component logs impression events.
+    """
+
     @tracer.wrap(name="ImpressionEventLoggingComponent.execute")
     async def execute(
         self,
         input: ImpressionEventLoggingRequest[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
         **kwargs
     ) -> None:
+        """
+        Logs impression events.
+
+        Args:
+            input: The input to the component. This contains the request and the scored impressions.
+
+        Returns:
+            None
+        """
         current_span = tracer.current_span()
         if current_span:
             current_span.set_tag("impression_size", len(input.scored_impressions))

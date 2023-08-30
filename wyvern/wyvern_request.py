@@ -14,6 +14,23 @@ from wyvern.entities.feature_entities import FeatureMap
 
 @dataclass
 class WyvernRequest:
+    """
+    WyvernRequest is a dataclass that represents a request to the Wyvern service. It is used to pass
+    information between the various components of the Wyvern service.
+
+    Attributes:
+        method: The HTTP method of the request
+        url: The full URL of the request
+        url_path: The path of the URL of the request
+        json: The JSON body of the request, represented by pydantic model
+        headers: The headers of the request
+        entity_store: A dictionary that can be used to store entities that are created during the request
+        events: A list of functions that return a list of LoggedEvents. These functions are called at the end of
+            the request to log events to the event store
+        feature_map: A FeatureMap that can be used to store features that are created during the request
+        request_id: The request ID of the request
+    """
+
     method: str
     url: str
     url_path: str
@@ -38,6 +55,17 @@ class WyvernRequest:
         req: fastapi.Request,
         request_id: Optional[str] = None,
     ) -> WyvernRequest:
+        """
+        Parses a FastAPI request into a WyvernRequest
+
+        Args:
+            json: The JSON body of the request, represented by pydantic model
+            req: The FastAPI request
+            request_id: The request ID of the request
+
+        Returns:
+            A WyvernRequest
+        """
         return cls(
             method=req.method,
             url=str(req.url),

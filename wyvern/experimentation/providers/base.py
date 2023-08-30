@@ -5,6 +5,10 @@ from typing import Optional
 
 
 class ExperimentationProvider(str, Enum):
+    """
+    An enum for the experimentation providers.
+    """
+
     EPPO = "eppo"
 
 

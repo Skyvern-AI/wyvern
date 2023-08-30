@@ -56,6 +56,16 @@ def _get_feature_views(
     features: List[str],
     all_feature_views: List[FeatureView],
 ) -> List[Tuple[FeatureView, List[str]]]:
+    """
+    Groups feature names by feature views.
+
+    Arguments:
+        features: List of feature references.
+        all_feature_views: List of all feature views.
+
+    Returns:
+        List of tuples of feature views and feature names.
+    """
     # view name to view proto
     view_index = {view.projection.name_to_use(): view for view in all_feature_views}
 
@@ -79,6 +89,15 @@ def _get_feature_views(
 def generate_wyvern_store_app(
     path: str,
 ) -> FastAPI:
+    """
+    Generate a FastAPI app for Wyvern feature store.
+
+    Arguments:
+        path: Path to the feature store repo.
+
+    Returns:
+        FastAPI app.
+    """
     proto_json.patch()
     store = FeatureStore(repo_path=path)
     app = FastAPI()
@@ -113,6 +132,15 @@ def generate_wyvern_store_app(
 
     @app.post(settings.WYVERN_ONLINE_FEATURES_PATH)
     def get_online_features(data: GetOnlineFeaturesRequest) -> Dict[str, Any]:
+        """
+        Get online features from the feature store.
+
+        Arguments:
+            data: Request data. See schemas.py for the schema.
+
+        Returns:
+            Online features response.
+        """
         try:
             # Validate and parse the request data into GetOnlineFeaturesRequest Protobuf object
             batch_sizes = [len(v) for v in data.entities.values()]
@@ -250,6 +278,15 @@ def generate_wyvern_store_app(
 
     @app.post("/feature/materialize", status_code=201)
     async def materialize(data: MaterializeRequest) -> None:
+        """
+        Materialize the feature store and refresh the registry. This is a blocking call.
+
+        Arguments:
+            data: Request data. See schemas.py for the schema.
+
+        Returns:
+            None.
+        """
         try:
             logger.info(f"materialize called: {data}")
             if data.start_date:
@@ -278,7 +315,13 @@ def generate_wyvern_store_app(
         Wyvern feature store's historical features include realtime historical feature logged by wyvern pipeline and
             offline historical features.
 
-        Currently, we use the feast offline feature and only supports historical realtime features on snowflake.
+        Currently, we use the feast's offline features and support historical realtime features only on snowflake.
+
+        Arguments:
+            data: Request data. See schemas.py for the schema.
+
+        Returns:
+            Historical features response.
         """
         # validate the data input: lengths of requests, timestamps and all the entities should be the same
         if "request" not in data.entities:
@@ -417,6 +460,14 @@ def start_wyvern_store(
     host: str,
     port: int,
 ):
+    """
+    Start the Wyvern feature store.
+
+    Arguments:
+        path: Path to the feature store repo.
+        host: Host to run the feature store on.
+        port: Port to run the feature store on.
+    """
     app = generate_wyvern_store_app(path)
     uvicorn.run(
         app,

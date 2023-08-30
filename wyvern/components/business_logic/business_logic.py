@@ -23,6 +23,16 @@ logger = logging.getLogger(__name__)
 
 
 class BusinessLogicEventData(EntityEventData):
+    """
+    The data associated with a business logic event
+
+    Parameters:
+        business_logic_pipeline_order: The order of the business logic pipeline that this event occurred in
+        business_logic_name: The name of the business logic component that this event occurred in
+        old_score: The old score of the entity
+        new_score: The new score of the entity
+    """
+
     business_logic_pipeline_order: int
     business_logic_name: str
     old_score: float
@@ -30,6 +40,10 @@ class BusinessLogicEventData(EntityEventData):
 
 
 class BusinessLogicEvent(LoggedEvent[BusinessLogicEventData]):
+    """
+    An event that occurs in the business logic layer
+    """
+
     event_type: EventType = EventType.BUSINESS_LOGIC
 
 
@@ -37,6 +51,14 @@ class BusinessLogicRequest(
     GenericModel,
     Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
 ):
+    """
+    A request to the business logic layer to perform business logic on a set of candidates
+
+    Parameters:
+        request: The request that the business logic layer is being asked to perform business logic on
+        scored_candidates: The candidates that the business logic layer is being asked to perform business logic on
+    """
+
     request: REQUEST_ENTITY
     scored_candidates: List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]]
 
@@ -49,6 +71,14 @@ class BusinessLogicResponse(
     GenericModel,
     Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
 ):
+    """
+    The response from the business logic layer after performing business logic on a set of candidates
+
+    Parameters:
+        request: The request that the business logic layer was asked to perform business logic on
+        adjusted_candidates: The candidates that the business logic layer performed business logic on
+    """
+
     request: BusinessLogicRequest[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY]
     adjusted_candidates: List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]]
 
@@ -100,6 +130,15 @@ class BusinessLogicPipeline(
         input: BusinessLogicRequest[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
         **kwargs,
     ) -> BusinessLogicResponse[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY]:
+        """
+        Executes the business logic pipeline on the inputted candidates
+
+        Parameters:
+            input: The input to the business logic pipeline
+
+        Returns:
+            The output of the business logic pipeline
+        """
         argument = input
 
         # Make sure that the inputted candidates are actually sorted
@@ -154,6 +193,19 @@ class BusinessLogicPipeline(
         request_id: str,
         old_scores: List[float],
     ) -> List[BusinessLogicEvent]:
+        """
+        Extracts the business logic events from the output of a business logic component
+
+        Args:
+            output: The output of a business logic component
+            pipeline_index: The index of the business logic component in the business logic pipeline
+            upstream_name: The name of the business logic component
+            request_id: The request id of the request that the business logic component was called in
+            old_scores: The old scores of the candidates that the business logic component was called on
+
+        Returns:
+            The business logic events that were extracted from the output of the business logic component
+        """
         timestamp = datetime.utcnow()
         events = [
             BusinessLogicEvent(

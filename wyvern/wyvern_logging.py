@@ -9,6 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 def setup_logging():
+    """
+    Setup logging configuration by loading from log_config.yml file. Logs an error if the
+    file cannot be found or loaded and uses default logging configuration.
+    """
     # this log_config.yml file path is changed compared to the original library code
     path = os.path.abspath("log_config.yml")
 

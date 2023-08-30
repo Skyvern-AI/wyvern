@@ -13,15 +13,44 @@ logger = logging.getLogger(__name__)
 
 
 class PaginationRequest(GenericModel, Generic[T]):
+    """
+    This is the input to the PaginationComponent.
+
+    Attributes:
+        pagination_fields: The pagination fields that are used to compute the pagination.
+        entities: The entities that need to be paginated.
+    """
+
     pagination_fields: PaginationFields
     entities: List[T]
 
 
 class PaginationComponent(Component[PaginationRequest[T], List[T]]):
+    """
+    This component is used to paginate the entities. It takes in the pagination fields and the entities and returns
+    the paginated entities.
+    """
+
     def __init__(self):
         super().__init__(name="PaginationComponent")
 
     async def execute(self, input: PaginationRequest[T], **kwargs) -> List[T]:
+        """
+        This method paginates the entities based on the pagination fields.
+
+        Validations:
+            1. The ranking page should be greater than or equal to 0.
+            2. The candidate page should be greater than or equal to 0.
+            3. The candidate page size should be less than or equal to 1000.
+            4. The number of entities should be less than or equal to 1000.
+            5. The user page size should be less than or equal to 100.
+            6. The user page size should be less than or equal to the candidate page size.
+            7. The end index should be less than the number of entities.
+            8. The end index should be greater than the start index.
+
+        Returns:
+            The paginated entities.
+        """
         user_page = input.pagination_fields.user_page
         candidate_page = input.pagination_fields.candidate_page
         candidate_page_size = input.pagination_fields.candidate_page_size

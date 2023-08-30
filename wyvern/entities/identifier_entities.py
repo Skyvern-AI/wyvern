@@ -9,6 +9,14 @@ from wyvern.entities.identifier import Identifier, SimpleIdentifierType
 
 
 class WyvernDataModel(BaseModel):
+    """
+    WyvernDataModel is a base class for all data models that could be hydrated from Wyvern Index.
+
+    Attributes:
+        _all_entities: a list of all the entities under the tree
+        _all_identifiers: a list of all the identifiers under the tree
+    """
+
     _all_entities: Optional[List[WyvernEntity]] = PrivateAttr()
     _all_identifiers: Optional[List[Identifier]] = PrivateAttr()
 
@@ -189,9 +197,22 @@ class WyvernEntity(WyvernDataModel):
 
 
 class QueryEntity(WyvernEntity):
+    """
+    QueryEntity is a base class for all entities that have query as an identifier.
+
+    Attributes:
+        query: the query string
+    """
+
     query: str
 
     def generate_identifier(self) -> Identifier:
+        """
+        This method returns the identifier for this entity.
+
+        Returns:
+            Identifier: the identifier for this entity with identifier_type=SimpleIdentifierType.QUERY.
+        """
         return Identifier(
             identifier=self.query,
             identifier_type=SimpleIdentifierType.QUERY.value,
@@ -199,9 +220,22 @@ class QueryEntity(WyvernEntity):
 
 
 class ProductEntity(WyvernEntity):
+    """
+    ProductEntity is a base class for all entities that have product_id as an identifier.
+
+    Attributes:
+        product_id: the product id
+    """
+
     product_id: str
 
     def generate_identifier(self) -> Identifier:
+        """
+        This method returns the identifier for this entity.
+
+        Returns:
+            Identifier: the identifier for this entity with identifier_type=SimpleIdentifierType.PRODUCT.
+        """
         return Identifier(
             identifier=self.product_id,
             identifier_type=SimpleIdentifierType.PRODUCT.value,
@@ -209,9 +243,22 @@ class ProductEntity(WyvernEntity):
 
 
 class UserEntity(WyvernEntity):
+    """
+    UserEntity is a base class for all entities that have user_id as an identifier.
+
+    Attributes:
+        user_id: the user id
+    """
+
     user_id: str
 
     def generate_identifier(self) -> Identifier:
+        """
+        This method returns the identifier for this entity.
+
+        Returns:
+            Identifier: the identifier for this entity with identifier_type=SimpleIdentifierType.USER.
+        """
         return Identifier(
             identifier=self.user_id,
             identifier_type=SimpleIdentifierType.USER.value,

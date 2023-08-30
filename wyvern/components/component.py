@@ -16,12 +16,25 @@ logger = logging.getLogger(__name__)
 
 
 class ComponentStatus(str, Enum):
+    """
+    This enum defines the status of the component.
+    """
+
     created = "created"
     initialized = "initialized"
     failed = "failed"
 
 
 class Component(Generic[INPUT_TYPE, OUTPUT_TYPE]):
+    """
+    Component is the base class for all the components in Wyvern. It is a generic class that takes in
+    the input type and the output type of the component.
+
+    It is responsible for:
+        1. Initializing the component
+        2. Initializing the upstream components
+    """
+
     def __init__(
         self,
         *upstreams: Component,

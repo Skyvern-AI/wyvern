@@ -164,6 +164,7 @@ async def sample_product_query_ranking_request() -> None:
     How to run this: `python wyvern/examples/example_business_logic.py`
 
     Json representation of the request:
+    ```
     {
         "request_id": "rrr",
         "query": "candle",
@@ -177,6 +178,7 @@ async def sample_product_query_ranking_request() -> None:
             {"product_id": "7", "product_name": "wax seal"}
        ],
     }
+    ```
     """
     logger.info("Start query product business logic case...")
     req = ExampleProductSearchRankingRequest(
