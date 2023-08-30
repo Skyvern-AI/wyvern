@@ -1539,7 +1539,8 @@ Boosts the score of each candidate by a certain factor
 - `boost` - The boost factor
 - `entity_key_mapping` - A lambda function that takes in a candidate entity and
   returns the field we should apply the boost to
-- `multiplicative` - Whether to apply the boost with multiplication or addition
+- `multiplicative` - Whether to apply the boost with multiplication or addition - true indicates it is
+  multiplication and false indicates it is addition
 
 **Returns**:
 
@@ -1564,7 +1565,8 @@ Methods to define: Given a CSV row, generate the entity key and boost value
 **Arguments**:
 
 - `csv_file` - The path to the CSV file
-- `multiplicative` - Whether to apply the boost with multiplication or addition
+- `multiplicative` - Whether to apply the boost with multiplication or addition - true indicates it is
+  multiplication and false indicates it is addition
 
 <a id="wyvern.components.business_logic.boosting_business_logic.CSVBoostingBusinessLogicComponent.initialize"></a>
 
@@ -2845,7 +2847,7 @@ information between the various components of the Wyvern service.
 - `method` - The HTTP method of the request
 - `url` - The full URL of the request
 - `url_path` - The path of the URL of the request
-- `json` - The JSON body of the request
+- `json` - The JSON body of the request, represented by pydantic model
 - `headers` - The headers of the request
 - `entity_store` - A dictionary that can be used to store entities that are created during the request
 - `events` - A list of functions that return a list of LoggedEvents. These functions are called at the end of
@@ -2869,7 +2871,7 @@ Parses a FastAPI request into a WyvernRequest
 
 **Arguments**:
 
-- `json` - The JSON body of the request
+- `json` - The JSON body of the request, represented by pydantic model
 - `req` - The FastAPI request
 - `request_id` - The request ID of the request
 
@@ -2908,7 +2910,8 @@ Request object for getting online features.
 - `entities` - A dictionary of entity name to entity value.
 - `features` - A list of feature names.
 - `full_feature_names` - A boolean indicating whether to return full feature names. If True, the feature names will
-  be returned in the format `<feature_view_name>__<feature_name>`. If False, only the feature names will be returned
+  be returned in the format `<feature_view_name>__<feature_name>`. If False, only the feature names will be
+  returned.
 
 <a id="wyvern.feature_store.schemas.GetHistoricalFeaturesRequest"></a>
 

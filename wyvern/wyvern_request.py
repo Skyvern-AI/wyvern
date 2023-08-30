@@ -22,7 +22,7 @@ class WyvernRequest:
         method: The HTTP method of the request
         url: The full URL of the request
         url_path: The path of the URL of the request
-        json: The JSON body of the request
+        json: The JSON body of the request, represented by pydantic model
         headers: The headers of the request
         entity_store: A dictionary that can be used to store entities that are created during the request
         events: A list of functions that return a list of LoggedEvents. These functions are called at the end of
@@ -59,7 +59,7 @@ class WyvernRequest:
         Parses a FastAPI request into a WyvernRequest
 
         Args:
-            json: The JSON body of the request
+            json: The JSON body of the request, represented by pydantic model
             req: The FastAPI request
             request_id: The request ID of the request
 

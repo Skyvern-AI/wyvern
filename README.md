@@ -21,11 +21,3 @@
 ```
 pip install wyvern-ai
 ```
-
-## Generate SDK reference
-
-The markdown is generated from the docstrings in the code. To generate the markdown, run:
-
-```bash
-pydoc-markdown -I $(pwd) > sdk_ref.md
-```

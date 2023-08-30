@@ -56,7 +56,8 @@ class BoostingBusinessLogicComponent(
             boost: The boost factor
             entity_key_mapping: A lambda function that takes in a candidate entity and
                 returns the field we should apply the boost to
-            multiplicative: Whether to apply the boost with multiplication or addition
+            multiplicative: Whether to apply the boost with multiplication or addition  - true indicates it is
+                multiplication and false indicates it is addition
 
         Returns:
             The list of scored candidates with the boost applied
@@ -90,7 +91,8 @@ class BoostingBusinessLogicComponent(
             entity_key_mapping: A lambda function that takes in a candidate entity and
                 returns the field we should apply the boost to
             entity_keys: The set of entity keys (unique identifiers) to boost
-            multiplicative: Whether to apply the boost with multiplication or addition
+            multiplicative: Whether to apply the boost with multiplication or addition  - true indicates it is
+                multiplication and false indicates it is addition
 
         Returns:
             The candidate with the boost applied
@@ -122,7 +124,8 @@ class CSVBoostingBusinessLogicComponent(
 
     Parameters:
         csv_file: The path to the CSV file
-        multiplicative: Whether to apply the boost with multiplication or addition
+        multiplicative: Whether to apply the boost with multiplication or addition  - true indicates it is
+                multiplication and false indicates it is addition
     """
 
     def __init__(self, *upstreams, csv_file: str, multiplicative: bool = False):

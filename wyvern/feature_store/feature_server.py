@@ -279,8 +279,7 @@ def generate_wyvern_store_app(
     @app.post("/feature/materialize", status_code=201)
     async def materialize(data: MaterializeRequest) -> None:
         """
-        Materialize the feature store and refresh the registry. This is a blocking call and this is expected
-        to be called by a cronjob.
+        Materialize the feature store and refresh the registry. This is a blocking call.
 
         Arguments:
             data: Request data. See schemas.py for the schema.
