@@ -12,6 +12,7 @@ from typing import Optional
 import requests
 import typer
 import uvicorn
+from humps.main import decamelize
 from platformdirs import user_data_dir
 from typing_extensions import Annotated
 
@@ -100,7 +101,14 @@ def init(
 ) -> None:
     """
     Initializes Wyvern application template code
+
+    Args:
+        project (str): Name of the project
     """
+
+    # decamelize project name first
+    project = decamelize(project)
+
     tracking.capture(event="oss_init_start")
     typer.echo("Initializing Wyvern application template code...")
 
@@ -154,6 +162,14 @@ def run(
 ) -> None:
     """
     Starts Wyvern application server
+
+    Example usage:
+    wyvern run --path pipelines.main:app --host 0.0.0.0 --port 5001
+
+    Args:
+        path (str): path to the wyvern app. Default path is pipelines.main:app
+        host (str): Host to run the application on. Default host is 0.0.0.0
+        port (int): Port to run the application on. Default port is 5001
     """
     tracking.capture(event="oss_run_start")
     typer.echo("Running your ML application")
