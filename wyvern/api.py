@@ -38,6 +38,10 @@ def ensure_async_client(func: Callable) -> Callable:
 
 
 class WyvernAPI:
+    """
+    Wyvern API client
+    """
+
     def __init__(
         self,
         api_key: Optional[str] = None,
@@ -79,6 +83,21 @@ class WyvernAPI:
         features: List[str],
         entities: Union[Dict[Hashable, List[Any]], pd.DataFrame],
     ) -> pd.DataFrame:
+        """
+        Aggregate all the historical features, including the offline features in your data warehouse
+        and the historical real-time features being consumed by wyvern pipeline.
+
+        Args:
+            features: A list of feature names.
+            entities: A dictionary or pandas DataFrame of entity names and their values.
+                some requirements of entities:
+                - entities must have request and timestamp keys
+                - request is a list of the request_id of request getting into Wyvern's pipeline
+                - timestamp is a list of timestamp of the request
+                - the rest of the columns are the entity for the features and the user interaction data
+        Returns:
+            A pandas DataFrame with all the feature data you're requesting from the entities.
+        """
         # nest_asyncio call is needed to avoid RuntimeError: This event loop is already running with notebook use case
         nest_asyncio.apply()
         if isinstance(entities, dict):
