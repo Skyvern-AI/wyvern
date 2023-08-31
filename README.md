@@ -14,7 +14,7 @@
   <a href="https://github.com/Wyvern-AI/wyvern/blob/main/LICENSE"><img src="https://badgen.net/badge/License/Elv2/green?icon=github"/></a>
 </div>
 
-## Check Out Our [Wyvern's Official Doc](https://docs.wyvern.ai)
+## Check Out [Wyvern's Official Doc](https://docs.wyvern.ai)
 
 ## Install Wyvern
 
