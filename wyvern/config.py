@@ -92,6 +92,10 @@ class Settings(BaseSettings):
     EXPERIMENTATION_PROVIDER: str = ExperimentationProvider.EPPO.value
     EPPO_API_KEY: str = ""
 
+    # wyvern component flag
+    FEATURE_STORE_ENABLED: bool = False
+    EVENT_LOGGING_ENABLED: bool = False
+
     class Config:
         env_file = (".env", ".env.prod")
         env_file_encoding = "utf-8"

@@ -81,7 +81,7 @@ class FeatureStoreRetrievalComponent(
         Returns:
             FeatureMap containing the features for the given identifiers and feature names.
         """
-        if not feature_names:
+        if not feature_names or not settings.FEATURE_STORE_ENABLED:
             return FeatureMap(feature_map={})
 
         logger.info(f"Fetching features from feature store: {feature_names}")
