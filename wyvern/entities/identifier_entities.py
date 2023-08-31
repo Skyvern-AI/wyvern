@@ -140,9 +140,10 @@ class WyvernDataModel(BaseModel):
 
 class WyvernEntity(WyvernDataModel):
     """
-    WyvernEntity is a base class for all entities that have primary identifier
-    TODO:
-        we want to design a way to so that
+    WyvernEntity is a base class for all entities that have primary identifier.
+    An entity is the basic unit of data that could be indexed and queried.
+
+    we want to design a way to so that
         1. the primary key of the entity could map to the name of the entity
         2. it's easy to define the relation
 
