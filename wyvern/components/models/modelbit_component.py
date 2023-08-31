@@ -134,12 +134,12 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
         output_data: Dict[Identifier, Optional[Union[float, str, List[float]]]] = {}
 
         for batch_idx, resp in enumerate(responses):
-            if resp.status_code != 200:
+            if resp.status != 200:
                 logger.warning(f"Modelbit inference failed: {resp.text}")
                 continue
-            resp_list: List[
-                List[Union[float, str, List[float], None]]
-            ] = resp.json().get(
+            resp_list: List[List[Union[float, str, List[float], None]]] = (
+                await resp.json()
+            ).get(
                 "data",
                 [],
             )

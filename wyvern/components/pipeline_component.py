@@ -2,7 +2,6 @@
 from functools import cached_property
 from typing import Optional, Set, Type
 
-from wyvern import request_context
 from wyvern.components.api_route_component import APIRouteComponent
 from wyvern.components.component import Component
 from wyvern.components.features.feature_retrieval_pipeline import (
@@ -67,11 +66,9 @@ class PipelineComponent(APIRouteComponent[REQUEST_ENTITY, RESPONSE_SCHEMA]):
             requested_feature_names=self.feature_names,
             feature_overrides=self.realtime_features_overrides,
         )
-        feature_map = await self.feature_retrieval_pipeline.execute(
+        await self.feature_retrieval_pipeline.execute(
             feature_request,
         )
-        current_request = request_context.ensure_current_request()
-        current_request.feature_map = feature_map
 
     async def warm_up(self, input: REQUEST_ENTITY) -> None:
         await super().warm_up(input)
