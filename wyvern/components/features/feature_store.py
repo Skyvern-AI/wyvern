@@ -48,9 +48,10 @@ class FeatureStoreRetrievalComponent(
     The FeatureStoreRetrievalComponent is a singleton and can be accessed via `feature_store_retrieval_component`.
 
     The FeatureStoreRetrievalComponent is configured via the following environment variables:
-    - WYVERN_API_KEY
-    - WYVERN_FEATURE_STORE_URL
-    - WYVERN_ONLINE_FEATURES_PATH
+    - WYVERN_API_KEY: if you're using Wyvern's feature store, this is the API key for Wyvern
+    - WYVERN_FEATURE_STORE_URL: url to the feature store
+    - WYVERN_ONLINE_FEATURES_PATH: url path to the feature store's online features endpoint
+    - FEATURE_STORE_ENABLED: whether the feature store is enabled or not
     """
 
     def __init__(
@@ -81,7 +82,7 @@ class FeatureStoreRetrievalComponent(
         Returns:
             FeatureMap containing the features for the given identifiers and feature names.
         """
-        if not feature_names:
+        if not feature_names or not settings.FEATURE_STORE_ENABLED:
             return FeatureMap(feature_map={})
 
         logger.info(f"Fetching features from feature store: {feature_names}")

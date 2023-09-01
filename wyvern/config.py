@@ -44,6 +44,9 @@ class Settings(BaseSettings):
         EXPERIMENTATION_ENABLED: Whether experimentation is enabled
         EXPERIMENTATION_PROVIDER: The experimentation provider
         EPPO_API_KEY: The API key for EPPO (an experimentation provider)
+
+        FEATURE_STORE_ENABLED: Whether the feature store is enabled
+        EVENT_LOGGING_ENABLED: Whether event logging is enabled
     """
 
     ENVIRONMENT: str = "development"
@@ -91,6 +94,10 @@ class Settings(BaseSettings):
     EXPERIMENTATION_ENABLED: bool = False
     EXPERIMENTATION_PROVIDER: str = ExperimentationProvider.EPPO.value
     EPPO_API_KEY: str = ""
+
+    # wyvern component flag
+    FEATURE_STORE_ENABLED: bool = False
+    EVENT_LOGGING_ENABLED: bool = False
 
     class Config:
         env_file = (".env", ".env.prod")

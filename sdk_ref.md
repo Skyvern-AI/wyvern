@@ -193,6 +193,9 @@ in production for secrets you do not wish to save in code
 - `EXPERIMENTATION_PROVIDER` - The experimentation provider
 - `EPPO_API_KEY` - The API key for EPPO (an experimentation provider)
 
+- `FEATURE_STORE_ENABLED` - Whether the feature store is enabled
+- `EVENT_LOGGING_ENABLED` - Whether event logging is enabled
+
 <a id="wyvern.core.compression"></a>
 
 # wyvern.core.compression
@@ -607,6 +610,10 @@ def init(project: str = typer.Argument(...,
 
 Initializes Wyvern application template code
 
+**Arguments**:
+
+- `project` _str_ - Name of the project
+
 <a id="wyvern.cli.commands.run"></a>
 
 #### run
@@ -628,6 +635,15 @@ def run(
 ```
 
 Starts Wyvern application server
+
+Example usage:
+wyvern run --path pipelines.main:app --host 0.0.0.0 --port 5001
+
+**Arguments**:
+
+- `path` _str_ - path to the wyvern app. Default path is pipelines.main:app
+- `host` _str_ - Host to run the application on. Default host is 0.0.0.0
+- `port` _int_ - Port to run the application on. Default port is 5001
 
 <a id="wyvern.cli.commands.redis"></a>
 
@@ -661,6 +677,44 @@ Ensure that the async client is open before calling the function and close it af
 **Returns**:
 
 The wrapped function
+
+<a id="wyvern.api.WyvernAPI"></a>
+
+## WyvernAPI Objects
+
+```python
+class WyvernAPI()
+```
+
+Wyvern API client
+
+<a id="wyvern.api.WyvernAPI.get_historical_features"></a>
+
+#### get_historical_features
+
+```python
+@ensure_async_client
+def get_historical_features(
+        features: List[str], entities: Union[Dict[Hashable, List[Any]],
+                                             pd.DataFrame]) -> pd.DataFrame
+```
+
+Aggregate all the historical features, including the offline features in your data warehouse
+and the historical real-time features being consumed by wyvern pipeline.
+
+**Arguments**:
+
+- `features` - A list of feature names.
+- `entities` - A dictionary or pandas DataFrame of entity names and their values.
+  some requirements of entities:
+  - entities must have request and timestamp keys
+  - request is a list of the request_id of request getting into Wyvern's pipeline
+  - timestamp is a list of timestamp of the request
+  - the rest of the columns are the entity for the features and the user interaction data
+
+**Returns**:
+
+A pandas DataFrame with all the feature data you're requesting from the entities.
 
 <a id="wyvern.components.candidates"></a>
 
@@ -955,9 +1009,10 @@ The FeatureStoreRetrievalComponent is a singleton and can be accessed via `featu
 
 The FeatureStoreRetrievalComponent is configured via the following environment variables:
 
-- WYVERN_API_KEY
-- WYVERN_FEATURE_STORE_URL
-- WYVERN_ONLINE_FEATURES_PATH
+- WYVERN_API_KEY: if you're using Wyvern's feature store, this is the API key for Wyvern
+- WYVERN_FEATURE_STORE_URL: url to the feature store
+- WYVERN_ONLINE_FEATURES_PATH: url path to the feature store's online features endpoint
+- FEATURE_STORE_ENABLED: whether the feature store is enabled or not
 
 <a id="wyvern.components.features.feature_store.FeatureStoreRetrievalComponent.fetch_features_from_feature_store"></a>
 
