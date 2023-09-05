@@ -114,7 +114,7 @@ class WyvernKinesisFirehose:
             for i in range(0, len(dict_records), CHUNK_SIZE)
         ]
         for chunk in record_chunks:
-            if settings.EVENT_LOGGING_ENABLED:
+            if settings.EVENT_LOGGING_ENABLED and settings.ENVIRONMENT != "development":
                 try:
                     self.firehose_client.put_record_batch(
                         DeliveryStreamName=stream_name.get_stream_name(),
@@ -127,7 +127,7 @@ class WyvernKinesisFirehose:
                     )
             else:
                 logger.debug(
-                    "Not sending records to Kinesis Firehose in development mode. Records: {chunk}",
+                    "Logging disabled. Not sending records to Kinesis Firehose. Records: {chunk}",
                 )
 
 
