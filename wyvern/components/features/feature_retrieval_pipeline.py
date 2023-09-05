@@ -161,6 +161,7 @@ class FeatureRetrievalPipeline(
             )
         )
         current_request.feature_map = feature_retrieval_response
+        fs_features = feature_retrieval_response.copy(deep=True)
 
         """
         TODO (suchintan):
@@ -323,7 +324,7 @@ class FeatureRetrievalPipeline(
                     *real_time_request_combination_features,
                     *real_time_candidate_features,
                     *real_time_candidate_combination_features,
-                    *feature_retrieval_response.feature_map.values(),
+                    *fs_features.feature_map.values(),
                 )
             await self.feature_logger_component.execute(
                 FeatureEventLoggingRequest(
