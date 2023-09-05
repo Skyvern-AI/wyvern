@@ -96,8 +96,8 @@ class Settings(BaseSettings):
     EPPO_API_KEY: str = ""
 
     # wyvern component flag
-    FEATURE_STORE_ENABLED: bool = False
-    EVENT_LOGGING_ENABLED: bool = False
+    FEATURE_STORE_ENABLED: bool = True
+    EVENT_LOGGING_ENABLED: bool = True
 
     class Config:
         env_file = (".env", ".env.prod")
