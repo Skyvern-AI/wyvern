@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Generic, List, Optional
+from typing import Any, Generic, List, Optional, Union, Dict
 
 from pydantic import BaseModel
 
@@ -21,6 +21,7 @@ from wyvern.components.pagination.pagination_component import (
 from wyvern.components.pagination.pagination_fields import PaginationFields
 from wyvern.components.pipeline_component import PipelineComponent
 from wyvern.entities.candidate_entities import ScoredCandidate
+from wyvern.entities.identifier import Identifier
 from wyvern.entities.identifier_entities import QueryEntity
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.event_logging import event_logger
@@ -70,6 +71,10 @@ class RankingResponse(BaseModel):
     events: Optional[List[LoggedEvent[Any]]]
 
 
+class ExperimentationComponent():
+    ...
+
+
 class RankingPipeline(
     PipelineComponent[RankingRequest, RankingResponse],
     Generic[WYVERN_ENTITY],
@@ -83,11 +88,12 @@ class RankingPipeline(
 
     PATH: str = "/ranking"
 
-    def __init__(self, name: Optional[str] = None):
+    def __init__(self, name: Optional[str] = None, model: Union[ModelComponent, ExperimentationComponent[ModelComponent], None] = None,
+                 business_logic_pipeline: Union[BusinessLogicPipeline, ExperimentationComponent[BusinessLogicPipeline], None] = None):
         self.pagination_component = PaginationComponent[
             ScoredCandidate[WYVERN_ENTITY]
         ]()
-        self.ranking_model = self.get_model()
+        self.ranking_model = self._get_model()
         self.candidate_logging_component = CandidateEventLoggingComponent[
             WYVERN_ENTITY,
             RankingRequest[WYVERN_ENTITY],
@@ -103,15 +109,16 @@ class RankingPipeline(
             self.candidate_logging_component,
             self.impression_logging_component,
         ]
-        self.business_logic_pipeline: BusinessLogicPipeline
-        business_logic = self.get_business_logic()
-        if business_logic:
-            self.business_logic_pipeline = business_logic
-        else:
-            self.business_logic_pipeline = BusinessLogicPipeline[
-                WYVERN_ENTITY,
-                RankingRequest[WYVERN_ENTITY],
-            ]()
+        # TODO (kerem): move into _execute_business_logic method
+        # self.business_logic_pipeline: BusinessLogicPipeline
+        # business_logic = self.get_business_logic()
+        # if business_logic:
+        #     self.business_logic_pipeline = business_logic
+        # else:
+        #     self.business_logic_pipeline = BusinessLogicPipeline[
+        #         WYVERN_ENTITY,
+        #         RankingRequest[WYVERN_ENTITY],
+        #     ]()
         upstream_components.append(self.business_logic_pipeline)
 
         super().__init__(
@@ -119,16 +126,40 @@ class RankingPipeline(
             name=name,
         )
 
-    def get_model(self) -> ModelComponent:
+    # ExperimentationComponent[ModelComponent](map[str, model_component], experimentation_details)
+    # {
+    #     "on": ModelComponentV2,
+    #     "off": ModelComponentV1,
+    #     "default": ModelComponentV1,
+    # }
+
+    def _execute_model(self, model_input) -> Dict[Identifier, Union[...]]:
+        # TODO (kerem): use this to extract the model if the passed model is an experimentation component
         """
         This is the ranking model.
 
         The model input should be a subclass of ModelInput.
         Its output should be scored candidates
         """
-        raise NotImplementedError
+
+        if self.ranking_model is None:
+            # talk with suchintan about this
+            # an idea is to use reverse index as the score if candidate.score is missing.
+            # same as what suchintan built before
+
+            # candidates = request.candidates
+            # if candidates and candidates[0].score is None:
+            #     # use the index
+            #     return candidates
+
+        if self.ranking_model is ExperimentationComponent:
+            ...
+
+        model_outputs: Dict[Identifier, Union[...]] = dict()
+        return model_outputs
 
     def get_business_logic(self) -> Optional[BusinessLogicPipeline]:
+        # TODO (kerem): keep this as an optional thing to override but add an arg to the init
         """
         This is the business logic pipeline. It is optional. If not provided, the ranking pipeline will not
         apply any business logic.
@@ -202,7 +233,7 @@ class RankingPipeline(
             request=request,
             entities=request.candidates,
         )
-        model_outputs = await self.ranking_model.execute(model_input)
+        model_outputs = await self._execute_model(model_input)
 
         scored_candidates: List[ScoredCandidate] = [
             ScoredCandidate(
@@ -223,7 +254,7 @@ class RankingPipeline(
         )
 
         # business_logic makes sure the candidates are sorted
-        business_logic_response = await self.business_logic_pipeline.execute(
+        business_logic_response = await self._execute_business_logic(
             business_logic_request,
         )
         return business_logic_response.adjusted_candidates

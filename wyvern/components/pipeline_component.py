@@ -54,16 +54,38 @@ class PipelineComponent(APIRouteComponent[REQUEST_ENTITY, RESPONSE_SCHEMA]):
     async def initialize(self) -> None:
         # get all the feature names from all the upstream components
         for component in self.initialized_components:
+            if type(component) is ExperimentationComponent[ModelComponent]:
+                continue
             for feature_name in component.manifest_feature_names:
                 self.feature_names.add(feature_name)
+
+    def generate_dynamic_features(self) -> Set[str]:
+        feature_names = set()
+        for component in self.initialized_components:
+            if type(component) is ExperimentationComponent[ModelComponent]:
+                for feature_name in component.get_sth().manifest_feature_names:
+                    feature_names.add(feature_name)
+            else:
+                continue
+        return feature_names
 
     async def retrieve_features(self, request: REQUEST_ENTITY) -> None:
         """
         TODO shu: it doesn't support feature overrides. Write code to support that
         """
+
+        # for component in self.initialized_components:
+        #     if component.type == ExperimentationComponent:
+        #         component.get_component_for(wyvern_request.get_treatment(component.experiment))
+        #         for feature_name in component.manifest_feature_names:
+        #             self.feature_names.add(feature_name)
+
+        requested_feature_names: Set[str] = self.feature_names.union(
+            self.generate_dynamic_features()
+        )
         feature_request = FeatureRetrievalPipelineRequest[REQUEST_ENTITY](
             request=request,
-            requested_feature_names=self.feature_names,
+            requested_feature_names=requested_feature_names,
             feature_overrides=self.realtime_features_overrides,
         )
         await self.feature_retrieval_pipeline.execute(

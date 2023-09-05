@@ -153,6 +153,7 @@ class WyvernEntity(WyvernDataModel):
     """
 
     _identifier: Identifier = PrivateAttr()
+    score: Optional[float] = None
 
     class Config:
         validate_assignment = True
@@ -228,6 +229,13 @@ class ProductEntity(WyvernEntity):
     """
 
     product_id: str
+
+    @property
+    def score(self) -> Optional[float]:
+        """
+        This method returns the score for this entity
+        """
+        return None
 
     def generate_identifier(self) -> Identifier:
         """
