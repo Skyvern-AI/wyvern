@@ -77,6 +77,3 @@ class WyvernRequest:
             feature_map=FeatureMap(feature_map={}),
             request_id=request_id,
         )
-
-    def extend_feature_map(self, feature_map: FeatureMap) -> None:
-        self.feature_map.feature_map.update(feature_map.feature_map)
