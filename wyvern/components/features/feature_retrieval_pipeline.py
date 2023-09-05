@@ -6,7 +6,6 @@ from typing import Generic, List, Optional, Set, Type
 from ddtrace import tracer
 from pydantic.generics import GenericModel
 
-from wyvern import request_context
 from wyvern.components.component import Component
 from wyvern.components.features.feature_logger import (
     FeatureEventLoggingComponent,
@@ -23,7 +22,7 @@ from wyvern.components.features.realtime_features_component import (
 )
 from wyvern.entities.candidate_entities import CandidateSetEntity
 from wyvern.entities.feature_entities import FeatureData, FeatureMap
-from wyvern.entities.feature_entity_helpers import feature_map_create
+from wyvern.entities.feature_entity_helpers import feature_map_create, feature_map_join
 from wyvern.entities.identifier_entities import WyvernEntity
 from wyvern.wyvern_typing import REQUEST_ENTITY
 
@@ -144,9 +143,6 @@ class FeatureRetrievalPipeline(
 
         all_entities = input.request.get_all_entities(cached=True)
         all_identifiers = input.request.get_all_identifiers(cached=True)
-
-        current_request = request_context.ensure_current_request()
-
         # TODO (suchintan): Pass in the feature retrieval features here so they can leverage them
         feature_retrieval_request = FeatureStoreRetrievalRequest(
             identifiers=all_identifiers,
@@ -160,7 +156,6 @@ class FeatureRetrievalPipeline(
                 **kwargs,
             )
         )
-        current_request.feature_map = feature_retrieval_response
 
         """
         TODO (suchintan):
@@ -312,7 +307,6 @@ class FeatureRetrievalPipeline(
                 *real_time_candidate_features,
                 *real_time_candidate_combination_features,
             )
-            current_request.extend_feature_map(real_time_feature_responses)
 
         with tracer.trace("FeatureRetrievalPipeline.create_feature_response"):
             await self.feature_logger_component.execute(
@@ -321,5 +315,10 @@ class FeatureRetrievalPipeline(
                     feature_map=real_time_feature_responses,
                 ),
             )
+            # TODO (suchintan): Improve performance of this
+            feature_responses = feature_map_join(
+                feature_retrieval_response,
+                real_time_feature_responses,
+            )
 
-        return current_request.feature_map
+        return feature_responses
