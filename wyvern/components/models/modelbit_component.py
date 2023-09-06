@@ -121,16 +121,21 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
             )
 
         # split requests into smaller batches and parallelize them
-        futures = [
-            aiohttp_client().post(
-                self._modelbit_url,
-                headers=self.headers,
-                json={"data": all_requests[i : i + settings.MODELBIT_BATCH_SIZE]},
-            )
-            for i in range(0, len(all_requests), settings.MODELBIT_BATCH_SIZE)
-        ]
-        responses = await asyncio.gather(*futures)
-        # resp_list: List[List[float]] = resp.json().get("data", [])
+        try:
+            futures = [
+                aiohttp_client().post(
+                    self._modelbit_url,
+                    headers=self.headers,
+                    json={"data": all_requests[i : i + settings.MODELBIT_BATCH_SIZE]},
+                )
+                for i in range(0, len(all_requests), settings.MODELBIT_BATCH_SIZE)
+            ]
+            responses = await asyncio.gather(*futures)
+        except Exception as e:
+            # modelbit error
+            logger.exception(e)
+            return self.model_output_type(data={}, model_name=self.name)
+
         output_data: Dict[Identifier, Optional[Union[float, str, List[float]]]] = {}
 
         for batch_idx, resp in enumerate(responses):
