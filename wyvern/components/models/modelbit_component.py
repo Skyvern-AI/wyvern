@@ -4,15 +4,12 @@ import logging
 from functools import cached_property
 from typing import Any, Dict, List, Optional, Set, Tuple, TypeAlias, Union
 
-from wyvern.components.models.model_component import (
-    MODEL_INPUT,
-    MODEL_OUTPUT,
-    ModelComponent,
-)
+from wyvern.components.models.model_component import ModelComponent
 from wyvern.config import settings
 from wyvern.core.http import aiohttp_client
 from wyvern.entities.identifier import Identifier
 from wyvern.entities.identifier_entities import WyvernEntity
+from wyvern.entities.model_entities import MODEL_INPUT, MODEL_OUTPUT
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.exceptions import (
     WyvernModelbitTokenMissingError,

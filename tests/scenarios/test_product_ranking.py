@@ -13,11 +13,7 @@ from wyvern.components.features.realtime_features_component import (
     RealtimeFeatureComponent,
     RealtimeFeatureRequest,
 )
-from wyvern.components.models.model_component import (
-    ModelComponent,
-    ModelInput,
-    ModelOutput,
-)
+from wyvern.components.models.model_component import ModelComponent
 from wyvern.components.pipeline_component import PipelineComponent
 from wyvern.config import settings
 from wyvern.core.compression import wyvern_encode
@@ -26,6 +22,7 @@ from wyvern.entities.candidate_entities import CandidateSetEntity
 from wyvern.entities.feature_entities import FeatureData, FeatureMap
 from wyvern.entities.identifier import Identifier
 from wyvern.entities.identifier_entities import ProductEntity, WyvernEntity
+from wyvern.entities.model_entities import ModelInput, ModelOutput
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.service import WyvernService
 from wyvern.wyvern_request import WyvernRequest

@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from wyvern.components.events.events import LoggedEvent
 from wyvern.entities.feature_entities import FeatureMap
+from wyvern.entities.identifier import Identifier
 
 
 @dataclass
@@ -43,6 +44,7 @@ class WyvernRequest:
     events: List[Callable[[], List[LoggedEvent[Any]]]]
 
     feature_map: FeatureMap
+    model_score_map: Dict[str, Dict[Identifier, float]]
 
     request_id: Optional[str] = None
 
@@ -75,5 +77,6 @@ class WyvernRequest:
             entity_store={},
             events=[],
             feature_map=FeatureMap(feature_map={}),
+            model_score_map={},
             request_id=request_id,
         )
