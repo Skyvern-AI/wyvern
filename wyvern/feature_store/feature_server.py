@@ -320,6 +320,10 @@ def generate_wyvern_store_app(
         Arguments:
             data: Request data. See schemas.py for the schema.
 
+            data.entities: entities must contain two required columns, request and timestamp.
+                Besides the required columns, it contains all the entity columns (product, query, etc.),
+                as well as the extra feature data columns (like is_purchased, is_clicked, etc.).
+
         Returns:
             Historical features response.
         """
