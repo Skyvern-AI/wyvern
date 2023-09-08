@@ -135,7 +135,8 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
 
         for batch_idx, resp in enumerate(responses):
             if resp.status != 200:
-                logger.warning(f"Modelbit inference failed: {resp.text}")
+                text = await resp.text()
+                logger.warning(f"Modelbit inference failed: {text}")
                 continue
             resp_list: List[List[Union[float, str, List[float], None]]] = (
                 await resp.json()
