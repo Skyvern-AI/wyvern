@@ -142,15 +142,6 @@ class WyvernEntity(WyvernDataModel):
     """
     WyvernEntity is a base class for all entities that have primary identifier.
     An entity is the basic unit of data that could be indexed and queried.
-
-    we want to design a way to so that
-        1. the primary key of the entity could map to the name of the entity
-        2. it's easy to define the relation
-
-    example:
-        have a @wyvern_entity decorator that could be used to define the primary key name
-        and identifier type
-        @wyvenr_entity(key="product_id", type="product")
     """
 
     _identifier: Identifier = PrivateAttr()
