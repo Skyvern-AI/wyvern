@@ -5,6 +5,7 @@ import os
 import platform
 import shutil
 import subprocess
+import sys
 import zipfile
 from pathlib import Path
 from typing import Optional
@@ -175,6 +176,7 @@ def run(
     typer.echo("Running your ML application")
     # import the app from path
     try:
+        sys.path.append(".")
         module_path, app_name = path.split(":")
         module = importlib.import_module(module_path)
     except ImportError:
