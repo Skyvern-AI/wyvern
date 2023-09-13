@@ -81,5 +81,10 @@ class ModelInput(GenericModel, Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY
         return self.first_entity.identifier
 
 
+class ChainedModelInput(ModelInput[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY]):
+    upstream_model_output: Dict[Identifier, Optional[Union[float, str, List[float]]]]
+    upstream_model_name: Optional[str] = None
+
+
 MODEL_INPUT = TypeVar("MODEL_INPUT", bound=ModelInput)
 MODEL_OUTPUT = TypeVar("MODEL_OUTPUT", bound=ModelOutput)

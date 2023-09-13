@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 from urllib.parse import urlparse
 
 import fastapi
@@ -44,7 +44,9 @@ class WyvernRequest:
     events: List[Callable[[], List[LoggedEvent[Any]]]]
 
     feature_map: FeatureMap
-    model_score_map: Dict[str, Dict[Identifier, float]]
+
+    # the key is the name of the model and the value is a map of the identifier to the model score
+    model_score_map: Dict[str, Dict[Identifier, Union[float, str, List[float], None]]]
 
     request_id: Optional[str] = None
 
