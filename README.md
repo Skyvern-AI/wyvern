@@ -2,7 +2,7 @@
 
 <div align="center">
 
-**Wyvern is a real-time Machine Learning platform for marketplaces**
+**Wyvern is a real-time machine learning platform for marketplaces**
 
 [Homepage](https://www.wyvern.ai) | [Docs](https://docs.wyvern.ai) | [Join Us On Slack](https://join.slack.com/t/wyvernai/shared_invite/zt-22nu62m6f-duK46NyhIINsdjKJct1hqg)
 
