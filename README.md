@@ -84,9 +84,10 @@ The generated template code is an [ML pipeline](https://docs.wyvern.ai/ml_pipeli
 #### Pre-requisite
 
 - Redis service
-  Wyvern uses redis as its index and online feature store. By default, Wyvern connects to the localhost:6379
 
-Your can run this command to install and spin up local redis
+Wyvern uses redis as its index and online feature store. By default, Wyvern connects to the localhost:6379
+
+Your can run this command to install and spin up redis locally
 
 ```
 wyvern redis
