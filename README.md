@@ -48,7 +48,7 @@ As Wyvern is open sourced, we will bring in more integrations with different fea
 pip install wyvern-ai
 ```
 
-### Initiate Wyvern Application
+### Create Wyvern Project
 
 Once Wyvern is installed, run this command to initialize your Wyvern project:
 
@@ -101,7 +101,7 @@ Now cd into the repository that was generated and run:
 wyvern run
 ```
 
-This spins up a service at http://0.0.0.0:5001 and the default ranking API schema could be found at [http://0.0.0.0:5001/redoc](http://0.0.0.0:5001/redoc#operation/MyRankingPipeline_api_v1_ranking_post).
+Now your service runs on http://0.0.0.0:5001 and the default ranking API schema could be found at [http://0.0.0.0:5001/redoc](http://0.0.0.0:5001/redoc#operation/MyRankingPipeline_api_v1_ranking_post).
 
 #### Make A Request
 
