@@ -65,10 +65,13 @@ class ModelComponent(
         self,
         *upstreams,
         name: Optional[str] = None,
+        cache_output: bool = True,
     ):
         super().__init__(*upstreams, name=name)
         self.model_input_type = self.get_type_args_simple(0)
         self.model_output_type = self.get_type_args_simple(1)
+
+        self.cache_output = cache_output
 
     @classmethod
     def get_type_args_simple(cls, index: int) -> Type:
@@ -95,9 +98,13 @@ class ModelComponent(
         """
         The model_name and model_score will be automatically logged
         """
-        api_source = request_context.ensure_current_request().url_path
+        wyvern_request = request_context.ensure_current_request()
+        api_source = wyvern_request.url_path
         request_id = input.request.request_id
         model_output = await self.inference(input, **kwargs)
+
+        if self.cache_output:
+            wyvern_request.cache_model_score(self.name, model_output.data)
 
         def events_generator() -> List[ModelEvent]:
             timestamp = datetime.utcnow()

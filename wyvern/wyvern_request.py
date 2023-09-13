@@ -82,3 +82,12 @@ class WyvernRequest:
             model_score_map={},
             request_id=request_id,
         )
+
+    def cache_model_score(
+        self,
+        model_name: str,
+        data: Dict[Identifier, Union[float, str, List[float], None]],
+    ) -> None:
+        if model_name not in self.model_score_map:
+            self.model_score_map[model_name] = {}
+        self.model_score_map[model_name].update(data)
