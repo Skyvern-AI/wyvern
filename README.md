@@ -2,15 +2,18 @@
 
 <div align="center">
 
-**[Wyvern](https://docs.wyvern.ai) is a Real-time Machine Learning platform for marketplaces**
+**Wyvern is a Real-time Machine Learning platform for marketplaces**
+
+[Homepage](https://www.wyvern.ai) | [Docs](https://docs.wyvern.ai) | [Join Us On Slack](https://join.slack.com/t/wyvernai/shared_invite/zt-22nu62m6f-duK46NyhIINsdjKJct1hqg)
 
 </div>
 
 <div align="center">
-  <img src="/docs/wyvern_logo.jpg" width="180px" alt="bentoml" />
+  <img src="/docs/wyvern_logo.jpg" width="180px" />
 </div>
 
 <div align="center">
+  <a href="https://www.ycombinator.com/companies/wyvern-ai"><img src="https://badgen.net/badge/Y%20Combinator/S23/orange"/></a>
   <a href="https://join.slack.com/t/wyvernai/shared_invite/zt-22nu62m6f-duK46NyhIINsdjKJct1hqg"><img src="https://badgen.net/badge/join/slack/blue?icon=slack"/></a>
   <a href="https://github.com/Wyvern-AI/wyvern/blob/main/LICENSE"><img src="https://badgen.net/badge/License/Elv2/green?icon=github"/></a>
 </div>
