@@ -146,7 +146,7 @@ curl --location 'http://0.0.0.0:5001/api/v1/ranking' \
 }'
 ```
 
-This request sends 24 products retrieved from search to Wyvern and ask Wyvern to return the 8 products (in descending order) to show on the first page (`"user_page": 0`).
+The request sends 24 products to Wyvern. Wyvern ranks these products and returns the 8 products (in descending order) on the first page (`"user_page": 0`).
 
 You should see a response with the products being ordered descendingly by their ranking score.
 
@@ -196,7 +196,9 @@ You should see a response with the products being ordered descendingly by their 
 
 :tada:Congratulations on making your first Wyvern request!!!
 
-To learn more about Wyvern, please check out our [official documentations](https://docs.wyvern.ai/)
+To learn more about how this ML pipeline is built, check out [Wyvern ML Pipeline](https://docs.wyvern.ai/ml_pipeline)
+
+To learn more about Wyvern in general, check out our [documentations](https://docs.wyvern.ai/)
 
 ## More Documentations
 
