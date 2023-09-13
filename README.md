@@ -194,6 +194,10 @@ You should see a response with the products being ordered descendingly by their 
 
 </details>
 
+:tada:Congratulations on making your first Wyvern request!!!
+
+To learn more about Wyvern, please check out our [official documentations](https://docs.wyvern.ai/)
+
 ## More Documentations
 
 - [How Wyvern ML Pipeline Works](https://docs.wyvern.ai/ml_pipeline)
