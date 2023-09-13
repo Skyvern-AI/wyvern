@@ -68,6 +68,12 @@ Now that the `wyvern init` has set up your initial repository, you should see th
 │   │   ├── ranking_pipline.py
 │   │   ├── realtime_features.py
 │   │   ├── schemas.py
+├── feature-store-python
+│   ├── features
+│   │   ├── feature_store.yaml
+│   │   ├── features.py
+│   │   ├── main.py
+├── .env
 └── .gitignore
 ```
 
