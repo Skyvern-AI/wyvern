@@ -143,6 +143,10 @@ def init(
             shutil.move(item_path, os.path.join(project, item))
     shutil.rmtree(extracted_dir)
 
+    # add a .env file to the new repository with ENVIRONMENT=development
+    with open(os.path.join(project, ".env"), "w") as env_file:
+        env_file.write("ENVIRONMENT=development\n")
+
     tracking.capture(event="oss_init_succeed")
     typer.echo(
         f"Successfully initialized Wyvern application template code in {project}",
