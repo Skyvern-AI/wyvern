@@ -13,11 +13,7 @@ from wyvern.components.features.realtime_features_component import (
     RealtimeFeatureComponent,
     RealtimeFeatureRequest,
 )
-from wyvern.components.models.model_component import (
-    ModelComponent,
-    ModelInput,
-    ModelOutput,
-)
+from wyvern.components.models.model_component import ModelComponent
 from wyvern.components.pipeline_component import PipelineComponent
 from wyvern.config import settings
 from wyvern.core.compression import wyvern_encode
@@ -26,6 +22,7 @@ from wyvern.entities.candidate_entities import CandidateSetEntity
 from wyvern.entities.feature_entities import FeatureData, FeatureMap
 from wyvern.entities.identifier import Identifier
 from wyvern.entities.identifier_entities import ProductEntity, WyvernEntity
+from wyvern.entities.model_entities import ModelInput, ModelOutput
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.service import WyvernService
 from wyvern.wyvern_request import WyvernRequest
@@ -387,6 +384,7 @@ async def test_hydrate(mock_redis):
         json=json_input,
         headers={},
         entity_store={},
+        model_output_map={},
         events=[],
         feature_map=FeatureMap(feature_map={}),
     )
@@ -450,6 +448,7 @@ async def test_hydrate__duplicate_brand(mock_redis__duplicate_brand):
         entity_store={},
         events=[],
         feature_map=FeatureMap(feature_map={}),
+        model_output_map={},
     )
     request_context.set(test_wyvern_request)
 

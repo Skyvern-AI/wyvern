@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 from urllib.parse import urlparse
 
 import fastapi
@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from wyvern.components.events.events import LoggedEvent
 from wyvern.entities.feature_entities import FeatureMap
+from wyvern.entities.identifier import Identifier
 
 
 @dataclass
@@ -44,6 +45,21 @@ class WyvernRequest:
 
     feature_map: FeatureMap
 
+    # the key is the name of the model and the value is a map of the identifier to the model score
+    model_output_map: Dict[
+        str,
+        Dict[
+            Identifier,
+            Union[
+                float,
+                str,
+                List[float],
+                Dict[str, Optional[Union[float, str, list[float]]]],
+                None,
+            ],
+        ],
+    ]
+
     request_id: Optional[str] = None
 
     # TODO: params
@@ -75,5 +91,41 @@ class WyvernRequest:
             entity_store={},
             events=[],
             feature_map=FeatureMap(feature_map={}),
+            model_output_map={},
             request_id=request_id,
         )
+
+    def cache_model_output(
+        self,
+        model_name: str,
+        data: Dict[
+            Identifier,
+            Union[
+                float,
+                str,
+                List[float],
+                Dict[str, Optional[Union[float, str, list[float]]]],
+                None,
+            ],
+        ],
+    ) -> None:
+        if model_name not in self.model_output_map:
+            self.model_output_map[model_name] = {}
+        self.model_output_map[model_name].update(data)
+
+    def get_model_output(
+        self,
+        model_name: str,
+        identifier: Identifier,
+    ) -> Optional[
+        Union[
+            float,
+            str,
+            List[float],
+            Dict[str, Optional[Union[float, str, list[float]]]],
+            None,
+        ]
+    ]:
+        if model_name not in self.model_output_map:
+            return None
+        return self.model_output_map[model_name].get(identifier)

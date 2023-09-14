@@ -5,7 +5,7 @@ import asyncio
 import logging
 from enum import Enum
 from functools import cached_property
-from typing import Dict, Generic, Optional, Set
+from typing import Dict, Generic, List, Optional, Set, Union
 from uuid import uuid4
 
 from wyvern import request_context
@@ -177,3 +177,18 @@ class Component(Generic[INPUT_TYPE, OUTPUT_TYPE]):
         if not feature_data:
             return {}
         return feature_data.features
+
+    def get_model_output(
+        self,
+        model_name: str,
+        identifier: Identifier,
+    ) -> Optional[
+        Union[
+            float,
+            str,
+            List[float],
+            Dict[str, Optional[Union[float, str, list[float]]]],
+        ]
+    ]:
+        current_request = request_context.ensure_current_request()
+        return current_request.get_model_output(model_name, identifier)

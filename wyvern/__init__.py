@@ -2,11 +2,8 @@
 from wyvern.components.features.realtime_features_component import (
     RealtimeFeatureComponent,
 )
-from wyvern.components.models.model_component import (
-    ModelComponent,
-    ModelInput,
-    ModelOutput,
-)
+from wyvern.components.models.model_chain_component import ModelChainComponent
+from wyvern.components.models.model_component import ModelComponent
 from wyvern.components.pipeline_component import PipelineComponent
 from wyvern.components.ranking_pipeline import (
     RankingPipeline,
@@ -23,6 +20,7 @@ from wyvern.entities.identifier_entities import (
     WyvernDataModel,
     WyvernEntity,
 )
+from wyvern.entities.model_entities import ModelInput, ModelOutput
 from wyvern.feature_store.feature_server import generate_wyvern_store_app
 from wyvern.service import WyvernService
 from wyvern.wyvern_logging import setup_logging
@@ -41,6 +39,7 @@ __all__ = [
     "FeatureMap",
     "Identifier",
     "IdentifierType",
+    "ModelChainComponent",
     "ModelComponent",
     "ModelInput",
     "ModelOutput",
