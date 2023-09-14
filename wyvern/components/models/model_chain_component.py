@@ -20,7 +20,10 @@ class ModelChainComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
 
     @cached_property
     def manifest_feature_names(self) -> Set[str]:
-        return set()
+        feature_names: Set[str] = set()
+        for model in self.chain:
+            feature_names = feature_names.union(model.manifest_feature_names)
+        return feature_names
 
     async def inference(self, input: MODEL_INPUT, **kwargs) -> MODEL_OUTPUT:
         output = None
