@@ -46,7 +46,19 @@ class WyvernRequest:
     feature_map: FeatureMap
 
     # the key is the name of the model and the value is a map of the identifier to the model score
-    model_score_map: Dict[str, Dict[Identifier, Union[float, str, List[float], None]]]
+    model_score_map: Dict[
+        str,
+        Dict[
+            Identifier,
+            Union[
+                float,
+                str,
+                List[float],
+                Dict[str, Optional[Union[float, str, list[float]]]],
+                None,
+            ],
+        ],
+    ]
 
     request_id: Optional[str] = None
 
@@ -86,7 +98,16 @@ class WyvernRequest:
     def cache_model_score(
         self,
         model_name: str,
-        data: Dict[Identifier, Union[float, str, List[float], None]],
+        data: Dict[
+            Identifier,
+            Union[
+                float,
+                str,
+                List[float],
+                Dict[str, Optional[Union[float, str, list[float]]]],
+                None,
+            ],
+        ],
     ) -> None:
         if model_name not in self.model_score_map:
             self.model_score_map[model_name] = {}

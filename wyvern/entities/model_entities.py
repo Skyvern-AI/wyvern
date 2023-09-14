@@ -9,7 +9,12 @@ from wyvern.wyvern_typing import GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY
 
 MODEL_OUTPUT_DATA_TYPE = TypeVar(
     "MODEL_OUTPUT_DATA_TYPE",
-    bound=Union[float, str, List[float]],
+    bound=Union[
+        float,
+        str,
+        List[float],
+        Dict[str, Optional[Union[float, str, list[float]]]],
+    ],
 )
 """
 MODEL_OUTPUT_DATA_TYPE is the type of the output of the model. It can be a float, a string, or a list of floats
@@ -82,7 +87,17 @@ class ModelInput(GenericModel, Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY
 
 
 class ChainedModelInput(ModelInput[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY]):
-    upstream_model_output: Dict[Identifier, Optional[Union[float, str, List[float]]]]
+    upstream_model_output: Dict[
+        Identifier,
+        Optional[
+            Union[
+                float,
+                str,
+                List[float],
+                Dict[str, Optional[Union[float, str, list[float]]]],
+            ]
+        ],
+    ]
     upstream_model_name: Optional[str] = None
 
 

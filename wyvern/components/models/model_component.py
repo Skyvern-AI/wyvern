@@ -36,6 +36,7 @@ class ModelEventData(BaseModel):
     model_output: str
     entity_identifier: Optional[str] = None
     entity_identifier_type: Optional[str] = None
+    target: Optional[str] = None
 
 
 class ModelEvent(LoggedEvent[ModelEventData]):
@@ -108,20 +109,41 @@ class ModelComponent(
 
         def events_generator() -> List[ModelEvent]:
             timestamp = datetime.utcnow()
-            return [
-                ModelEvent(
-                    request_id=request_id,
-                    api_source=api_source,
-                    event_timestamp=timestamp,
-                    event_data=ModelEventData(
-                        model_name=model_output.model_name or self.__class__.__name__,
-                        model_output=str(output),
-                        entity_identifier=identifier.identifier,
-                        entity_identifier_type=identifier.identifier_type,
-                    ),
-                )
-                for identifier, output in model_output.data.items()
-            ]
+            all_events: List[ModelEvent] = []
+            for identifier, output in model_output.data.items():
+                if isinstance(output, dict):
+                    for key, value in output.items():
+                        all_events.append(
+                            ModelEvent(
+                                request_id=request_id,
+                                api_source=api_source,
+                                event_timestamp=timestamp,
+                                event_data=ModelEventData(
+                                    model_name=model_output.model_name
+                                    or self.__class__.__name__,
+                                    model_output=str(value),
+                                    target=key,
+                                    entity_identifier=identifier.identifier,
+                                    entity_identifier_type=identifier.identifier_type,
+                                ),
+                            ),
+                        )
+                else:
+                    all_events.append(
+                        ModelEvent(
+                            request_id=request_id,
+                            api_source=api_source,
+                            event_timestamp=timestamp,
+                            event_data=ModelEventData(
+                                model_name=model_output.model_name
+                                or self.__class__.__name__,
+                                model_output=str(output),
+                                entity_identifier=identifier.identifier,
+                                entity_identifier_type=identifier.identifier_type,
+                            ),
+                        ),
+                    )
+            return all_events
 
         event_logger.log_events(events_generator)  # type: ignore
 
