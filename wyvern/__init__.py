@@ -20,7 +20,7 @@ from wyvern.entities.identifier_entities import (
     WyvernDataModel,
     WyvernEntity,
 )
-from wyvern.entities.model_entities import ModelInput, ModelOutput
+from wyvern.entities.model_entities import ChainedModelInput, ModelInput, ModelOutput
 from wyvern.feature_store.feature_server import generate_wyvern_store_app
 from wyvern.service import WyvernService
 from wyvern.wyvern_logging import setup_logging
@@ -34,6 +34,7 @@ setup_tracing()
 __all__ = [
     "generate_wyvern_store_app",
     "CandidateSetEntity",
+    "ChainedModelInput",
     "CompositeIdentifier",
     "FeatureData",
     "FeatureMap",
