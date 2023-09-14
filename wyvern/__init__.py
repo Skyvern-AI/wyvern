@@ -2,6 +2,7 @@
 from wyvern.components.features.realtime_features_component import (
     RealtimeFeatureComponent,
 )
+from wyvern.components.models.model_chain_component import ModelChainComponent
 from wyvern.components.models.model_component import ModelComponent
 from wyvern.components.pipeline_component import PipelineComponent
 from wyvern.components.ranking_pipeline import (
@@ -38,6 +39,7 @@ __all__ = [
     "FeatureMap",
     "Identifier",
     "IdentifierType",
+    "ModelChainComponent",
     "ModelComponent",
     "ModelInput",
     "ModelOutput",
