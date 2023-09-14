@@ -30,6 +30,9 @@ class ModelEventData(BaseModel):
         entity_identifier: The identifier of the entity that was used to generate the model output. This is optional.
         entity_identifier_type: The type of the identifier of the entity that was used to generate the model output.
             This is optional.
+        target: The key in the dictionary output.
+            This attribute will only appear when the output of the model is a dictionary.
+            This is optional.
     """
 
     model_name: str
