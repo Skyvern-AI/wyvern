@@ -190,5 +190,12 @@ class Component(Generic[INPUT_TYPE, OUTPUT_TYPE]):
             Dict[str, Optional[Union[float, str, list[float]]]],
         ]
     ]:
+        """
+        Gets the model output for the given identifier
+
+        Args:
+            model_name: str. The name of the model
+            identifier: Identifier. The entity identifier
+        """
         current_request = request_context.ensure_current_request()
         return current_request.get_model_output(model_name, identifier)
