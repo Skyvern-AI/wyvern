@@ -69,7 +69,7 @@ class ModelComponent(
         self,
         *upstreams,
         name: Optional[str] = None,
-        cache_output: bool = True,
+        cache_output: bool = False,
     ):
         super().__init__(*upstreams, name=name)
         self.model_input_type = self.get_type_args_simple(0)
