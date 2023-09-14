@@ -41,6 +41,7 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
         name: Optional[str] = None,
         auth_token: Optional[str] = None,
         url: Optional[str] = None,
+        cache_output: bool = False,
     ) -> None:
         """
         Args:
@@ -52,7 +53,7 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
         Raises:
             WyvernModelbitTokenMissingError: If the auth token is not provided.
         """
-        super().__init__(*upstreams, name=name)
+        super().__init__(*upstreams, name=name, cache_output=cache_output)
         self._auth_token = auth_token or self.AUTH_TOKEN
         self._modelbit_url = url or self.URL
         self.headers = {
