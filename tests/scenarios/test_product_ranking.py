@@ -384,7 +384,7 @@ async def test_hydrate(mock_redis):
         json=json_input,
         headers={},
         entity_store={},
-        model_score_map={},
+        model_output_map={},
         events=[],
         feature_map=FeatureMap(feature_map={}),
     )
@@ -448,7 +448,7 @@ async def test_hydrate__duplicate_brand(mock_redis__duplicate_brand):
         entity_store={},
         events=[],
         feature_map=FeatureMap(feature_map={}),
-        model_score_map={},
+        model_output_map={},
     )
     request_context.set(test_wyvern_request)
 

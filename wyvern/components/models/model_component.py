@@ -105,7 +105,7 @@ class ModelComponent(
         model_output = await self.inference(input, **kwargs)
 
         if self.cache_output:
-            wyvern_request.cache_model_score(self.name, model_output.data)
+            wyvern_request.cache_model_output(self.name, model_output.data)
 
         def events_generator() -> List[ModelEvent]:
             timestamp = datetime.utcnow()
