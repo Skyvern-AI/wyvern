@@ -91,12 +91,10 @@ class ModelComponent(
 
         Our system will automatically fetch the required features from the feature store
             to make this model evaluation possible
+
+        By default, a model component does not require any features, so this function returns an empty set
         """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} is a ModelComponent. "
-            "The @cached_property function `manifest_feature_names` must be "
-            "implemented to define features required for the model.",
-        )
+        return set()
 
     async def execute(self, input: MODEL_INPUT, **kwargs) -> MODEL_OUTPUT:
         """
