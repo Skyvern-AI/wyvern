@@ -13,7 +13,11 @@ from wyvern.components.events.events import EventType, LoggedEvent
 from wyvern.config import settings
 from wyvern.entities.identifier import Identifier
 from wyvern.entities.identifier_entities import WyvernEntity
-from wyvern.entities.model_entities import MODEL_INPUT, MODEL_OUTPUT
+from wyvern.entities.model_entities import (
+    MODEL_INPUT,
+    MODEL_OUTPUT,
+    SINGULAR_MODEL_INPUT,
+)
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.event_logging import event_logger
 
@@ -53,7 +57,7 @@ class ModelEvent(LoggedEvent[ModelEventData]):
     event_type: EventType = EventType.MODEL
 
 
-class ModelComponent(
+class BaseModelComponent(
     Component[
         MODEL_INPUT,
         MODEL_OUTPUT,
@@ -150,6 +154,15 @@ class ModelComponent(
 
         return model_output
 
+    async def inference(
+        self,
+        input: MODEL_INPUT,
+        **kwargs,
+    ) -> MODEL_OUTPUT:
+        raise NotImplementedError
+
+
+class ModelComponent(BaseModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
     async def batch_inference(
         self,
         request: BaseWyvernRequest,
@@ -204,3 +217,8 @@ class ModelComponent(
             data=output_data,
             model_name=self.name,
         )
+
+
+class SingularModelComponent(BaseModelComponent[SINGULAR_MODEL_INPUT, MODEL_OUTPUT]):
+    async def inference(self, input: SINGULAR_MODEL_INPUT, **kwargs) -> MODEL_OUTPUT:
+        raise NotImplementedError

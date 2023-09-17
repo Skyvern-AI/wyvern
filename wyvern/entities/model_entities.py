@@ -86,6 +86,14 @@ class ModelInput(GenericModel, Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY
         return self.first_entity.identifier
 
 
+class SingularModelInput(
+    ModelInput,
+    Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
+):
+    entity: GENERALIZED_WYVERN_ENTITY
+
+
+SINGULAR_MODEL_INPUT = TypeVar("SINGULAR_MODEL_INPUT", bound=SingularModelInput)
 MODEL_INPUT = TypeVar("MODEL_INPUT", bound=ModelInput)
 MODEL_OUTPUT = TypeVar("MODEL_OUTPUT", bound=ModelOutput)
 
