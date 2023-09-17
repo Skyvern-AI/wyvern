@@ -148,7 +148,13 @@ class BusinessLogicPipeline(
             old_scores = [candidate.score for candidate in argument.scored_candidates]
 
             # this output might have the same reference as the argument.scored_candidates
-            output = await upstream.execute(input=argument, **kwargs)
+            if type(upstream) is ExperimentationComponent:
+                output = await upstream.get_sth().execute(
+                    input=argument,
+                    **kwargs,
+                )
+            else:
+                output = await upstream.execute(input=argument, **kwargs)
 
             # TODO (suchintan): This currently assumes that the
             #  output order is unchanged by the business logic component
