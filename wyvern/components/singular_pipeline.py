@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Generic, List, Optional
+from typing import Any, Dict, Generic, List, Optional, Union
 
 from pydantic.generics import GenericModel
 
-from wyvern.components.business_logic.business_logic import BusinessLogicPipeline
+from wyvern.components.business_logic.business_logic import (
+    SingularBusinessLogicPipeline,
+    SingularBusinessLogicRequest,
+)
 from wyvern.components.component import Component
 from wyvern.components.events.events import LoggedEvent
 from wyvern.components.models.model_component import SingularModelComponent
 from wyvern.components.pipeline_component import PipelineComponent
+from wyvern.entities.candidate_entities import ScoredEntity
 from wyvern.entities.model_entities import SingularModelInput
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.event_logging import event_logger
@@ -42,16 +46,20 @@ class SingularPipelineComponent(
         self,
         *upstreams: Component,
         model: SingularModelComponent,
-        business_logic: Optional[BusinessLogicPipeline] = None,
+        business_logic: Optional[SingularBusinessLogicPipeline] = None,
         name: Optional[str] = None,
         handle_feature_store_exceptions: bool = False,
     ) -> None:
         self.model = model
-        self.business_logic = business_logic
+        self.business_logic: SingularBusinessLogicPipeline
+
         upstream_components = list(upstreams)
         upstream_components.append(self.model)
-        if self.business_logic:
-            upstream_components.append(self.business_logic)
+        if business_logic:
+            self.business_logic = business_logic
+        else:
+            self.business_logic = SingularBusinessLogicPipeline()
+        upstream_components.append(self.business_logic)
         super().__init__(
             *upstream_components,
             name=name,
@@ -71,8 +79,34 @@ class SingularPipelineComponent(
             entity=input.entity,
         )
         output = await self.model.execute(model_input, **kwargs)
-        entity_data = output.data.get(input.entity.identifier)
+        entity_data: Union[
+            float,
+            str,
+            List[float],
+            Dict[str, Optional[Union[float, str, list[float]]]],
+        ] = output.data.get(input.entity.identifier)
+
+        business_logic_input = SingularBusinessLogicRequest[
+            GENERALIZED_WYVERN_ENTITY,
+            Union[
+                float,
+                str,
+                List[float],
+                Dict[str, Optional[Union[float, str, list[float]]]],
+            ],
+            SingularPipelineRequest[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
+        ](
+            request=input,
+            scored_entity=ScoredEntity(
+                entity=input.entity,
+                score=entity_data,
+            ),
+        )
+        business_logic_output = await self.business_logic.execute(
+            input=business_logic_input,
+            **kwargs,
+        )
         return SingularPipelineResponse(
-            data=entity_data,
+            data=business_logic_output.adjusted_entity.score,
             events=event_logger.get_logged_events() if input.include_events else None,
         )
