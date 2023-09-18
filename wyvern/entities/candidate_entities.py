@@ -1,21 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from typing import Generic, List, Protocol, TypeVar
+from typing import Generic, List, TypeVar
 
 from pydantic.generics import GenericModel
 
 from wyvern.entities.identifier_entities import WyvernDataModel
-from wyvern.entities.model_entities import MODEL_OUTPUT_DATA_TYPE
 from wyvern.wyvern_typing import GENERALIZED_WYVERN_ENTITY
-
-
-class ScoredEntityProtocol(
-    Protocol,
-    Generic[GENERALIZED_WYVERN_ENTITY, MODEL_OUTPUT_DATA_TYPE],
-):
-    entity: GENERALIZED_WYVERN_ENTITY
-    score: MODEL_OUTPUT_DATA_TYPE
 
 
 # TODO (suchintan): This should be renamed to ScoredEntity probably
