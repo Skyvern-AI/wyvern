@@ -30,7 +30,7 @@ class ModelEventData(BaseModel):
         entity_identifier: The identifier of the entity that was used to generate the model output. This is optional.
         entity_identifier_type: The type of the identifier of the entity that was used to generate the model output.
             This is optional.
-        target: The key in the dictionary output.
+        model_key: The key in the dictionary output.
             This attribute will only appear when the output of the model is a dictionary.
             This is optional.
     """
@@ -39,7 +39,7 @@ class ModelEventData(BaseModel):
     model_output: str
     entity_identifier: Optional[str] = None
     entity_identifier_type: Optional[str] = None
-    target: Optional[str] = None
+    model_key: Optional[str] = None
 
 
 class ModelEvent(LoggedEvent[ModelEventData]):
@@ -123,7 +123,7 @@ class ModelComponent(
                                     model_name=model_output.model_name
                                     or self.__class__.__name__,
                                     model_output=str(value),
-                                    target=key,
+                                    model_key=key,
                                     entity_identifier=identifier.identifier,
                                     entity_identifier_type=identifier.identifier_type,
                                 ),
