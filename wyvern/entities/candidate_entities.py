@@ -50,19 +50,3 @@ class CandidateSetEntity(
 
 
 CANDIDATE_SET_ENTITY = TypeVar("CANDIDATE_SET_ENTITY", bound=CandidateSetEntity)
-
-
-class ScoredEntity(
-    GenericModel,
-    Generic[GENERALIZED_WYVERN_ENTITY, MODEL_OUTPUT_DATA_TYPE],
-):
-    """
-    An entity with a model score.
-
-    Attributes:
-        entity: The candidate entity.
-        score: Type could be float, str, float or dict. The output from the model for the entity.
-    """
-
-    entity: GENERALIZED_WYVERN_ENTITY
-    score: MODEL_OUTPUT_DATA_TYPE

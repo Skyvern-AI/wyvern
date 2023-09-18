@@ -15,9 +15,9 @@ from wyvern.components.helpers.sorting import SortingComponent
 from wyvern.entities.candidate_entities import (
     GENERALIZED_WYVERN_ENTITY,
     ScoredCandidate,
-    ScoredEntity,
     ScoredEntityProtocol,
 )
+from wyvern.entities.identifier import Identifier
 from wyvern.entities.model_entities import MODEL_OUTPUT_DATA_TYPE
 from wyvern.event_logging import event_logger
 from wyvern.wyvern_typing import REQUEST_ENTITY
@@ -66,9 +66,9 @@ class BusinessLogicRequest(
     scored_candidates: List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]] = []
 
 
-class SingularBusinessLogicRequest(
+class SingleEntityBusinessLogicRequest(
     GenericModel,
-    Generic[GENERALIZED_WYVERN_ENTITY, MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
+    Generic[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
 ):
     """
     A request to the business logic layer to perform business logic on a single candidate
@@ -78,8 +78,9 @@ class SingularBusinessLogicRequest(
         candidate: The candidate that the business logic layer is being asked to perform business logic on
     """
 
+    identifier: Identifier
     request: REQUEST_ENTITY
-    scored_entity: ScoredEntity[GENERALIZED_WYVERN_ENTITY, MODEL_OUTPUT_DATA_TYPE]
+    model_output: MODEL_OUTPUT_DATA_TYPE
 
 
 # TODO (suchintan): Possibly delete this now that events are gone
@@ -99,9 +100,9 @@ class BusinessLogicResponse(
     adjusted_candidates: List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]]
 
 
-class SingularBusinessLogicResponse(
+class SingleEntityBusinessLogicResponse(
     GenericModel,
-    Generic[GENERALIZED_WYVERN_ENTITY, MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
+    Generic[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
 ):
     """
     The response from the business logic layer after performing business logic on a single candidate
@@ -111,12 +112,8 @@ class SingularBusinessLogicResponse(
         adjusted_candidate: The candidate that the business logic layer performed business logic on
     """
 
-    request: SingularBusinessLogicRequest[
-        GENERALIZED_WYVERN_ENTITY,
-        MODEL_OUTPUT_DATA_TYPE,
-        REQUEST_ENTITY,
-    ]
-    adjusted_entity: ScoredEntity[GENERALIZED_WYVERN_ENTITY, MODEL_OUTPUT_DATA_TYPE]
+    request: REQUEST_ENTITY
+    adjusted_model_output: MODEL_OUTPUT_DATA_TYPE
 
 
 class BusinessLogicComponent(
@@ -135,16 +132,15 @@ class BusinessLogicComponent(
     pass
 
 
-class SingularBusinessLogicComponent(
+class SingleEntityBusinessLogicComponent(
     Component[
-        SingularBusinessLogicRequest[
-            GENERALIZED_WYVERN_ENTITY,
+        SingleEntityBusinessLogicRequest[
             MODEL_OUTPUT_DATA_TYPE,
             REQUEST_ENTITY,
         ],
-        ScoredEntity[GENERALIZED_WYVERN_ENTITY, MODEL_OUTPUT_DATA_TYPE],
+        MODEL_OUTPUT_DATA_TYPE,
     ],
-    Generic[GENERALIZED_WYVERN_ENTITY, MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
+    Generic[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
 ):
     """
     A component that performs business logic on an entity with a set of candidates
@@ -287,26 +283,22 @@ class BusinessLogicPipeline(
         )
 
 
-class SingularBusinessLogicPipeline(
+class SingleEntityBusinessLogicPipeline(
     Component[
-        SingularBusinessLogicRequest[
-            GENERALIZED_WYVERN_ENTITY,
+        SingleEntityBusinessLogicRequest[
             MODEL_OUTPUT_DATA_TYPE,
             REQUEST_ENTITY,
         ],
-        SingularBusinessLogicResponse[
-            GENERALIZED_WYVERN_ENTITY,
+        SingleEntityBusinessLogicResponse[
             MODEL_OUTPUT_DATA_TYPE,
             REQUEST_ENTITY,
         ],
     ],
-    ExtractEventMixin[GENERALIZED_WYVERN_ENTITY, MODEL_OUTPUT_DATA_TYPE],
-    Generic[GENERALIZED_WYVERN_ENTITY, MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
+    Generic[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
 ):
     def __init__(
         self,
-        *upstreams: SingularBusinessLogicComponent[
-            GENERALIZED_WYVERN_ENTITY,
+        *upstreams: SingleEntityBusinessLogicComponent[
             MODEL_OUTPUT_DATA_TYPE,
             REQUEST_ENTITY,
         ],
@@ -317,32 +309,25 @@ class SingularBusinessLogicPipeline(
 
     async def execute(
         self,
-        input: SingularBusinessLogicRequest[
-            GENERALIZED_WYVERN_ENTITY,
+        input: SingleEntityBusinessLogicRequest[
             MODEL_OUTPUT_DATA_TYPE,
             REQUEST_ENTITY,
         ],
         **kwargs,
-    ) -> SingularBusinessLogicResponse[
-        GENERALIZED_WYVERN_ENTITY,
-        MODEL_OUTPUT_DATA_TYPE,
-        REQUEST_ENTITY,
-    ]:
+    ) -> SingleEntityBusinessLogicResponse[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY]:
         argument = input
         for (pipeline_index, upstream) in enumerate(self.ordered_upstreams):
-            old_scores = [argument.scored_entity.score]
-
-            # this output might have the same reference as the argument.scored_candidates
+            old_output = argument.model_output
             output = await upstream.execute(argument, **kwargs)
-
             extracted_events: List[
                 BusinessLogicEvent
             ] = self.extract_business_logic_events(
-                [output],
+                input.identifier,
+                output,
+                old_output,
                 pipeline_index,
                 upstream.name,
                 argument.request.request_id,
-                old_scores,
             )
 
             def log_events(
@@ -350,19 +335,59 @@ class SingularBusinessLogicPipeline(
             ):
                 return extracted_events
 
-            # TODO (suchintan): "invariant" list error
             event_logger.log_events(log_events)  # type: ignore
 
-            argument = SingularBusinessLogicRequest[
-                GENERALIZED_WYVERN_ENTITY,
+            argument = SingleEntityBusinessLogicRequest[
                 MODEL_OUTPUT_DATA_TYPE,
                 REQUEST_ENTITY,
             ](
+                identifier=input.identifier,
                 request=input.request,
-                scored_entity=output,
+                model_output=output,
             )
 
-        return SingularBusinessLogicResponse(
-            request=input,
-            adjusted_entity=argument.scored_entity,
+        return SingleEntityBusinessLogicResponse(
+            request=input.request,
+            adjusted_model_output=argument.model_output,
         )
+
+    def extract_business_logic_events(
+        self,
+        identifier: Identifier,
+        output: MODEL_OUTPUT_DATA_TYPE,
+        old_output: MODEL_OUTPUT_DATA_TYPE,
+        pipeline_index: int,
+        upstream_name: str,
+        request_id: str,
+    ) -> List[BusinessLogicEvent]:
+        """
+        Extracts the business logic events from the output of a business logic component
+
+        Args:
+            output: The output of a business logic component
+            pipeline_index: The index of the business logic component in the business logic pipeline
+            upstream_name: The name of the business logic component
+            request_id: The request id of the request that the business logic component was called in
+            old_output: The old scores of the candidates that the business logic component was called on
+
+        Returns:
+            The business logic events that were extracted from the output of the business logic component
+        """
+        timestamp = datetime.utcnow()
+        events = [
+            BusinessLogicEvent(
+                request_id=request_id,
+                api_source=request_context.ensure_current_request().url_path,
+                event_timestamp=timestamp,
+                event_data=BusinessLogicEventData(
+                    business_logic_pipeline_order=pipeline_index,
+                    business_logic_name=upstream_name,
+                    old_score=str(old_output),
+                    new_score=str(output),
+                    entity_identifier=identifier.identifier,
+                    entity_identifier_type=identifier.identifier_type,
+                ),
+            ),
+        ]
+
+        return events
