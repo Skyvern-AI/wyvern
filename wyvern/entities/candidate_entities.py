@@ -10,7 +10,10 @@ from wyvern.wyvern_typing import GENERALIZED_WYVERN_ENTITY
 
 
 # TODO (suchintan): This should be renamed to ScoredEntity probably
-class ScoredCandidate(GenericModel, Generic[GENERALIZED_WYVERN_ENTITY]):
+class ScoredCandidate(
+    GenericModel,
+    Generic[GENERALIZED_WYVERN_ENTITY],
+):
     """
     A candidate entity with a score.
 
@@ -30,7 +33,6 @@ class CandidateSetEntity(
 ):
     """
     A set of candidate entities. This is a generic model that can be used to represent a set of candidate entities.
-
     Attributes:
         candidates: The list of candidate entities.
     """

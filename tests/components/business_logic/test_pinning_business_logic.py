@@ -66,6 +66,7 @@ async def set_up_pinning_components(
             entity_store={},
             events=[],
             feature_map=FeatureMap(feature_map={}),
+            model_output_map={},
         ),
     )
     return await pipeline.execute(request)

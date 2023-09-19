@@ -2,39 +2,30 @@
 import asyncio
 import logging
 from functools import cached_property
-from typing import Any, Dict, List, Optional, Set, Tuple, TypeAlias, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, TypeAlias, Union, final
 
 from wyvern.components.models.model_component import (
-    MODEL_INPUT,
-    MODEL_OUTPUT,
-    ModelComponent,
+    BaseModelComponent,
+    MultiEntityModelComponent,
+    SingleEntityModelComponent,
 )
 from wyvern.config import settings
 from wyvern.core.http import aiohttp_client
 from wyvern.entities.identifier import Identifier
 from wyvern.entities.identifier_entities import WyvernEntity
+from wyvern.entities.model_entities import MODEL_INPUT, MODEL_OUTPUT
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.exceptions import (
     WyvernModelbitTokenMissingError,
     WyvernModelbitValidationError,
 )
+from wyvern.wyvern_typing import INPUT_TYPE, REQUEST_ENTITY
 
 JSON: TypeAlias = Union[Dict[str, "JSON"], List["JSON"], str, int, float, bool, None]
 logger = logging.getLogger(__name__)
 
 
-class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
-    """
-    ModelbitComponent is a base class for all modelbit model components. It provides a common interface to implement
-    all modelbit models.
-
-    ModelbitComponent is a subclass of ModelComponent.
-
-    Attributes:
-        AUTH_TOKEN: A class variable that stores the auth token for Modelbit.
-        URL: A class variable that stores the url for Modelbit.
-    """
-
+class ModelbitMixin(BaseModelComponent[INPUT_TYPE, MODEL_OUTPUT]):
     AUTH_TOKEN: str = ""
     URL: str = ""
 
@@ -44,6 +35,7 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
         name: Optional[str] = None,
         auth_token: Optional[str] = None,
         url: Optional[str] = None,
+        cache_output: bool = False,
     ) -> None:
         """
         Args:
@@ -55,7 +47,7 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
         Raises:
             WyvernModelbitTokenMissingError: If the auth token is not provided.
         """
-        super().__init__(*upstreams, name=name)
+        super().__init__(*upstreams, name=name, cache_output=cache_output)
         self._auth_token = auth_token or self.AUTH_TOKEN
         self._modelbit_url = url or self.URL
         self.headers = {
@@ -82,31 +74,7 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
         """
         return set(self.modelbit_features)
 
-    async def build_requests(
-        self,
-        input: MODEL_INPUT,
-    ) -> Tuple[List[Identifier], List[Any]]:
-        """
-        Please refer to modlebit batch inference API:
-            https://doc.modelbit.com/deployments/rest-api/
-        """
-        target_entities: List[
-            Union[WyvernEntity, BaseWyvernRequest]
-        ] = input.entities or [input.request]
-        target_identifiers = [entity.identifier for entity in target_entities]
-        all_requests = [
-            [
-                idx + 1,
-                [
-                    self.get_feature(identifier, feature_name)
-                    for feature_name in self.modelbit_features
-                ],
-            ]
-            for idx, identifier in enumerate(target_identifiers)
-        ]
-        return target_identifiers, all_requests
-
-    async def inference(self, input: MODEL_INPUT, **kwargs) -> MODEL_OUTPUT:
+    async def inference(self, input: INPUT_TYPE, **kwargs) -> MODEL_OUTPUT:
         """
         This method sends a request to Modelbit and returns the output.
         """
@@ -155,3 +123,69 @@ class ModelbitComponent(ModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
             data=output_data,
             model_name=self.name,
         )
+
+    async def build_requests(
+        self,
+        input: INPUT_TYPE,
+    ) -> Tuple[List[Identifier], List[Any]]:
+        """
+        This method builds requests for Modelbit. This method should be implemented by the subclass.
+        """
+        raise NotImplementedError
+
+
+class ModelbitComponent(
+    ModelbitMixin[MODEL_INPUT, MODEL_OUTPUT],
+    MultiEntityModelComponent[MODEL_INPUT, MODEL_OUTPUT],
+):
+    """
+    ModelbitComponent is a base class for all modelbit model components. It provides a common interface to implement
+    all modelbit models.
+
+    ModelbitComponent is a subclass of ModelComponent.
+
+    Attributes:
+        AUTH_TOKEN: A class variable that stores the auth token for Modelbit.
+        URL: A class variable that stores the url for Modelbit.
+    """
+
+    async def build_requests(
+        self,
+        input: MODEL_INPUT,
+    ) -> Tuple[List[Identifier], List[Any]]:
+        """
+        Please refer to modlebit batch inference API:
+            https://doc.modelbit.com/deployments/rest-api/
+        """
+        target_entities: List[
+            Union[WyvernEntity, BaseWyvernRequest]
+        ] = input.entities or [input.request]
+        target_identifiers = [entity.identifier for entity in target_entities]
+        all_requests = [
+            [
+                idx + 1,
+                [
+                    self.get_feature(identifier, feature_name)
+                    for feature_name in self.modelbit_features
+                ],
+            ]
+            for idx, identifier in enumerate(target_identifiers)
+        ]
+        return target_identifiers, all_requests
+
+
+class SingleEntityModelbitComponent(
+    ModelbitMixin[REQUEST_ENTITY, MODEL_OUTPUT],
+    SingleEntityModelComponent[REQUEST_ENTITY, MODEL_OUTPUT],
+):
+    @final
+    async def build_requests(
+        self,
+        input: REQUEST_ENTITY,
+    ) -> Tuple[List[Identifier], List[Any]]:
+        target_identifier, request = await self.build_request(input)
+        all_requests = [[1, request]]
+        return [target_identifier], all_requests
+
+    async def build_request(self, input: REQUEST_ENTITY) -> Tuple[Identifier, Any]:
+        raise NotImplementedError

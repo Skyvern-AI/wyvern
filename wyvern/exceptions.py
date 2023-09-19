@@ -154,3 +154,11 @@ class ExperimentationClientInitializationError(WyvernError):
 
 class EntityColumnMissingError(WyvernError):
     message = "Entity column {entity} is missing in the entity data"
+
+
+class MissingModelChainOutputError(WyvernError):
+    message = "Model chain output is missing"
+
+
+class MissingModelOutputError(WyvernError):
+    message = "Identifier is missing in the model output"

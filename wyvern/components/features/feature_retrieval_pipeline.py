@@ -6,6 +6,7 @@ from typing import Generic, List, Optional, Set, Type
 from ddtrace import tracer
 from pydantic.generics import GenericModel
 
+from wyvern import request_context
 from wyvern.components.component import Component
 from wyvern.components.features.feature_logger import (
     FeatureEventLoggingComponent,
@@ -159,6 +160,8 @@ class FeatureRetrievalPipeline(
                 **kwargs,
             )
         )
+        current_request = request_context.ensure_current_request()
+        current_request.feature_map = feature_retrieval_response
 
         """
         TODO (suchintan):
