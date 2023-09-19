@@ -313,13 +313,14 @@ class SingleEntityBusinessLogicPipeline(
     ) -> SingleEntityBusinessLogicResponse[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY]:
         argument = input
         for (pipeline_index, upstream) in enumerate(self.ordered_upstreams):
-            old_output = argument.model_output
+            old_output = str(argument.model_output)
+
             output = await upstream.execute(argument, **kwargs)
             extracted_events: List[
                 BusinessLogicEvent
             ] = self.extract_business_logic_events(
                 input.identifier,
-                output,
+                str(output),
                 old_output,
                 pipeline_index,
                 upstream.name,
@@ -350,8 +351,8 @@ class SingleEntityBusinessLogicPipeline(
     def extract_business_logic_events(
         self,
         identifier: Identifier,
-        output: MODEL_OUTPUT_DATA_TYPE,
-        old_output: MODEL_OUTPUT_DATA_TYPE,
+        output: str,
+        old_output: str,
         pipeline_index: int,
         upstream_name: str,
         request_id: str,
@@ -378,8 +379,8 @@ class SingleEntityBusinessLogicPipeline(
                 event_data=BusinessLogicEventData(
                     business_logic_pipeline_order=pipeline_index,
                     business_logic_name=upstream_name,
-                    old_score=str(old_output),
-                    new_score=str(output),
+                    old_score=old_output,
+                    new_score=output,
                     entity_identifier=identifier.identifier,
                     entity_identifier_type=identifier.identifier_type,
                 ),

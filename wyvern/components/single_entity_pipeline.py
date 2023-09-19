@@ -12,22 +12,23 @@ from wyvern.components.events.events import LoggedEvent
 from wyvern.components.models.model_component import SingleEntityModelComponent
 from wyvern.components.pipeline_component import PipelineComponent
 from wyvern.entities.identifier import Identifier
+from wyvern.entities.model_entities import MODEL_OUTPUT_DATA_TYPE
 from wyvern.event_logging import event_logger
 from wyvern.exceptions import MissingModeloutputError
-from wyvern.wyvern_typing import REQUEST_ENTITY, RESPONSE_SCHEMA
+from wyvern.wyvern_typing import REQUEST_ENTITY
 
 
-class SingleEntityPipelineResponse(GenericModel, Generic[RESPONSE_SCHEMA]):
-    data: RESPONSE_SCHEMA
-    events: Optional[List[LoggedEvent[Any]]]
+class SingleEntityPipelineResponse(GenericModel, Generic[MODEL_OUTPUT_DATA_TYPE]):
+    data: MODEL_OUTPUT_DATA_TYPE
+    events: Optional[List[LoggedEvent[Any]]] = None
 
 
 class SingleEntityPipeline(
     PipelineComponent[
         REQUEST_ENTITY,
-        SingleEntityPipelineResponse[RESPONSE_SCHEMA],
+        SingleEntityPipelineResponse[MODEL_OUTPUT_DATA_TYPE],
     ],
-    Generic[REQUEST_ENTITY, RESPONSE_SCHEMA],
+    Generic[REQUEST_ENTITY, MODEL_OUTPUT_DATA_TYPE],
 ):
     def __init__(
         self,
@@ -57,9 +58,9 @@ class SingleEntityPipeline(
         self,
         input: REQUEST_ENTITY,
         **kwargs,
-    ) -> SingleEntityPipelineResponse[RESPONSE_SCHEMA]:
+    ) -> SingleEntityPipelineResponse[MODEL_OUTPUT_DATA_TYPE]:
         output = await self.model.execute(input, **kwargs)
-        identifiers: List[Identifier] = output.keys()
+        identifiers: List[Identifier] = list(output.data.keys())
         if not identifiers:
             raise MissingModeloutputError()
         identifier = identifiers[0]
@@ -87,7 +88,17 @@ class SingleEntityPipeline(
             input=business_logic_input,
             **kwargs,
         )
-        return SingleEntityPipelineResponse(
-            data=business_logic_output.adjusted_model_output,
+        return self.generate_response(
+            input,
+            business_logic_output.adjusted_model_output,
+        )
+
+    def generate_response(
+        self,
+        input: REQUEST_ENTITY,
+        pipeline_output: MODEL_OUTPUT_DATA_TYPE,
+    ) -> SingleEntityPipelineResponse[MODEL_OUTPUT_DATA_TYPE]:
+        return SingleEntityPipelineResponse[MODEL_OUTPUT_DATA_TYPE](
+            data=pipeline_output,
             events=event_logger.get_logged_events() if input.include_events else None,
         )

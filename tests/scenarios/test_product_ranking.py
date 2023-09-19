@@ -318,10 +318,11 @@ class RankingComponent(
 
 @pytest.fixture
 def test_client(mock_redis):
-    wyvern_service = WyvernService.generate(
+    wyvern_app = WyvernService.generate_app(
         route_components=[RankingComponent],
+        realtime_feature_components=[],
     )
-    yield TestClient(wyvern_service.service.app)
+    yield TestClient(wyvern_app)
 
 
 def test_get_all_identifiers():

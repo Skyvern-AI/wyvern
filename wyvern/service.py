@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import List, Optional, Type
+from typing import List, Optional, Type, Union
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -40,7 +40,7 @@ class WyvernService:
 
     async def register_routes(
         self,
-        route_components: List[Type[APIRouteComponent]],
+        route_components: List[Union[Type[APIRouteComponent], APIRouteComponent]],
     ) -> None:
         """
         Register the routes for the Wyvern service
@@ -69,7 +69,9 @@ class WyvernService:
     @staticmethod
     def generate(
         *,
-        route_components: Optional[List[Type[APIRouteComponent]]] = None,
+        route_components: Optional[
+            List[Union[Type[APIRouteComponent], APIRouteComponent]]
+        ] = None,
         realtime_feature_components: Optional[
             List[Type[RealtimeFeatureComponent]]
         ] = None,
@@ -105,7 +107,7 @@ class WyvernService:
     @staticmethod
     def run(
         *,
-        route_components: List[Type[APIRouteComponent]],
+        route_components: List[Union[Type[APIRouteComponent], APIRouteComponent]],
         realtime_feature_components: Optional[
             List[Type[RealtimeFeatureComponent]]
         ] = None,
@@ -135,7 +137,9 @@ class WyvernService:
     @staticmethod
     def generate_app(
         *,
-        route_components: Optional[List[Type[APIRouteComponent]]] = None,
+        route_components: Optional[
+            List[Union[Type[APIRouteComponent], APIRouteComponent]]
+        ] = None,
         realtime_feature_components: Optional[
             List[Type[RealtimeFeatureComponent]]
         ] = None,

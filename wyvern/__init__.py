@@ -2,13 +2,21 @@
 from wyvern.components.features.realtime_features_component import (
     RealtimeFeatureComponent,
 )
-from wyvern.components.models.model_chain_component import ModelChainComponent
-from wyvern.components.models.model_component import ModelComponent
+from wyvern.components.models.model_chain_component import SingleEntityModelChain
+from wyvern.components.models.model_component import (
+    ModelComponent,
+    MultiEntityModelComponent,
+    SingleEntityModelComponent,
+)
 from wyvern.components.pipeline_component import PipelineComponent
 from wyvern.components.ranking_pipeline import (
     RankingPipeline,
     RankingRequest,
     RankingResponse,
+)
+from wyvern.components.single_entity_pipeline import (
+    SingleEntityPipeline,
+    SingleEntityPipelineResponse,
 )
 from wyvern.entities.candidate_entities import CandidateSetEntity
 from wyvern.entities.feature_entities import FeatureData, FeatureMap
@@ -40,10 +48,10 @@ __all__ = [
     "FeatureMap",
     "Identifier",
     "IdentifierType",
-    "ModelChainComponent",
     "ModelComponent",
     "ModelInput",
     "ModelOutput",
+    "MultiEntityModelComponent",
     "PipelineComponent",
     "ProductEntity",
     "QueryEntity",
@@ -51,6 +59,10 @@ __all__ = [
     "RankingResponse",
     "RankingRequest",
     "RealtimeFeatureComponent",
+    "SingleEntityModelChain",
+    "SingleEntityModelComponent",
+    "SingleEntityPipeline",
+    "SingleEntityPipelineResponse",
     "UserEntity",
     "WyvernDataModel",
     "WyvernEntity",
