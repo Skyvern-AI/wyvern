@@ -101,7 +101,7 @@ class BusinessLogicResponse(
 
 class SingleEntityBusinessLogicResponse(
     GenericModel,
-    Generic[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
+    Generic[REQUEST_ENTITY, MODEL_OUTPUT_DATA_TYPE],
 ):
     """
     The response from the business logic layer after performing business logic on a single candidate
@@ -112,7 +112,7 @@ class SingleEntityBusinessLogicResponse(
     """
 
     request: REQUEST_ENTITY
-    adjusted_model_output: MODEL_OUTPUT_DATA_TYPE
+    adjusted_output: MODEL_OUTPUT_DATA_TYPE
 
 
 class BusinessLogicComponent(
@@ -286,11 +286,11 @@ class SingleEntityBusinessLogicPipeline(
             MODEL_OUTPUT_DATA_TYPE,
         ],
         SingleEntityBusinessLogicResponse[
-            MODEL_OUTPUT_DATA_TYPE,
             REQUEST_ENTITY,
+            MODEL_OUTPUT_DATA_TYPE,
         ],
     ],
-    Generic[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
+    Generic[REQUEST_ENTITY, MODEL_OUTPUT_DATA_TYPE],
 ):
     def __init__(
         self,
@@ -310,7 +310,7 @@ class SingleEntityBusinessLogicPipeline(
             MODEL_OUTPUT_DATA_TYPE,
         ],
         **kwargs,
-    ) -> SingleEntityBusinessLogicResponse[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY]:
+    ) -> SingleEntityBusinessLogicResponse[REQUEST_ENTITY, MODEL_OUTPUT_DATA_TYPE]:
         argument = input
         for (pipeline_index, upstream) in enumerate(self.ordered_upstreams):
             old_output = str(argument.model_output)
@@ -324,7 +324,7 @@ class SingleEntityBusinessLogicPipeline(
                 old_output,
                 pipeline_index,
                 upstream.name,
-                argument.request.request_id,
+                input.request.request_id,
             )
 
             def log_events(
@@ -345,7 +345,7 @@ class SingleEntityBusinessLogicPipeline(
 
         return SingleEntityBusinessLogicResponse(
             request=input.request,
-            adjusted_model_output=argument.model_output,
+            adjusted_output=argument.model_output,
         )
 
     def extract_business_logic_events(
@@ -361,11 +361,12 @@ class SingleEntityBusinessLogicPipeline(
         Extracts the business logic events from the output of a business logic component
 
         Args:
+            identifier: The identifier of the entity that the describe what the model output is for
             output: The output of a business logic component
+            old_output: The old scores of the candidates that the business logic component was called on
             pipeline_index: The index of the business logic component in the business logic pipeline
             upstream_name: The name of the business logic component
             request_id: The request id of the request that the business logic component was called in
-            old_output: The old scores of the candidates that the business logic component was called on
 
         Returns:
             The business logic events that were extracted from the output of the business logic component

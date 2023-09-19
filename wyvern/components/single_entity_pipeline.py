@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Dict, Generic, List, Optional, Union
+from typing import Any, Generic, List, Optional
 
 from pydantic.generics import GenericModel
 
@@ -14,7 +14,7 @@ from wyvern.components.pipeline_component import PipelineComponent
 from wyvern.entities.identifier import Identifier
 from wyvern.entities.model_entities import MODEL_OUTPUT_DATA_TYPE
 from wyvern.event_logging import event_logger
-from wyvern.exceptions import MissingModeloutputError
+from wyvern.exceptions import MissingModelOutputError
 from wyvern.wyvern_typing import REQUEST_ENTITY
 
 
@@ -34,20 +34,25 @@ class SingleEntityPipeline(
         self,
         *upstreams: Component,
         model: SingleEntityModelComponent,
-        business_logic: Optional[SingleEntityBusinessLogicPipeline] = None,
+        business_logic: Optional[
+            SingleEntityBusinessLogicPipeline[REQUEST_ENTITY, MODEL_OUTPUT_DATA_TYPE]
+        ] = None,
         name: Optional[str] = None,
         handle_feature_store_exceptions: bool = False,
     ) -> None:
-        self.model = model
-        self.business_logic: SingleEntityBusinessLogicPipeline
-
         upstream_components = list(upstreams)
+
+        self.model = model
         upstream_components.append(self.model)
-        if business_logic:
-            self.business_logic = business_logic
-        else:
-            self.business_logic = SingleEntityBusinessLogicPipeline()
+
+        if not business_logic:
+            business_logic = SingleEntityBusinessLogicPipeline[
+                REQUEST_ENTITY,
+                MODEL_OUTPUT_DATA_TYPE,
+            ]()
+        self.business_logic = business_logic
         upstream_components.append(self.business_logic)
+
         super().__init__(
             *upstream_components,
             name=name,
@@ -62,23 +67,13 @@ class SingleEntityPipeline(
         output = await self.model.execute(input, **kwargs)
         identifiers: List[Identifier] = list(output.data.keys())
         if not identifiers:
-            raise MissingModeloutputError()
+            raise MissingModelOutputError()
         identifier = identifiers[0]
-        model_output_data: Union[
-            float,
-            str,
-            List[float],
-            Dict[str, Optional[Union[float, str, list[float]]]],
-        ] = output.data.get(identifier)
+        model_output_data: MODEL_OUTPUT_DATA_TYPE = output.data.get(identifier)
 
         business_logic_input = SingleEntityBusinessLogicRequest[
             REQUEST_ENTITY,
-            Union[
-                float,
-                str,
-                List[float],
-                Dict[str, Optional[Union[float, str, list[float]]]],
-            ],
+            MODEL_OUTPUT_DATA_TYPE,
         ](
             identifier=identifier,
             request=input,
@@ -90,7 +85,7 @@ class SingleEntityPipeline(
         )
         return self.generate_response(
             input,
-            business_logic_output.adjusted_model_output,
+            business_logic_output.adjusted_output,
         )
 
     def generate_response(
