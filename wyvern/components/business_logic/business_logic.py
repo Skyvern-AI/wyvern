@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Generic, List, Optional
+from typing import Generic, List, Optional, Sequence
 
 from ddtrace import tracer
 from pydantic.generics import GenericModel
@@ -16,6 +16,8 @@ from wyvern.entities.candidate_entities import (
     GENERALIZED_WYVERN_ENTITY,
     ScoredCandidate,
 )
+from wyvern.entities.identifier import Identifier
+from wyvern.entities.model_entities import MODEL_OUTPUT_DATA_TYPE
 from wyvern.event_logging import event_logger
 from wyvern.wyvern_typing import REQUEST_ENTITY
 
@@ -35,8 +37,8 @@ class BusinessLogicEventData(EntityEventData):
 
     business_logic_pipeline_order: int
     business_logic_name: str
-    old_score: float
-    new_score: float
+    old_score: str
+    new_score: str
 
 
 class BusinessLogicEvent(LoggedEvent[BusinessLogicEventData]):
@@ -60,10 +62,24 @@ class BusinessLogicRequest(
     """
 
     request: REQUEST_ENTITY
-    scored_candidates: List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]]
+    scored_candidates: List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]] = []
 
-    # TODO (suchintan): Give business logic layer access to the feature map in the future
-    # feature_map: FeatureMap
+
+class SingleEntityBusinessLogicRequest(
+    GenericModel,
+    Generic[REQUEST_ENTITY, MODEL_OUTPUT_DATA_TYPE],
+):
+    """
+    A request to the business logic layer to perform business logic on a single candidate
+
+    Parameters:
+        request: The request that the business logic layer is being asked to perform business logic on
+        candidate: The candidate that the business logic layer is being asked to perform business logic on
+    """
+
+    identifier: Identifier
+    request: REQUEST_ENTITY
+    model_output: MODEL_OUTPUT_DATA_TYPE
 
 
 # TODO (suchintan): Possibly delete this now that events are gone
@@ -83,12 +99,47 @@ class BusinessLogicResponse(
     adjusted_candidates: List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]]
 
 
+class SingleEntityBusinessLogicResponse(
+    GenericModel,
+    Generic[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
+):
+    """
+    The response from the business logic layer after performing business logic on a single candidate
+
+    Parameters:
+        request: The request that the business logic layer was asked to perform business logic on
+        adjusted_candidate: The candidate that the business logic layer performed business logic on
+    """
+
+    request: REQUEST_ENTITY
+    adjusted_model_output: MODEL_OUTPUT_DATA_TYPE
+
+
 class BusinessLogicComponent(
     Component[
         BusinessLogicRequest[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
         List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]],
     ],
     Generic[GENERALIZED_WYVERN_ENTITY, REQUEST_ENTITY],
+):
+    """
+    A component that performs business logic on an entity with a set of candidates
+
+    The request itself could contain more than just entities, for example it may contain a query and so on
+    """
+
+    pass
+
+
+class SingleEntityBusinessLogicComponent(
+    Component[
+        SingleEntityBusinessLogicRequest[
+            REQUEST_ENTITY,
+            MODEL_OUTPUT_DATA_TYPE,
+        ],
+        MODEL_OUTPUT_DATA_TYPE,
+    ],
+    Generic[REQUEST_ENTITY, MODEL_OUTPUT_DATA_TYPE],
 ):
     """
     A component that performs business logic on an entity with a set of candidates
@@ -141,7 +192,7 @@ class BusinessLogicPipeline(
         """
         argument = input
 
-        # Make sure that the inputted candidates are actually sorted
+        # Make sure that the input candidates are actually sorted
         output = await self.sorting_component.execute(input.scored_candidates)
 
         for (pipeline_index, upstream) in enumerate(self.ordered_upstreams):
@@ -187,11 +238,11 @@ class BusinessLogicPipeline(
 
     def extract_business_logic_events(
         self,
-        output: List[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]],
+        output: Sequence[ScoredCandidate[GENERALIZED_WYVERN_ENTITY]],
         pipeline_index: int,
         upstream_name: str,
         request_id: str,
-        old_scores: List[float],
+        old_scores: List,
     ) -> List[BusinessLogicEvent]:
         """
         Extracts the business logic events from the output of a business logic component
@@ -215,14 +266,125 @@ class BusinessLogicPipeline(
                 event_data=BusinessLogicEventData(
                     business_logic_pipeline_order=pipeline_index,
                     business_logic_name=upstream_name,
-                    old_score=old_scores[j],
-                    new_score=output[j].score,
+                    old_score=str(old_scores[j]),
+                    new_score=str(output[j].score),
                     entity_identifier=candidate.entity.identifier.identifier,
                     entity_identifier_type=candidate.entity.identifier.identifier_type,
                 ),
             )
             for (j, candidate) in enumerate(output)
             if output[j].score != old_scores[j]
+        ]
+
+        return events
+
+
+class SingleEntityBusinessLogicPipeline(
+    Component[
+        SingleEntityBusinessLogicRequest[
+            REQUEST_ENTITY,
+            MODEL_OUTPUT_DATA_TYPE,
+        ],
+        SingleEntityBusinessLogicResponse[
+            MODEL_OUTPUT_DATA_TYPE,
+            REQUEST_ENTITY,
+        ],
+    ],
+    Generic[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
+):
+    def __init__(
+        self,
+        *upstreams: SingleEntityBusinessLogicComponent[
+            REQUEST_ENTITY,
+            MODEL_OUTPUT_DATA_TYPE,
+        ],
+        name: Optional[str] = None,
+    ):
+        self.ordered_upstreams = upstreams
+        super().__init__(*upstreams, name=name)
+
+    async def execute(
+        self,
+        input: SingleEntityBusinessLogicRequest[
+            REQUEST_ENTITY,
+            MODEL_OUTPUT_DATA_TYPE,
+        ],
+        **kwargs,
+    ) -> SingleEntityBusinessLogicResponse[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY]:
+        argument = input
+        for (pipeline_index, upstream) in enumerate(self.ordered_upstreams):
+            old_output = str(argument.model_output)
+
+            output = await upstream.execute(argument, **kwargs)
+            extracted_events: List[
+                BusinessLogicEvent
+            ] = self.extract_business_logic_events(
+                input.identifier,
+                str(output),
+                old_output,
+                pipeline_index,
+                upstream.name,
+                argument.request.request_id,
+            )
+
+            def log_events(
+                extracted_events: List[BusinessLogicEvent] = extracted_events,
+            ):
+                return extracted_events
+
+            event_logger.log_events(log_events)  # type: ignore
+
+            argument = SingleEntityBusinessLogicRequest[
+                REQUEST_ENTITY,
+                MODEL_OUTPUT_DATA_TYPE,
+            ](
+                identifier=input.identifier,
+                request=input.request,
+                model_output=output,
+            )
+
+        return SingleEntityBusinessLogicResponse(
+            request=input.request,
+            adjusted_model_output=argument.model_output,
+        )
+
+    def extract_business_logic_events(
+        self,
+        identifier: Identifier,
+        output: str,
+        old_output: str,
+        pipeline_index: int,
+        upstream_name: str,
+        request_id: str,
+    ) -> List[BusinessLogicEvent]:
+        """
+        Extracts the business logic events from the output of a business logic component
+
+        Args:
+            output: The output of a business logic component
+            pipeline_index: The index of the business logic component in the business logic pipeline
+            upstream_name: The name of the business logic component
+            request_id: The request id of the request that the business logic component was called in
+            old_output: The old scores of the candidates that the business logic component was called on
+
+        Returns:
+            The business logic events that were extracted from the output of the business logic component
+        """
+        timestamp = datetime.utcnow()
+        events = [
+            BusinessLogicEvent(
+                request_id=request_id,
+                api_source=request_context.ensure_current_request().url_path,
+                event_timestamp=timestamp,
+                event_data=BusinessLogicEventData(
+                    business_logic_pipeline_order=pipeline_index,
+                    business_logic_name=upstream_name,
+                    old_score=old_output,
+                    new_score=output,
+                    entity_identifier=identifier.identifier,
+                    entity_identifier_type=identifier.identifier_type,
+                ),
+            ),
         ]
 
         return events

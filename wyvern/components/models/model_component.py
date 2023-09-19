@@ -16,6 +16,7 @@ from wyvern.entities.identifier_entities import WyvernEntity
 from wyvern.entities.model_entities import MODEL_INPUT, MODEL_OUTPUT
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.event_logging import event_logger
+from wyvern.wyvern_typing import INPUT_TYPE, REQUEST_ENTITY
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +54,9 @@ class ModelEvent(LoggedEvent[ModelEventData]):
     event_type: EventType = EventType.MODEL
 
 
-class ModelComponent(
+class BaseModelComponent(
     Component[
-        MODEL_INPUT,
+        INPUT_TYPE,
         MODEL_OUTPUT,
     ],
 ):
@@ -96,13 +97,13 @@ class ModelComponent(
         """
         return set()
 
-    async def execute(self, input: MODEL_INPUT, **kwargs) -> MODEL_OUTPUT:
+    async def execute(self, input: INPUT_TYPE, **kwargs) -> MODEL_OUTPUT:
         """
         The model_name and model_score will be automatically logged
         """
         wyvern_request = request_context.ensure_current_request()
         api_source = wyvern_request.url_path
-        request_id = input.request.request_id
+        request_id = self._get_request_id(input)
         model_output = await self.inference(input, **kwargs)
 
         if self.cache_output:
@@ -150,6 +151,18 @@ class ModelComponent(
 
         return model_output
 
+    async def inference(
+        self,
+        input: INPUT_TYPE,
+        **kwargs,
+    ) -> MODEL_OUTPUT:
+        raise NotImplementedError
+
+    def _get_request_id(self, input: INPUT_TYPE) -> Optional[str]:
+        raise NotImplementedError
+
+
+class MultiEntityModelComponent(BaseModelComponent[MODEL_INPUT, MODEL_OUTPUT]):
     async def batch_inference(
         self,
         request: BaseWyvernRequest,
@@ -204,3 +217,17 @@ class ModelComponent(
             data=output_data,
             model_name=self.name,
         )
+
+    def _get_request_id(self, input: MODEL_INPUT) -> Optional[str]:
+        return input.request.request_id
+
+
+ModelComponent = MultiEntityModelComponent
+
+
+class SingleEntityModelComponent(BaseModelComponent[REQUEST_ENTITY, MODEL_OUTPUT]):
+    async def inference(self, input: REQUEST_ENTITY, **kwargs) -> MODEL_OUTPUT:
+        raise NotImplementedError
+
+    def _get_request_id(self, input: REQUEST_ENTITY) -> Optional[str]:
+        return input.request_id

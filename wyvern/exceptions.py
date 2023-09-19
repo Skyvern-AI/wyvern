@@ -158,3 +158,7 @@ class EntityColumnMissingError(WyvernError):
 
 class MissingModelChainOutputError(WyvernError):
     message = "Model chain output is missing"
+
+
+class MissingModeloutputError(WyvernError):
+    message = "Identifier is missing in the model output"
