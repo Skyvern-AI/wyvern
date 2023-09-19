@@ -67,7 +67,7 @@ class BusinessLogicRequest(
 
 class SingleEntityBusinessLogicRequest(
     GenericModel,
-    Generic[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
+    Generic[REQUEST_ENTITY, MODEL_OUTPUT_DATA_TYPE],
 ):
     """
     A request to the business logic layer to perform business logic on a single candidate
@@ -134,12 +134,12 @@ class BusinessLogicComponent(
 class SingleEntityBusinessLogicComponent(
     Component[
         SingleEntityBusinessLogicRequest[
-            MODEL_OUTPUT_DATA_TYPE,
             REQUEST_ENTITY,
+            MODEL_OUTPUT_DATA_TYPE,
         ],
         MODEL_OUTPUT_DATA_TYPE,
     ],
-    Generic[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY],
+    Generic[REQUEST_ENTITY, MODEL_OUTPUT_DATA_TYPE],
 ):
     """
     A component that performs business logic on an entity with a set of candidates
@@ -282,8 +282,8 @@ class BusinessLogicPipeline(
 class SingleEntityBusinessLogicPipeline(
     Component[
         SingleEntityBusinessLogicRequest[
-            MODEL_OUTPUT_DATA_TYPE,
             REQUEST_ENTITY,
+            MODEL_OUTPUT_DATA_TYPE,
         ],
         SingleEntityBusinessLogicResponse[
             MODEL_OUTPUT_DATA_TYPE,
@@ -295,8 +295,8 @@ class SingleEntityBusinessLogicPipeline(
     def __init__(
         self,
         *upstreams: SingleEntityBusinessLogicComponent[
-            MODEL_OUTPUT_DATA_TYPE,
             REQUEST_ENTITY,
+            MODEL_OUTPUT_DATA_TYPE,
         ],
         name: Optional[str] = None,
     ):
@@ -306,8 +306,8 @@ class SingleEntityBusinessLogicPipeline(
     async def execute(
         self,
         input: SingleEntityBusinessLogicRequest[
-            MODEL_OUTPUT_DATA_TYPE,
             REQUEST_ENTITY,
+            MODEL_OUTPUT_DATA_TYPE,
         ],
         **kwargs,
     ) -> SingleEntityBusinessLogicResponse[MODEL_OUTPUT_DATA_TYPE, REQUEST_ENTITY]:
@@ -335,8 +335,8 @@ class SingleEntityBusinessLogicPipeline(
             event_logger.log_events(log_events)  # type: ignore
 
             argument = SingleEntityBusinessLogicRequest[
-                MODEL_OUTPUT_DATA_TYPE,
                 REQUEST_ENTITY,
+                MODEL_OUTPUT_DATA_TYPE,
             ](
                 identifier=input.identifier,
                 request=input.request,

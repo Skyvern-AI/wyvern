@@ -72,13 +72,13 @@ class SingleEntityPipeline(
         ] = output.data.get(identifier)
 
         business_logic_input = SingleEntityBusinessLogicRequest[
+            REQUEST_ENTITY,
             Union[
                 float,
                 str,
                 List[float],
                 Dict[str, Optional[Union[float, str, list[float]]]],
             ],
-            REQUEST_ENTITY,
         ](
             identifier=identifier,
             request=input,

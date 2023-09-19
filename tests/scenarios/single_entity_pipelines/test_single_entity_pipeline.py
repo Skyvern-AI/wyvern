@@ -90,11 +90,11 @@ fraud_model = SingleEntityModelChain[FraudRequest, ModelOutput[float]](
 
 
 class FraudBusinessLogicComponent(
-    SingleEntityBusinessLogicComponent[float, FraudRequest],
+    SingleEntityBusinessLogicComponent[FraudRequest, float],
 ):
     async def execute(
         self,
-        input: SingleEntityBusinessLogicRequest[float, FraudRequest],
+        input: SingleEntityBusinessLogicRequest[FraudRequest, float],
         **kwargs,
     ) -> float:
         if input.request.seller.identifier.identifier == "test_seller_new":
