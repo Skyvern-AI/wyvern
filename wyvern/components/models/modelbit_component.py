@@ -2,7 +2,7 @@
 import asyncio
 import logging
 from functools import cached_property
-from typing import Any, Dict, List, Optional, Set, Tuple, TypeAlias, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, TypeAlias, Union, final
 
 from wyvern.components.models.model_component import (
     BaseModelComponent,
@@ -178,6 +178,7 @@ class SingleEntityModelbitComponent(
     ModelbitMixin[REQUEST_ENTITY, MODEL_OUTPUT],
     SingleEntityModelComponent[REQUEST_ENTITY, MODEL_OUTPUT],
 ):
+    @final
     async def build_requests(
         self,
         input: REQUEST_ENTITY,
