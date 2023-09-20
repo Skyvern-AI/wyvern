@@ -41,23 +41,23 @@ class RankingRequest(
 
     Attributes:
         query: the query entity
-        candidates: the list of candidate entities
+        entities: the list of entities to rank
     """
 
     query: QueryEntity
-    candidates: List[WYVERN_ENTITY]
+    entities: List[WYVERN_ENTITY]
 
 
-class ResponseCandidate(BaseModel):
+class ResponseEntity(BaseModel):
     """
-    This is the response candidate.
+    This is the response entity.
 
     Attributes:
-        candidate_id: the identifier of the candidate
-        ranked_score: the ranked score of the candidate
+        entity_id: the identifier of the entity
+        ranked_score: the ranked score of the entity
     """
 
-    candidate_id: str
+    entity_id: str
     ranked_score: float
 
 
@@ -66,11 +66,11 @@ class RankingResponse(BaseModel):
     This is the response for the ranking pipeline.
 
     Attributes:
-        ranked_candidates: the list of ranked candidates
+        ranked_entities: the list of ranked entities
         events: the list of logged events
     """
 
-    ranked_candidates: List[ResponseCandidate]
+    ranked_entities: List[ResponseEntity]
     events: Optional[List[LoggedEvent[Any]]]
 
 
@@ -128,7 +128,7 @@ class RankingPipeline(
         This is the ranking model.
 
         The model input should be a subclass of ModelInput.
-        Its output should be scored candidates
+        Its output should be scored entities
         """
         raise NotImplementedError
 
@@ -150,33 +150,33 @@ class RankingPipeline(
         input: RankingRequest[WYVERN_ENTITY],
         **kwargs,
     ) -> RankingResponse:
-        original_candidates: List[ScoredCandidate] = [
+        entities: List[ScoredCandidate] = [
             ScoredCandidate(
-                entity=candidate,
+                entity=entity,
                 score=i,
             )
-            for i, candidate in enumerate(input.candidates)
+            for i, entity in enumerate(input.entities)
         ]
         candidate_logging_request = CandidateEventLoggingRequest[
             WYVERN_ENTITY,
             RankingRequest[WYVERN_ENTITY],
         ](
             request=input,
-            scored_candidates=original_candidates,
+            scored_candidates=entities,
         )
         await self.candidate_logging_component.execute(candidate_logging_request)
 
-        ranked_candidates = await self.rank_candidates(input)
+        if not self.bypass_ranking(input):
+            entities = await self.rank_entities(input)
 
         pagination_request = PaginationRequest[ScoredCandidate[WYVERN_ENTITY]](
             pagination_fields=input,
-            entities=ranked_candidates,
+            entities=entities,
         )
         paginated_candidates = await self.pagination_component.execute(
             pagination_request,
         )
 
-        # TODO (suchintan): This should be automatic  -- add this to the pipeline abstraction
         impression_logging_request = ImpressionEventLoggingRequest[
             WYVERN_ENTITY,
             RankingRequest[WYVERN_ENTITY],
@@ -186,31 +186,31 @@ class RankingPipeline(
         )
         await self.impression_logging_component.execute(impression_logging_request)
 
-        response_ranked_candidates = [
-            ResponseCandidate(
-                candidate_id=candidate.entity.identifier.identifier,
+        response_ranked_entities = [
+            ResponseEntity(
+                entity_id=candidate.entity.identifier.identifier,
                 ranked_score=candidate.score,
             )
             for candidate in paginated_candidates
         ]
 
         response = RankingResponse(
-            ranked_candidates=response_ranked_candidates,
+            ranked_entities=response_ranked_entities,
             events=event_logger.get_logged_events() if input.include_events else None,
         )
 
         return response
 
-    async def rank_candidates(
+    async def rank_entities(
         self,
         request: RankingRequest[WYVERN_ENTITY],
     ) -> List[ScoredCandidate[WYVERN_ENTITY]]:
         """
-        This function ranks the candidates.
+        This function ranks the entities.
 
-        1. It first calls the ranking model to get the model scores for the candidates.
+        1. It first calls the ranking model to get the model scores for the entities.
         2. It then calls the business logic pipeline to adjust the model scores.
-        3. It returns the adjusted candidates.
+        3. It returns the entities with adjusted rank score.
 
         Args:
             request: the ranking request
@@ -220,7 +220,7 @@ class RankingPipeline(
         """
         model_input = ModelInput[WYVERN_ENTITY, RankingRequest[WYVERN_ENTITY]](
             request=request,
-            entities=request.candidates,
+            entities=request.entities,
         )
         model_outputs = await self.ranking_model.execute(model_input)
 
@@ -231,7 +231,7 @@ class RankingPipeline(
                     model_outputs.data.get(candidate.identifier) or 0
                 ),  # TODO (shu): what to do if model score is None?
             )
-            for i, candidate in enumerate(request.candidates)
+            for i, candidate in enumerate(request.entities)
         ]
 
         business_logic_request = BusinessLogicRequest[
@@ -247,3 +247,6 @@ class RankingPipeline(
             business_logic_request,
         )
         return business_logic_response.adjusted_candidates
+
+    def bypass_ranking(self, request: RankingRequest[WYVERN_ENTITY]) -> bool:
+        return False
