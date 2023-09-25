@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Dict, Generic, List, Optional, TypeVar, Union
+from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
 
 from pydantic.generics import GenericModel
 
@@ -13,7 +13,7 @@ MODEL_OUTPUT_DATA_TYPE = TypeVar(
         float,
         str,
         List[float],
-        Dict[str, Optional[Union[float, str, list[float]]]],
+        Dict[str, Any],
     ],
 )
 """

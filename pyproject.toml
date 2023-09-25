@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wyvern-ai"
-version = "0.0.18-beta7"
+version = "0.0.18-beta8"
 description = ""
 authors = ["Wyvern AI <info@wyvern.ai>"]
 readme = "README.md"
