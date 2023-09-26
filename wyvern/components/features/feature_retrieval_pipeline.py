@@ -6,6 +6,7 @@ from typing import Generic, List, Optional, Set, Type
 from ddtrace import tracer
 from pydantic.generics import GenericModel
 
+from wyvern import request_context
 from wyvern.components.component import Component
 from wyvern.components.features.feature_logger import (
     FeatureEventLoggingComponent,
@@ -126,12 +127,15 @@ class FeatureRetrievalPipeline(
         # Or the client wants to evaluate the feature
         # TODO (suchintan): We don't support "chained" real-time features yet.. hopefully soon
         real_time_features = self._generate_real_time_features(input)
-
+        real_time_feature_component_names = {
+            real_time_feature_component.name
+            for real_time_feature_component in real_time_features
+        }
         # Figure out which features are real-time features based on the definitions within the real-time feature object
         features_requested_by_real_time_features = {
             feature_name
-            for real_time_feature in real_time_features
-            for feature_name in real_time_feature.output_feature_names
+            for feature_name in input.requested_feature_names
+            if feature_name.split(":")[0] in real_time_feature_component_names
         }
 
         # Figure out which features come from the feature store
@@ -156,6 +160,8 @@ class FeatureRetrievalPipeline(
                 **kwargs,
             )
         )
+        current_request = request_context.ensure_current_request()
+        current_request.feature_map = feature_retrieval_response
 
         """
         TODO (suchintan):

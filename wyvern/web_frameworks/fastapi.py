@@ -2,7 +2,7 @@
 import logging
 import time
 from contextlib import asynccontextmanager
-from typing import Dict, Type
+from typing import Dict, Type, Union
 
 import uvicorn
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
@@ -101,7 +101,7 @@ class WyvernFastapi:
 
     async def register_route(
         self,
-        route_component: Type[APIRouteComponent],
+        route_component: Union[Type[APIRouteComponent], APIRouteComponent],
     ) -> None:
         """
         Register a route component. This will register the route with FastAPI and also initialize the route component.
@@ -112,10 +112,12 @@ class WyvernFastapi:
         Raises:
             WyvernRouteRegistrationError: If the route component is not a subclass of APIRouteComponent.
         """
-        if not issubclass(route_component, APIRouteComponent):
+        if isinstance(route_component, APIRouteComponent):
+            root_component = route_component
+        elif not issubclass(route_component, APIRouteComponent):
             raise WyvernRouteRegistrationError(component=route_component)
-
-        root_component = route_component()
+        else:
+            root_component = route_component()
         await root_component.initialize_wrapper()
         path = _massage_path(f"/api/{root_component.API_VERSION}/{root_component.PATH}")
 
