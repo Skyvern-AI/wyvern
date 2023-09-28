@@ -19,7 +19,7 @@ from wyvern.wyvern_typing import REQUEST_ENTITY
 
 
 class SingleEntityPipelineResponse(GenericModel, Generic[MODEL_OUTPUT_DATA_TYPE]):
-    data: MODEL_OUTPUT_DATA_TYPE
+    data: Optional[MODEL_OUTPUT_DATA_TYPE] = None
     events: Optional[List[LoggedEvent[Any]]] = None
 
 
@@ -91,7 +91,7 @@ class SingleEntityPipeline(
     def generate_response(
         self,
         input: REQUEST_ENTITY,
-        pipeline_output: MODEL_OUTPUT_DATA_TYPE,
+        pipeline_output: Optional[MODEL_OUTPUT_DATA_TYPE],
     ) -> SingleEntityPipelineResponse[MODEL_OUTPUT_DATA_TYPE]:
         return SingleEntityPipelineResponse[MODEL_OUTPUT_DATA_TYPE](
             data=pipeline_output,

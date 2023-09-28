@@ -79,7 +79,7 @@ class SingleEntityBusinessLogicRequest(
 
     identifier: Identifier
     request: REQUEST_ENTITY
-    model_output: MODEL_OUTPUT_DATA_TYPE
+    model_output: Optional[MODEL_OUTPUT_DATA_TYPE] = None
 
 
 # TODO (suchintan): Possibly delete this now that events are gone
@@ -112,7 +112,7 @@ class SingleEntityBusinessLogicResponse(
     """
 
     request: REQUEST_ENTITY
-    adjusted_output: MODEL_OUTPUT_DATA_TYPE
+    adjusted_output: Optional[MODEL_OUTPUT_DATA_TYPE] = None
 
 
 class BusinessLogicComponent(
