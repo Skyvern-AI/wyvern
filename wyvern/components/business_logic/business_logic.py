@@ -112,7 +112,7 @@ class SingleEntityBusinessLogicResponse(
     """
 
     request: REQUEST_ENTITY
-    adjusted_output: MODEL_OUTPUT_DATA_TYPE
+    adjusted_output: Optional[MODEL_OUTPUT_DATA_TYPE] = None
 
 
 class BusinessLogicComponent(
