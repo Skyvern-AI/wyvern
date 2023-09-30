@@ -21,6 +21,7 @@ class WyvernError(Exception):
         **kwargs,
     ) -> None:
         self.error_code = error_code
+        self.kwargs = kwargs
         if message:
             self.message = message
         try:
