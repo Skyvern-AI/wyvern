@@ -61,6 +61,7 @@ class WyvernRequest:
     ]
 
     request_id: Optional[str] = None
+    run_id: int = 0
 
     # TODO: params
 
@@ -69,6 +70,7 @@ class WyvernRequest:
         cls,
         json: BaseModel,
         req: fastapi.Request,
+        run_id: int = 0,
         request_id: Optional[str] = None,
     ) -> WyvernRequest:
         """
@@ -93,6 +95,7 @@ class WyvernRequest:
             feature_map=FeatureMap(feature_map={}),
             model_output_map={},
             request_id=request_id,
+            run_id=run_id,
         )
 
     def cache_model_output(
