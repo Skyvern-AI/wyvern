@@ -112,6 +112,7 @@ class BaseModelComponent(
         def events_generator() -> List[ModelEvent]:
             timestamp = datetime.utcnow()
             all_events: List[ModelEvent] = []
+            model_name = model_output.model_name or self.name or self.__class__.__name__
             for identifier, output in model_output.data.items():
                 if isinstance(output, dict):
                     for key, value in output.items():
@@ -121,8 +122,7 @@ class BaseModelComponent(
                                 api_source=api_source,
                                 event_timestamp=timestamp,
                                 event_data=ModelEventData(
-                                    model_name=model_output.model_name
-                                    or self.__class__.__name__,
+                                    model_name=model_name,
                                     model_output=str(value),
                                     model_key=key,
                                     entity_identifier=identifier.identifier,
@@ -137,8 +137,7 @@ class BaseModelComponent(
                             api_source=api_source,
                             event_timestamp=timestamp,
                             event_data=ModelEventData(
-                                model_name=model_output.model_name
-                                or self.__class__.__name__,
+                                model_name=model_name,
                                 model_output=str(output),
                                 entity_identifier=identifier.identifier,
                                 entity_identifier_type=identifier.identifier_type,
