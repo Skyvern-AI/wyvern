@@ -112,7 +112,7 @@ class BaseModelComponent(
         def events_generator() -> List[ModelEvent]:
             timestamp = datetime.utcnow()
             all_events: List[ModelEvent] = []
-            model_name = model_output.model_name or self.name or self.__class__.__name__
+            model_name = self.name or self.__class__.__name__
             for identifier, output in model_output.data.items():
                 if isinstance(output, dict):
                     for key, value in output.items():
