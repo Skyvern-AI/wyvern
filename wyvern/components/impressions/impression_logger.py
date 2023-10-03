@@ -86,13 +86,16 @@ class ImpressionEventLoggingComponent(
         current_span = tracer.current_span()
         if current_span:
             current_span.set_tag("impression_size", len(input.scored_impressions))
-        url_path = request_context.ensure_current_request().url_path
+        wyvern_request = request_context.ensure_current_request()
+        url_path = wyvern_request.url_path
+        run_id = wyvern_request.run_id
 
         def impression_events_generator() -> List[ImpressionEvent]:
             timestamp = datetime.utcnow()
             impression_events = [
                 ImpressionEvent(
                     request_id=input.request.request_id,
+                    run_id=run_id,
                     api_source=url_path,
                     event_timestamp=timestamp,
                     event_data=ImpressionEventData(

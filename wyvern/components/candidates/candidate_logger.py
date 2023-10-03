@@ -57,13 +57,16 @@ class CandidateEventLoggingComponent(
         current_span = tracer.current_span()
         if current_span:
             current_span.set_tag("candidate_size", len(input.scored_candidates))
-        url_path = request_context.ensure_current_request().url_path
+        wyvern_request = request_context.ensure_current_request()
+        url_path = wyvern_request.url_path
+        run_id = wyvern_request.run_id
 
         def candidate_events_generator() -> List[CandidateEvent]:
             timestamp = datetime.utcnow()
             candidate_events = [
                 CandidateEvent(
                     request_id=input.request.request_id,
+                    run_id=run_id,
                     api_source=url_path,
                     event_timestamp=timestamp,
                     event_data=CandidateEventData(

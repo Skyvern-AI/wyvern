@@ -157,6 +157,7 @@ class WyvernFastapi:
                 request_id = None
                 if isinstance(data, BaseWyvernRequest):
                     request_id = data.request_id
+
                 wyvern_req = WyvernRequest.parse_fastapi_request(
                     json=data,
                     req=fastapi_request,

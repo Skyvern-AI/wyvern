@@ -64,7 +64,9 @@ class FeatureEventLoggingComponent(
         self, input: FeatureEventLoggingRequest[REQUEST_ENTITY], **kwargs
     ) -> None:
         """Logs feature events."""
-        url_path = request_context.ensure_current_request().url_path
+        wyvern_request = request_context.ensure_current_request()
+        url_path = wyvern_request.url_path
+        run_id = wyvern_request.run_id
 
         def feature_event_generator():
             """Generates feature events. This is a generator function that's called by the event logger. It's never called directly.
@@ -76,6 +78,7 @@ class FeatureEventLoggingComponent(
             return [
                 FeatureEvent(
                     request_id=input.request.request_id,
+                    run_id=run_id,
                     api_source=url_path,
                     event_timestamp=timestamp,
                     event_data=FeatureLogEventData(

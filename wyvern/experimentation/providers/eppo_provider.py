@@ -90,10 +90,12 @@ class EppoExperimentationClient(BaseExperimentationProvider):
             timestamp = datetime.utcnow()
             request_id = request.request_id
             api_source = request.url_path
+            run_id = request.run_id
 
             return [
                 ExperimentationEvent(
                     request_id=request_id,
+                    run_id=run_id,
                     api_source=api_source,
                     event_timestamp=timestamp,
                     event_data=ExperimentationEventData(
