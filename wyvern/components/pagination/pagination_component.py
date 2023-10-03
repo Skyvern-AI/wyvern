@@ -51,6 +51,10 @@ class PaginationComponent(Component[PaginationRequest[T], List[T]]):
         Returns:
             The paginated entities.
         """
+        if len(input.entities) == 0:
+            logger.info("Found no entities to paginate, skipping pagination")
+            return []
+
         user_page = input.pagination_fields.user_page
         candidate_page = input.pagination_fields.candidate_page
         candidate_page_size = input.pagination_fields.candidate_page_size
