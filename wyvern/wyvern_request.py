@@ -61,7 +61,7 @@ class WyvernRequest:
     ]
 
     request_id: Optional[str] = None
-    run_id: int = 0
+    run_id: str = "0"
 
     # TODO: params
 
@@ -70,7 +70,7 @@ class WyvernRequest:
         cls,
         json: BaseModel,
         req: fastapi.Request,
-        run_id: int = 0,
+        run_id: str = "0",
         request_id: Optional[str] = None,
     ) -> WyvernRequest:
         """

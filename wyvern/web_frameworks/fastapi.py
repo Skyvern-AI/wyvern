@@ -162,7 +162,7 @@ class WyvernFastapi:
                     json=data,
                     req=fastapi_request,
                     request_id=request_id,
-                    run_id=x_wyvern_run_id,
+                    run_id=str(x_wyvern_run_id),
                 )
                 request_context.set(wyvern_req)
 
