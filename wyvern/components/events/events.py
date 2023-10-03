@@ -3,10 +3,19 @@ from datetime import datetime
 from enum import Enum
 from typing import Generic, Optional, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic.generics import GenericModel
 
+from wyvern import request_context
+
 EVENT_DATA = TypeVar("EVENT_DATA", bound=BaseModel)
+
+
+def generate_run_id() -> str:
+    curr_wyvern_request = request_context.current()
+    if curr_wyvern_request is None:
+        return str(0)
+    return str(curr_wyvern_request.run_id)
 
 
 class EventType(str, Enum):
@@ -37,6 +46,7 @@ class LoggedEvent(GenericModel, Generic[EVENT_DATA]):
     event_timestamp: Optional[datetime]
     event_type: EventType
     event_data: EVENT_DATA
+    run_id: str = Field(default_factory=generate_run_id)
 
 
 class EntityEventData(BaseModel):

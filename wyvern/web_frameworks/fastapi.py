@@ -2,10 +2,10 @@
 import logging
 import time
 from contextlib import asynccontextmanager
-from typing import Dict, Type, Union
+from typing import Annotated, Dict, Type, Union
 
 import uvicorn
-from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
@@ -131,6 +131,10 @@ class WyvernFastapi:
             data: root_component.REQUEST_SCHEMA_CLASS,  # type: ignore
             fastapi_request: Request,
             background_tasks: BackgroundTasks,
+            x_wyvern_run_id: Annotated[
+                int,
+                Header(),
+            ] = 0,
         ) -> root_component.RESPONSE_SCHEMA_CLASS:  # type: ignore
             """
             The main entrypoint for the route component. This will parse the request payload, set the WyvernRequest in
@@ -153,10 +157,12 @@ class WyvernFastapi:
                 request_id = None
                 if isinstance(data, BaseWyvernRequest):
                     request_id = data.request_id
+
                 wyvern_req = WyvernRequest.parse_fastapi_request(
                     json=data,
                     req=fastapi_request,
                     request_id=request_id,
+                    run_id=str(x_wyvern_run_id),
                 )
                 request_context.set(wyvern_req)
 

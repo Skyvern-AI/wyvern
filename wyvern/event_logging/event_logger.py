@@ -50,12 +50,14 @@ def log_custom_events(events: List[ENTITY_EVENT_DATA_TYPE]) -> None:
     request = request_context.ensure_current_request()
     api_source = request.url_path
     request_id = request.request_id
+    run_id = request.run_id
 
     def event_generator() -> List[LoggedEvent[Any]]:
         timestamp = datetime.utcnow()
         return [
             CustomEvent(
                 request_id=request_id,
+                run_id=run_id,
                 api_source=api_source,
                 event_timestamp=timestamp,
                 event_data=event,

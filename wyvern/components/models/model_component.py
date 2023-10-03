@@ -105,6 +105,7 @@ class BaseModelComponent(
         api_source = wyvern_request.url_path
         request_id = self._get_request_id(input)
         model_output = await self.inference(input, **kwargs)
+        run_id = wyvern_request.run_id
 
         if self.cache_output:
             wyvern_request.cache_model_output(self.name, model_output.data)
@@ -119,6 +120,7 @@ class BaseModelComponent(
                         all_events.append(
                             ModelEvent(
                                 request_id=request_id,
+                                run_id=run_id,
                                 api_source=api_source,
                                 event_timestamp=timestamp,
                                 event_data=ModelEventData(
@@ -134,6 +136,7 @@ class BaseModelComponent(
                     all_events.append(
                         ModelEvent(
                             request_id=request_id,
+                            run_id=run_id,
                             api_source=api_source,
                             event_timestamp=timestamp,
                             event_data=ModelEventData(
