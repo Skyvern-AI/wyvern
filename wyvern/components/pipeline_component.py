@@ -2,6 +2,8 @@
 from functools import cached_property
 from typing import Optional, Set, Type
 
+from ddtrace import tracer
+
 from wyvern import request_context
 from wyvern.components.api_route_component import APIRouteComponent
 from wyvern.components.component import Component
@@ -58,6 +60,7 @@ class PipelineComponent(APIRouteComponent[REQUEST_ENTITY, RESPONSE_SCHEMA]):
             for feature_name in component.manifest_feature_names:
                 self.feature_names.add(feature_name)
 
+    @tracer.wrap(name="PipelineComponent.retrieve_features")
     async def retrieve_features(self, request: REQUEST_ENTITY) -> None:
         """
         TODO shu: it doesn't support feature overrides. Write code to support that
@@ -67,7 +70,6 @@ class PipelineComponent(APIRouteComponent[REQUEST_ENTITY, RESPONSE_SCHEMA]):
             requested_feature_names=self.feature_names,
             feature_overrides=self.realtime_features_overrides,
         )
-
         feature_map = await self.feature_retrieval_pipeline.execute(
             feature_request,
         )
