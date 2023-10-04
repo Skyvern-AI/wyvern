@@ -160,7 +160,8 @@ class FeatureRetrievalPipeline(
                 **kwargs,
             )
         )
-
+        current_request = request_context.ensure_current_request()
+        current_request.feature_map = feature_retrieval_response
         """
         TODO (suchintan):
         1. Figure out a set of: (Candidate entities), (Non-candidate entities), (Request)
@@ -325,7 +326,6 @@ class FeatureRetrievalPipeline(
                 real_time_feature_responses,
             )
 
-        current_request = request_context.ensure_current_request()
         current_request.feature_map = feature_responses
         current_request.feature_map_polars = FeatureMapPolars(
             feature_map=feature_responses,
