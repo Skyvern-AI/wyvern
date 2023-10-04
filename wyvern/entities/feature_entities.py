@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import logging
 from typing import Dict, List, Optional
 
 import polars as pl
@@ -8,6 +9,8 @@ from pydantic.main import BaseModel
 
 from wyvern.entities.identifier import Identifier
 from wyvern.wyvern_typing import WyvernFeature
+
+logger = logging.getLogger(__name__)
 
 
 class FeatureData(BaseModel, frozen=True):
@@ -80,6 +83,12 @@ class FeatureMapPolars:
         identifier_list: List[str],
         feature_names: List[str],
     ) -> pl.DataFrame:
+        if identifier_type not in self.feature_map:
+            logger.warning(
+                f"Identifier type {identifier_type} not found in feature map. "
+                f"Current identifier types: {self.feature_map.keys()}",
+            )
+            return pl.DataFrame()
         df = self.feature_map[identifier_type]
         # Filter the dataframe by both identifier_type and identifier
         df = df.filter(pl.col("identifier").is_in(identifier_list))
