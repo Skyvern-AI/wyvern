@@ -8,6 +8,8 @@ from functools import cached_property
 from typing import Dict, Generic, List, Optional, Set, Union
 from uuid import uuid4
 
+import polars as pl
+
 from wyvern import request_context
 from wyvern.entities.identifier import Identifier
 from wyvern.wyvern_typing import INPUT_TYPE, OUTPUT_TYPE, WyvernFeature
@@ -141,6 +143,19 @@ class Component(Generic[INPUT_TYPE, OUTPUT_TYPE]):
             to make this model evaluation possible
         """
         return set()
+
+    def get_features(
+        self,
+        identifier_type: str,
+        identifier_list: List[str],
+        feature_names: List[str],
+    ) -> pl.DataFrame:
+        current_request = request_context.ensure_current_request()
+        return current_request.feature_map_polars.get_features(
+            identifier_type,
+            identifier_list,
+            feature_names,
+        )
 
     def get_feature(
         self,

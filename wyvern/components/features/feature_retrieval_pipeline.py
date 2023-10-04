@@ -22,7 +22,7 @@ from wyvern.components.features.realtime_features_component import (
     RealtimeFeatureRequest,
 )
 from wyvern.entities.candidate_entities import CandidateSetEntity
-from wyvern.entities.feature_entities import FeatureData, FeatureMap
+from wyvern.entities.feature_entities import FeatureData, FeatureMap, FeatureMapPolars
 from wyvern.entities.feature_entity_helpers import feature_map_create, feature_map_join
 from wyvern.entities.identifier_entities import WyvernEntity
 from wyvern.wyvern_typing import REQUEST_ENTITY
@@ -160,8 +160,6 @@ class FeatureRetrievalPipeline(
                 **kwargs,
             )
         )
-        current_request = request_context.ensure_current_request()
-        current_request.feature_map = feature_retrieval_response
 
         """
         TODO (suchintan):
@@ -327,4 +325,9 @@ class FeatureRetrievalPipeline(
                 real_time_feature_responses,
             )
 
+        current_request = request_context.ensure_current_request()
+        current_request.feature_map = feature_responses
+        current_request.feature_map_polars = FeatureMapPolars(
+            feature_map=feature_responses,
+        )
         return feature_responses

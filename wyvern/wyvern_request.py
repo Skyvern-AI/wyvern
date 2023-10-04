@@ -9,7 +9,7 @@ import fastapi
 from pydantic import BaseModel
 
 from wyvern.components.events.events import LoggedEvent
-from wyvern.entities.feature_entities import FeatureMap
+from wyvern.entities.feature_entities import FeatureMap, FeatureMapPolars
 from wyvern.entities.identifier import Identifier
 
 
@@ -44,6 +44,7 @@ class WyvernRequest:
     events: List[Callable[[], List[LoggedEvent[Any]]]]
 
     feature_map: FeatureMap
+    feature_map_polars: FeatureMapPolars
 
     # the key is the name of the model and the value is a map of the identifier to the model score
     model_output_map: Dict[
@@ -93,6 +94,7 @@ class WyvernRequest:
             entity_store={},
             events=[],
             feature_map=FeatureMap(feature_map={}),
+            feature_map_polars=FeatureMapPolars(feature_map=FeatureMap(feature_map={})),
             model_output_map={},
             request_id=request_id,
             run_id=run_id,

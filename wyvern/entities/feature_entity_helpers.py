@@ -2,7 +2,7 @@
 from typing import Dict, Optional
 
 from wyvern.entities.feature_entities import FeatureData, FeatureMap
-from wyvern.entities.identifier import Identifier
+from wyvern.entities.identifier import CompositeIdentifier, Identifier
 
 
 def feature_map_join(*feature_maps: FeatureMap) -> FeatureMap:
@@ -22,12 +22,16 @@ def feature_map_create(*feature_data: Optional[FeatureData]) -> FeatureMap:
     for data in feature_data:
         if data is None:
             continue
-
-        if data.identifier in feature_map:
+        identifier = (
+            data.identifier.primary_identifier
+            if isinstance(data.identifier, CompositeIdentifier)
+            else data.identifier
+        )
+        if identifier in feature_map:
             # print(f"Duplicate keys found in feature map {data}")
             # TODO (suchintan): handle duplicate keys at this stage
-            feature_map[data.identifier].features.update(data.features)
+            feature_map[identifier].features.update(data.features)
         else:
-            feature_map[data.identifier] = data
+            feature_map[identifier] = data
 
     return FeatureMap(feature_map=feature_map)
