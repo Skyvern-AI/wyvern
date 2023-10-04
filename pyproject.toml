@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wyvern-ai"
-version = "0.0.23"
+version = "0.0.24"
 description = ""
 authors = ["Wyvern AI <info@wyvern.ai>"]
 readme = "README.md"
@@ -18,7 +18,7 @@ pyyaml = "^6.0"
 pyhumps = "^3.8.0"
 python-dotenv = "^1.0.0"
 pandas = "^1.5,<2.0"
-feast = {extras = ["redis", "snowflake"], version = "^0.31.1"}
+feast = {version = "^0.34.1", extras = ["redis", "snowflake"]}
 snowflake-connector-python = "^3.1"
 boto3 = "^1.26.146"
 ddtrace = "^1.14.0"
