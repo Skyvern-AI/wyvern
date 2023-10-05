@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Generic, List, Optional
+from typing import Any, Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel
 
@@ -8,6 +8,7 @@ from wyvern.components.business_logic.business_logic import (
     BusinessLogicRequest,
 )
 from wyvern.components.candidates.candidate_logger import CandidateEventLoggingComponent
+from wyvern.components.component import Component
 from wyvern.components.events.events import LoggedEvent
 from wyvern.components.impressions.impression_logger import (
     ImpressionEventLoggingComponent,
@@ -69,9 +70,12 @@ class RankingResponse(BaseModel):
     events: Optional[List[LoggedEvent[Any]]]
 
 
+RANKING_REQUEST = TypeVar("RANKING_REQUEST", bound=RankingRequest)
+
+
 class RankingPipeline(
-    PipelineComponent[RankingRequest, RankingResponse],
-    Generic[WYVERN_ENTITY],
+    PipelineComponent[RANKING_REQUEST, RankingResponse],
+    Generic[RANKING_REQUEST, WYVERN_ENTITY],
 ):
     """
     This is the ranking pipeline.
@@ -82,67 +86,47 @@ class RankingPipeline(
 
     PATH: str = "/ranking"
 
-    def __init__(self, name: Optional[str] = None):
+    def __init__(
+        self,
+        *upstreams: Component,
+        model: ModelComponent,
+        business_logic: Optional[BusinessLogicPipeline] = None,
+        name: Optional[str] = None,
+    ):
         self.pagination_component = PaginationComponent[
             ScoredCandidate[WYVERN_ENTITY]
         ]()
-        self.ranking_model = self.get_model()
+        self.ranking_model = model
         self.candidate_logging_component = CandidateEventLoggingComponent[
             WYVERN_ENTITY,
-            RankingRequest[WYVERN_ENTITY],
+            RANKING_REQUEST,
         ]()
         self.impression_logging_component = ImpressionEventLoggingComponent[
             WYVERN_ENTITY,
-            RankingRequest[WYVERN_ENTITY],
+            RANKING_REQUEST,
         ]()
+        if not business_logic:
+            business_logic = BusinessLogicPipeline[WYVERN_ENTITY, RANKING_REQUEST]()
+
+        self.business_logic_pipeline = business_logic
 
         upstream_components = [
+            *upstreams,
             self.pagination_component,
             self.ranking_model,
             self.candidate_logging_component,
             self.impression_logging_component,
+            self.business_logic_pipeline,
         ]
-        self.business_logic_pipeline: BusinessLogicPipeline
-        business_logic = self.get_business_logic()
-        if business_logic:
-            self.business_logic_pipeline = business_logic
-        else:
-            self.business_logic_pipeline = BusinessLogicPipeline[
-                WYVERN_ENTITY,
-                RankingRequest[WYVERN_ENTITY],
-            ]()
-        upstream_components.append(self.business_logic_pipeline)
 
         super().__init__(
             *upstream_components,
             name=name,
         )
 
-    def get_model(self) -> ModelComponent:
-        """
-        This is the ranking model.
-
-        The model input should be a subclass of ModelInput.
-        Its output should be scored candidates
-        """
-        raise NotImplementedError
-
-    def get_business_logic(self) -> Optional[BusinessLogicPipeline]:
-        """
-        This is the business logic pipeline. It is optional. If not provided, the ranking pipeline will not
-        apply any business logic.
-
-        The business logic pipeline should be a subclass of BusinessLogicPipeline. Some examples of business logic
-        for ranking pipeline are:
-        1. Deduplication
-        2. Filtering
-        3. (De)boosting
-        """
-        return None
-
     async def execute(
         self,
-        input: RankingRequest[WYVERN_ENTITY],
+        input: RANKING_REQUEST,
         **kwargs,
     ) -> RankingResponse:
         ranked_candidates = await self.rank_candidates(input)
@@ -158,7 +142,7 @@ class RankingPipeline(
         # TODO (suchintan): This should be automatic  -- add this to the pipeline abstraction
         impression_logging_request = ImpressionEventLoggingRequest[
             WYVERN_ENTITY,
-            RankingRequest[WYVERN_ENTITY],
+            RANKING_REQUEST,
         ](
             scored_impressions=paginated_candidates,
             request=input,
@@ -182,7 +166,7 @@ class RankingPipeline(
 
     async def rank_candidates(
         self,
-        request: RankingRequest[WYVERN_ENTITY],
+        request: RANKING_REQUEST,
     ) -> List[ScoredCandidate[WYVERN_ENTITY]]:
         """
         This function ranks the candidates.
@@ -197,7 +181,7 @@ class RankingPipeline(
         Returns:
             A list of ScoredCandidate
         """
-        model_input = ModelInput[WYVERN_ENTITY, RankingRequest[WYVERN_ENTITY]](
+        model_input = ModelInput[WYVERN_ENTITY, RANKING_REQUEST](
             request=request,
             entities=request.candidates,
         )
@@ -213,10 +197,7 @@ class RankingPipeline(
             for i, candidate in enumerate(request.candidates)
         ]
 
-        business_logic_request = BusinessLogicRequest[
-            WYVERN_ENTITY,
-            RankingRequest[WYVERN_ENTITY],
-        ](
+        business_logic_request = BusinessLogicRequest[WYVERN_ENTITY, RANKING_REQUEST](
             request=request,
             scored_candidates=scored_candidates,
         )
