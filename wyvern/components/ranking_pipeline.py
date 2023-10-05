@@ -54,7 +54,7 @@ class ResponseCandidate(BaseModel):
         ranked_score: the ranked score of the candidate
     """
 
-    candidate_id: str
+    product_id: str
     ranked_score: float
 
 
@@ -67,7 +67,7 @@ class RankingResponse(BaseModel):
         events: the list of logged events
     """
 
-    ranked_candidates: List[ResponseCandidate]
+    ranked_products: List[ResponseCandidate]
     events: Optional[List[LoggedEvent[Any]]]
 
 
@@ -169,14 +169,14 @@ class RankingPipeline(
 
         response_ranked_candidates = [
             ResponseCandidate(
-                candidate_id=candidate.entity.identifier.identifier,
+                product_id=candidate.entity.identifier.identifier,
                 ranked_score=candidate.score,
             )
             for candidate in paginated_candidates
         ]
 
         response = RankingResponse(
-            ranked_candidates=response_ranked_candidates,
+            ranked_products=response_ranked_candidates,
             events=event_logger.get_logged_events() if input.include_events else None,
         )
 
