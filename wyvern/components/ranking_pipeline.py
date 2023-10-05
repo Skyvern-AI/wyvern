@@ -21,7 +21,6 @@ from wyvern.components.pagination.pagination_component import (
 from wyvern.components.pagination.pagination_fields import PaginationFields
 from wyvern.components.pipeline_component import PipelineComponent
 from wyvern.entities.candidate_entities import ScoredCandidate
-from wyvern.entities.identifier_entities import QueryEntity
 from wyvern.entities.model_entities import ModelInput
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.event_logging import event_logger
@@ -41,7 +40,6 @@ class RankingRequest(
         candidates: the list of candidate entities
     """
 
-    query: QueryEntity
     candidates: List[WYVERN_ENTITY]
 
 
