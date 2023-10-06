@@ -82,6 +82,15 @@ class WyvernFastapi:
                 },
             )
 
+        @self.app.exception_handler(ValidationError)
+        async def pydantic_validation_error_handler(
+            request: Request,
+            exc: ValidationError,
+        ):
+            json = await request.json()
+            logger.exception(f"Validation error error={exc} request_payload={json}")
+            raise HTTPException(status_code=422, detail=exc.errors())
+
         @self.app.get("/healthcheck")
         async def healthcheck() -> Dict[str, str]:
             return {"status": "OK"}
@@ -178,12 +187,6 @@ class WyvernFastapi:
 
                 # profiler.stop()
                 # profiler.print(show_all=True)
-            except ValidationError as e:
-                logger.exception(f"Validation error error={e} request_payload={json}")
-                raise HTTPException(status_code=422, detail=e.errors())
-            except Exception as e:
-                logger.exception(f"Unexpected error error={e} request_payload={json}")
-                raise HTTPException(status_code=500, detail=str(e))
             finally:
                 request_context.reset()
             if not output:
