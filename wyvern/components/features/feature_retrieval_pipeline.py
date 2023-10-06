@@ -313,7 +313,7 @@ class FeatureRetrievalPipeline(
             real_time_feature_dfs: List[pl.DataFrame] = [
                 df for df in real_time_feature_dfs_optional if df is not None
             ]
-            real_time_feature_merged_df = None
+            real_time_feature_merged_df = pl.DataFrame()
             if real_time_feature_dfs:
                 real_time_feature_merged_df = pl.concat(
                     real_time_feature_dfs,
@@ -321,7 +321,9 @@ class FeatureRetrievalPipeline(
                 )
 
         with tracer.trace("FeatureRetrievalPipeline.create_feature_response"):
-            if real_time_feature_merged_df:
+            if real_time_feature_merged_df.is_empty():
+                feature_responses = feature_df.df
+            else:
                 await self.feature_logger_component.execute(
                     FeatureEventLoggingRequest(
                         request=input.request,
@@ -333,8 +335,6 @@ class FeatureRetrievalPipeline(
                     on=IDENTIFIER,
                     how="outer",
                 )
-            else:
-                feature_responses = feature_df.df
 
         current_request.feature_df = FeatureDataFrame(df=feature_responses)
         return current_request.feature_df
