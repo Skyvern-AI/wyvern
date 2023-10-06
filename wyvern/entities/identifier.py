@@ -149,5 +149,5 @@ def get_identifier_key(
     identifier is used. This is useful while doing feature retrievals for composite entities.
     """
     if isinstance(identifier, CompositeIdentifier):
-        return f"{identifier.primary_identifier.identifier_type}:{identifier.primary_identifier.identifier}"
-    return f"{identifier.identifier_type}:{identifier.identifier}"
+        return str(identifier.primary_identifier)
+    return str(identifier)

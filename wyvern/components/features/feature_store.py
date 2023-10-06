@@ -131,7 +131,7 @@ class FeatureStoreRetrievalComponent(
         ]
         df_columns.extend(
             [
-                pl.Series(name=feature_name, values=results[i]["values"])
+                pl.Series(name=feature_name, values=results[i + 1]["values"])
                 for i, feature_name in enumerate(feature_names[1:])
             ],
         )
