@@ -72,16 +72,6 @@ class WyvernFastapi:
         self.host = host
         self.port = port
 
-        @self.app.exception_handler(WyvernError)
-        async def wyvern_exception_handler(request: Request, exc: WyvernError):
-            return JSONResponse(
-                status_code=400,
-                content={
-                    "detail": str(exc),
-                    "error_code": exc.error_code,
-                },
-            )
-
         @self.app.get("/healthcheck")
         async def healthcheck() -> Dict[str, str]:
             return {"status": "OK"}
@@ -181,6 +171,15 @@ class WyvernFastapi:
             except ValidationError as e:
                 logger.exception(f"Validation error error={e} request_payload={json}")
                 raise HTTPException(status_code=422, detail=e.errors())
+            except WyvernError as e:
+                logger.warning(f"Wyvern error error={e} request_payload={json}")
+                return JSONResponse(
+                    status_code=400,
+                    content={
+                        "detail": str(e),
+                        "error_code": e.error_code,
+                    },
+                )
             except Exception as e:
                 logger.exception(f"Unexpected error error={e} request_payload={json}")
                 raise HTTPException(status_code=500, detail=str(e))
