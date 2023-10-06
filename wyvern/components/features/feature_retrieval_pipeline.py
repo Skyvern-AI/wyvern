@@ -313,23 +313,28 @@ class FeatureRetrievalPipeline(
             real_time_feature_dfs: List[pl.DataFrame] = [
                 df for df in real_time_feature_dfs_optional if df is not None
             ]
-            real_time_feature_merged_df = pl.concat(
-                real_time_feature_dfs,
-                how="diagonal",
-            )
+            real_time_feature_merged_df = None
+            if real_time_feature_dfs:
+                real_time_feature_merged_df = pl.concat(
+                    real_time_feature_dfs,
+                    how="diagonal",
+                )
 
         with tracer.trace("FeatureRetrievalPipeline.create_feature_response"):
-            await self.feature_logger_component.execute(
-                FeatureEventLoggingRequest(
-                    request=input.request,
-                    feature_df=FeatureDataFrame(df=real_time_feature_merged_df),
-                ),
-            )
-            feature_responses = feature_df.df.join(
-                real_time_feature_merged_df,
-                on=IDENTIFIER,
-                how="outer",
-            )
+            if real_time_feature_merged_df:
+                await self.feature_logger_component.execute(
+                    FeatureEventLoggingRequest(
+                        request=input.request,
+                        feature_df=FeatureDataFrame(df=real_time_feature_merged_df),
+                    ),
+                )
+                feature_responses = feature_df.df.join(
+                    real_time_feature_merged_df,
+                    on=IDENTIFIER,
+                    how="outer",
+                )
+            else:
+                feature_responses = feature_df.df
 
         current_request.feature_df = FeatureDataFrame(df=feature_responses)
         return current_request.feature_df
