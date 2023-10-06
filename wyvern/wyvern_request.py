@@ -9,7 +9,7 @@ import fastapi
 from pydantic import BaseModel
 
 from wyvern.components.events.events import LoggedEvent
-from wyvern.entities.feature_entities import FeatureMap, FeatureMapPolars
+from wyvern.entities.feature_entities import FeatureDataFrame
 from wyvern.entities.identifier import Identifier
 
 
@@ -28,7 +28,7 @@ class WyvernRequest:
         entity_store: A dictionary that can be used to store entities that are created during the request
         events: A list of functions that return a list of LoggedEvents. These functions are called at the end of
             the request to log events to the event store
-        feature_map: A FeatureMap that can be used to store features that are created during the request
+        feature_df: The feature data frame that is created during the request
         request_id: The request ID of the request
     """
 
@@ -43,8 +43,7 @@ class WyvernRequest:
     # The list of list here is a minor performance optimization to prevent copying of lists for events
     events: List[Callable[[], List[LoggedEvent[Any]]]]
 
-    feature_map: FeatureMap
-    feature_map_polars: FeatureMapPolars
+    feature_df: FeatureDataFrame
 
     # the key is the name of the model and the value is a map of the identifier to the model score
     model_output_map: Dict[
@@ -93,8 +92,7 @@ class WyvernRequest:
             headers=dict(req.headers),
             entity_store={},
             events=[],
-            feature_map=FeatureMap(feature_map={}),
-            feature_map_polars=FeatureMapPolars(feature_map=FeatureMap(feature_map={})),
+            feature_df=FeatureDataFrame(),
             model_output_map={},
             request_id=request_id,
             run_id=run_id,

@@ -139,3 +139,15 @@ class CompositeIdentifier(Identifier):
             secondary_identifier=secondary_identifier,
             **kwargs,
         )
+
+
+def get_identifier_key(
+    identifier: Identifier,
+) -> str:
+    """
+    Returns the identifier key for a given identifier. If the identifier is a composite identifier, the primary
+    identifier is used. This is useful while doing feature retrievals for composite entities.
+    """
+    if isinstance(identifier, CompositeIdentifier):
+        return f"{identifier.primary_identifier.identifier_type}:{identifier.primary_identifier.identifier}"
+    return f"{identifier.identifier_type}:{identifier.identifier}"

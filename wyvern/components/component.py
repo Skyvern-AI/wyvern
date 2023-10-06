@@ -12,6 +12,7 @@ import polars as pl
 
 from wyvern import request_context
 from wyvern.entities.identifier import Identifier
+from wyvern.exceptions import WyvernFeatureValueError
 from wyvern.wyvern_typing import INPUT_TYPE, OUTPUT_TYPE, WyvernFeature
 
 logger = logging.getLogger(__name__)
@@ -144,21 +145,19 @@ class Component(Generic[INPUT_TYPE, OUTPUT_TYPE]):
         """
         return set()
 
+    @staticmethod
     def get_features(
-        self,
-        identifier_type: str,
-        identifier_list: List[str],
+        identifiers: List[Identifier],
         feature_names: List[str],
     ) -> pl.DataFrame:
         current_request = request_context.ensure_current_request()
-        return current_request.feature_map_polars.get_features(
-            identifier_type,
-            identifier_list,
+        return current_request.feature_df.get_features(
+            identifiers,
             feature_names,
         )
 
+    @staticmethod
     def get_feature(
-        self,
         identifier: Identifier,
         feature_name: str,
     ) -> WyvernFeature:
@@ -174,12 +173,19 @@ class Component(Generic[INPUT_TYPE, OUTPUT_TYPE]):
             you just have to pass in feature_name="wyvern_feature".
         """
         current_request = request_context.ensure_current_request()
-        feature_data = current_request.feature_map.feature_map.get(identifier)
-        if not feature_data:
-            return None
-        return feature_data.features.get(feature_name)
+        df = current_request.feature_df.get_features(
+            [identifier],
+            [feature_name],
+        )
+        df = df.filter(pl.col(feature_name).is_not_null())
+        if len(df) > 1:
+            raise WyvernFeatureValueError(
+                identifier=identifier,
+                feature_name=feature_name,
+            )
+        return df[feature_name][0] if df[feature_name] else None
 
-    def get_all_features(
+    def get_all_features_for_identifier(
         self,
         identifier: Identifier,
     ) -> Dict[str, WyvernFeature]:
@@ -188,10 +194,15 @@ class Component(Generic[INPUT_TYPE, OUTPUT_TYPE]):
         The features are cached once fetched/evaluated.
         """
         current_request = request_context.ensure_current_request()
-        feature_data = current_request.feature_map.feature_map.get(identifier)
-        if not feature_data:
-            return {}
-        return feature_data.features
+        df = current_request.feature_df.get_all_features_for_identifier(identifier)
+        feature_dict = df.to_dict()
+        result: Dict[str, WyvernFeature] = {}
+        for key, value in feature_dict.items():
+            if len(value) > 1:
+                raise WyvernFeatureValueError(identifier=identifier, feature_name=key)
+            result[key] = value[0] if value else None
+
+        return result
 
     def get_model_output(
         self,

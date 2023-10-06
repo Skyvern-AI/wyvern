@@ -15,10 +15,12 @@ from typing import (
     get_args,
 )
 
+import polars as pl
 from pydantic.generics import GenericModel
 
 from wyvern.components.component import Component
-from wyvern.entities.feature_entities import FeatureData, FeatureMap
+from wyvern.entities.feature_entities import IDENTIFIER, FeatureData, FeatureDataFrame
+from wyvern.entities.identifier import get_identifier_key
 from wyvern.entities.identifier_entities import WyvernEntity
 from wyvern.feature_store.constants import (
     FULL_FEATURE_NAME_SEPARATOR,
@@ -47,7 +49,7 @@ class RealtimeFeatureRequest(GenericModel, Generic[REQUEST_ENTITY]):
     """
 
     request: REQUEST_ENTITY
-    feature_retrieval_response: FeatureMap
+    feature_retrieval_response: FeatureDataFrame
 
 
 class RealtimeFeatureEntity(GenericModel, Generic[PRIMARY_ENTITY, SECONDARY_ENTITY]):
@@ -334,45 +336,53 @@ class RealtimeFeatureComponent(
     async def compute_request_features_wrapper(
         self,
         request: RealtimeFeatureRequest[REQUEST_ENTITY],
-    ) -> Optional[FeatureData]:
+    ) -> Optional[pl.DataFrame]:
         feature_data = await self.compute_request_features(request)
-        return self.set_full_feature_name(feature_data)
+        return self.create_df_with_full_feature_name(feature_data)
 
     async def compute_features_wrapper(
         self,
         entity: PRIMARY_ENTITY,
         request: RealtimeFeatureRequest[REQUEST_ENTITY],
-    ) -> Optional[FeatureData]:
+    ) -> Optional[pl.DataFrame]:
         feature_data = await self.compute_features(entity, request)
-        return self.set_full_feature_name(feature_data)
+        return self.create_df_with_full_feature_name(feature_data)
 
     async def compute_composite_features_wrapper(
         self,
         primary_entity: PRIMARY_ENTITY,
         secondary_entity: SECONDARY_ENTITY,
         request: RealtimeFeatureRequest[REQUEST_ENTITY],
-    ) -> Optional[FeatureData]:
+    ) -> Optional[pl.DataFrame]:
         feature_data = await self.compute_composite_features(
             primary_entity,
             secondary_entity,
             request,
         )
-        return self.set_full_feature_name(feature_data)
+        return self.create_df_with_full_feature_name(feature_data)
 
-    def set_full_feature_name(
+    def create_df_with_full_feature_name(
         self,
         feature_data: Optional[FeatureData],
-    ) -> Optional[FeatureData]:
+    ) -> Optional[pl.DataFrame]:
         """
-        Sets the full feature name for the feature data
+        Creates a dataframe with the full feature name for the feature data
         """
         if not feature_data:
             return None
 
-        return FeatureData(
-            identifier=feature_data.identifier,
-            features={
-                f"{self.name}:{feature_name}": feature_value
-                for feature_name, feature_value in feature_data.features.items()
-            },
+        df = pl.DataFrame().with_columns(
+            [
+                pl.Series(
+                    name=IDENTIFIER,
+                    values=[get_identifier_key(feature_data.identifier)],
+                ),
+            ],
         )
+        df = df.with_columns(
+            [
+                pl.Series(name=f"{self.name}:{feature_name}", values=[feature_value])
+                for feature_name, feature_value in feature_data.features.items()
+            ],
+        )
+        return df

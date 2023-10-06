@@ -99,6 +99,14 @@ class WyvernFeatureNameError(WyvernError):
     )
 
 
+class WyvernFeatureValueError(WyvernError):
+    """
+    Raised when there is an error in feature value
+    """
+
+    message = "More than one feature value found for identifier={identifier} feature_name={feature_name}."
+
+
 class WyvernModelInputError(WyvernError):
     """
     Raised when there is an error in model input

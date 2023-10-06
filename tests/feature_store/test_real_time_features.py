@@ -8,7 +8,7 @@ from tests.scenarios.test_product_ranking import (  # noqa: F401
     RankingRealtimeFeatureComponent,
 )
 from wyvern.components.features.feature_store import feature_store_retrieval_component
-from wyvern.entities.feature_entities import FeatureMap
+from wyvern.entities.feature_entities import FeatureDataFrame
 from wyvern.feature_store.historical_feature_util import separate_real_time_features
 from wyvern.service import WyvernService
 
@@ -29,7 +29,7 @@ def mock_feature_store(mocker):
     mocker.patch.object(
         feature_store_retrieval_component,
         "fetch_features_from_feature_store",
-        return_value=FeatureMap(feature_map={}),
+        return_value=FeatureDataFrame(),
     )
 
 

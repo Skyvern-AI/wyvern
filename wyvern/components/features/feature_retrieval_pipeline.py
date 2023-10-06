@@ -3,6 +3,7 @@ import asyncio
 import logging
 from typing import Generic, List, Optional, Set, Type
 
+import polars as pl
 from ddtrace import tracer
 from pydantic.generics import GenericModel
 
@@ -22,8 +23,7 @@ from wyvern.components.features.realtime_features_component import (
     RealtimeFeatureRequest,
 )
 from wyvern.entities.candidate_entities import CandidateSetEntity
-from wyvern.entities.feature_entities import FeatureData, FeatureMap, FeatureMapPolars
-from wyvern.entities.feature_entity_helpers import feature_map_create, feature_map_join
+from wyvern.entities.feature_entities import IDENTIFIER, FeatureDataFrame
 from wyvern.entities.identifier_entities import WyvernEntity
 from wyvern.wyvern_typing import REQUEST_ENTITY
 
@@ -49,7 +49,7 @@ class FeatureRetrievalPipelineRequest(GenericModel, Generic[REQUEST_ENTITY]):
 
 
 class FeatureRetrievalPipeline(
-    Component[FeatureRetrievalPipelineRequest[REQUEST_ENTITY], FeatureMap],
+    Component[FeatureRetrievalPipelineRequest[REQUEST_ENTITY], FeatureDataFrame],
     Generic[REQUEST_ENTITY],
 ):
     """
@@ -112,7 +112,7 @@ class FeatureRetrievalPipeline(
     @tracer.wrap(name="FeatureRetrievalPipeline.execute")
     async def execute(
         self, input: FeatureRetrievalPipelineRequest[REQUEST_ENTITY], **kwargs
-    ) -> FeatureMap:
+    ) -> FeatureDataFrame:
         """
         This method is used to retrieve features for a given request.
 
@@ -153,15 +153,13 @@ class FeatureRetrievalPipeline(
             feature_names=list(feature_names_to_retrieve_from_feature_store),
         )
 
-        feature_retrieval_response: FeatureMap = (
-            await self.feature_retrieval_component.execute(
-                input=feature_retrieval_request,
-                handle_exceptions=self.handle_exceptions,
-                **kwargs,
-            )
+        feature_df = await self.feature_retrieval_component.execute(
+            input=feature_retrieval_request,
+            handle_exceptions=self.handle_exceptions,
+            **kwargs,
         )
         current_request = request_context.ensure_current_request()
-        current_request.feature_map = feature_retrieval_response
+        current_request.feature_df = feature_df
         """
         TODO (suchintan):
         1. Figure out a set of: (Candidate entities), (Non-candidate entities), (Request)
@@ -206,10 +204,10 @@ class FeatureRetrievalPipeline(
         with tracer.trace("FeatureRetrievalPipeline.real_time_no_entity_features"):
             request = RealtimeFeatureRequest[REQUEST_ENTITY](
                 request=input.request,
-                feature_retrieval_response=feature_retrieval_response,
+                feature_retrieval_response=feature_df,
             )
             real_time_request_no_entity_features: List[
-                Optional[FeatureData]
+                Optional[pl.DataFrame]
             ] = await asyncio.gather(
                 *[
                     real_time_feature.compute_request_features_wrapper(
@@ -222,7 +220,7 @@ class FeatureRetrievalPipeline(
 
         with tracer.trace("FeatureRetrievalPipeline.real_time_entity_features"):
             real_time_request_features: List[
-                Optional[FeatureData]
+                Optional[pl.DataFrame]
             ] = await asyncio.gather(
                 *[
                     real_time_feature.compute_features_wrapper(
@@ -237,7 +235,7 @@ class FeatureRetrievalPipeline(
 
         with tracer.trace("FeatureRetrievalPipeline.real_time_combination_features"):
             real_time_request_combination_features: List[
-                Optional[FeatureData]
+                Optional[pl.DataFrame]
             ] = await asyncio.gather(
                 *[
                     real_time_feature.compute_composite_features_wrapper(
@@ -257,8 +255,8 @@ class FeatureRetrievalPipeline(
                 ]
             )
 
-        real_time_candidate_features: List[Optional[FeatureData]] = []
-        real_time_candidate_combination_features: List[Optional[FeatureData]] = []
+        real_time_candidate_features: List[Optional[pl.DataFrame]] = []
+        real_time_candidate_combination_features: List[Optional[pl.DataFrame]] = []
 
         if isinstance(input.request, CandidateSetEntity):
             with tracer.trace("FeatureRetrievalPipeline.real_time_candidate_features"):
@@ -304,30 +302,34 @@ class FeatureRetrievalPipeline(
         # Idea 2: Define feature views that have the same interface,
         #   and we collect them together ahead of this dict comprehension
         # pytest / linter validation: we should assert for feature name conflicts -- this should never happen
-        with tracer.trace("FeatureRetrievalPipeline.create_feature_map"):
-            real_time_feature_responses = feature_map_create(
+        with tracer.trace("FeatureRetrievalPipeline.merge_feature_dfs"):
+            real_time_feature_dfs_optional = [
                 *real_time_request_no_entity_features,
                 *real_time_request_features,
                 *real_time_request_combination_features,
                 *real_time_candidate_features,
                 *real_time_candidate_combination_features,
+            ]
+            real_time_feature_dfs: List[pl.DataFrame] = [
+                df for df in real_time_feature_dfs_optional if df is not None
+            ]
+            real_time_feature_merged_df = pl.concat(
+                real_time_feature_dfs,
+                how="diagonal",
             )
 
         with tracer.trace("FeatureRetrievalPipeline.create_feature_response"):
             await self.feature_logger_component.execute(
                 FeatureEventLoggingRequest(
                     request=input.request,
-                    feature_map=real_time_feature_responses,
+                    feature_df=FeatureDataFrame(df=real_time_feature_merged_df),
                 ),
             )
-            # TODO (suchintan): Improve performance of this
-            feature_responses = feature_map_join(
-                feature_retrieval_response,
-                real_time_feature_responses,
+            feature_responses = feature_df.df.join(
+                real_time_feature_merged_df,
+                on=IDENTIFIER,
+                how="outer",
             )
 
-        current_request.feature_map = feature_responses
-        current_request.feature_map_polars = FeatureMapPolars(
-            feature_map=feature_responses,
-        )
-        return feature_responses
+        current_request.feature_df = FeatureDataFrame(df=feature_responses)
+        return current_request.feature_df

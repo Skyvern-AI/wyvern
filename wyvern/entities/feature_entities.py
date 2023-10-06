@@ -2,15 +2,17 @@
 from __future__ import annotations
 
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import polars as pl
 from pydantic.main import BaseModel
 
-from wyvern.entities.identifier import Identifier
+from wyvern.entities.identifier import Identifier, get_identifier_key
 from wyvern.wyvern_typing import WyvernFeature
 
 logger = logging.getLogger(__name__)
+
+IDENTIFIER = "IDENTIFIER"
 
 
 class FeatureData(BaseModel, frozen=True):
@@ -43,58 +45,30 @@ class FeatureMap(BaseModel, frozen=True):
     feature_map: Dict[Identifier, FeatureData]
 
 
-class FeatureMapPolars:
+class FeatureDataFrame(BaseModel):
     """
-    A class to represent a map of identifiers to feature data. Uses polars library for efficient data processing.
+    A class to store features in a polars dataframe.
     """
 
-    feature_map: Dict[str, pl.DataFrame] = {}
+    df: pl.DataFrame = pl.DataFrame().with_columns(
+        pl.Series(name=IDENTIFIER, dtype=pl.Utf8),
+    )
 
-    def __init__(self, feature_map: Optional[FeatureMap] = None, **kwargs):
-        if feature_map is None:
-            self.feature_map = {}
-        else:
-            data: Dict[str, List[List[WyvernFeature]]] = {}
-            columns = {}
-            for identifier, feature_data in feature_map.feature_map.items():
-                if identifier.identifier_type not in data:
-                    data[identifier.identifier_type] = []
-                    columns[identifier.identifier_type] = list(
-                        feature_data.features.keys(),
-                    )
-                data[identifier.identifier_type].append(
-                    [identifier.identifier] + list(feature_data.features.values()),
-                )
-
-            result = {}
-            for identifier_type, identifier_data in data.items():
-                column_list = ["identifier"]
-                column_list.extend(columns[identifier_type])
-                column_list = [col.replace(":", "__") for col in column_list]
-                result[identifier_type] = pl.DataFrame(
-                    identifier_data,
-                    schema=column_list,
-                )
-            self.feature_map = result
+    class Config:
+        arbitrary_types_allowed = True
+        frozen = True
 
     def get_features(
         self,
-        identifier_type: str,
-        identifier_list: List[str],
+        identifiers: List[Identifier],
         feature_names: List[str],
     ) -> pl.DataFrame:
-        if identifier_type not in self.feature_map:
-            logger.warning(
-                f"Identifier type {identifier_type} not found in feature map. "
-                f"Current identifier types: {self.feature_map.keys()}",
-            )
-            return pl.DataFrame()
-        df = self.feature_map[identifier_type]
-        # Filter the dataframe by both identifier_type and identifier
-        df = df.filter(pl.col("identifier").is_in(identifier_list))
+        # Filter the dataframe by identifier. If the identifier is a composite identifier, use the primary identifier
+        identifier_keys = [get_identifier_key(identifier) for identifier in identifiers]
+        df = self.df.filter(pl.col(IDENTIFIER).is_in(identifier_keys))
 
         # Process feature names, adding identifier to the selection
-        feature_names = ["identifier"] + [f.replace(":", "__") for f in feature_names]
+        feature_names = [IDENTIFIER] + [f.replace(":", "__") for f in feature_names]
         existing_cols = df.columns
         for col_name in feature_names:
             if col_name not in existing_cols:
@@ -104,20 +78,23 @@ class FeatureMapPolars:
 
         return df
 
+    def get_all_features_for_identifier(self, identifier: Identifier) -> pl.DataFrame:
+        identifier_key = get_identifier_key(identifier)
+        return self.df.filter(pl.col(IDENTIFIER) == identifier_key)
 
-def build_empty_feature_map(
-    identifiers: List[Identifier],
-    feature_names: List[str],
-) -> FeatureMap:
-    """
-    Builds an empty feature map with the given identifiers and feature names.
-    """
-    return FeatureMap(
-        feature_map={
-            identifier: FeatureData(
-                identifier=identifier,
-                features={feature: None for feature in feature_names},
-            )
-            for identifier in identifiers
-        },
-    )
+    @staticmethod
+    def build_empty_df(
+        identifiers: List[Identifier],
+        feature_names: List[str],
+    ) -> FeatureDataFrame:
+        """
+        Builds an empty polars df with the given identifiers and feature names.
+        """
+        identifier_keys = [get_identifier_key(identifier) for identifier in identifiers]
+        df_columns = [
+            pl.Series(name=IDENTIFIER, values=identifier_keys, dtype=pl.Object),
+        ]
+        df_columns.extend(
+            [pl.lit(None).alias(feature_name) for feature_name in feature_names],  # type: ignore
+        )
+        return FeatureDataFrame(df=pl.DataFrame().with_columns(df_columns))

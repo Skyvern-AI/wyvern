@@ -13,7 +13,7 @@ from wyvern.components.business_logic.pinning_business_logic import (
     PinningBusinessLogicComponent,
 )
 from wyvern.entities.candidate_entities import ScoredCandidate
-from wyvern.entities.feature_entities import FeatureMap, FeatureMapPolars
+from wyvern.entities.feature_entities import FeatureDataFrame
 from wyvern.entities.identifier_entities import ProductEntity
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.wyvern_request import WyvernRequest
@@ -65,8 +65,7 @@ async def set_up_pinning_components(
             headers={},
             entity_store={},
             events=[],
-            feature_map=FeatureMap(feature_map={}),
-            feature_map_polars=FeatureMapPolars(feature_map=FeatureMap(feature_map={})),
+            feature_df=FeatureDataFrame(),
             model_output_map={},
         ),
     )
