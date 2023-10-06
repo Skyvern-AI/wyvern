@@ -7,7 +7,10 @@ from wyvern.components.business_logic.business_logic import (
     BusinessLogicPipeline,
     BusinessLogicRequest,
 )
-from wyvern.components.candidates.candidate_logger import CandidateEventLoggingComponent
+from wyvern.components.candidates.candidate_logger import (
+    CandidateEventLoggingComponent,
+    CandidateEventLoggingRequest,
+)
 from wyvern.components.component import Component
 from wyvern.components.events.events import LoggedEvent
 from wyvern.components.impressions.impression_logger import (
@@ -129,6 +132,22 @@ class RankingPipeline(
         input: RANKING_REQUEST,
         **kwargs,
     ) -> RankingResponse:
+        original_candidates: List[ScoredCandidate] = [
+            ScoredCandidate(
+                entity=candidate,
+                score=i,
+            )
+            for i, candidate in enumerate(input.candidates)
+        ]
+        candidate_logging_request = CandidateEventLoggingRequest[
+            WYVERN_ENTITY,
+            RANKING_REQUEST,
+        ](
+            request=input,
+            scored_candidates=original_candidates,
+        )
+        await self.candidate_logging_component.execute(candidate_logging_request)
+
         ranked_candidates = await self.rank_candidates(input)
 
         pagination_request = PaginationRequest[ScoredCandidate[WYVERN_ENTITY]](
