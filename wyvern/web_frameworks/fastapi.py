@@ -74,6 +74,8 @@ class WyvernFastapi:
 
         @self.app.exception_handler(WyvernError)
         async def wyvern_exception_handler(request: Request, exc: WyvernError):
+            json = await request.json()
+            logger.warning(f"wyvern_error={exc} request_payload={json}")
             return JSONResponse(
                 status_code=400,
                 content={
