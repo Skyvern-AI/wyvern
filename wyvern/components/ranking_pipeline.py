@@ -2,6 +2,7 @@
 from typing import Any, Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel
+from pydantic.generics import GenericModel
 
 from wyvern.components.business_logic.business_logic import (
     BusinessLogicPipeline,
@@ -34,6 +35,7 @@ from wyvern.wyvern_typing import WYVERN_ENTITY
 class RankingRequest(
     BaseWyvernRequest,
     PaginationFields,
+    GenericModel,
     Generic[WYVERN_ENTITY],
 ):
     """
@@ -88,6 +90,7 @@ class RankingPipeline(
     """
 
     PATH: str = "/ranking"
+    RESPONSE_SCHEMA_CLASS = RankingResponse
 
     def __init__(
         self,
