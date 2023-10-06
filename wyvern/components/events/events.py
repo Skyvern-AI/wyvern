@@ -61,6 +61,10 @@ class EntityEventData(BaseModel):
     entity_identifier_type: str
 
 
+class CustomEntityEventData(EntityEventData):
+    event_name: str
+
+
 ENTITY_EVENT_DATA_TYPE = TypeVar("ENTITY_EVENT_DATA_TYPE", bound=EntityEventData)
 
 
