@@ -22,6 +22,7 @@ from wyvern.components.features.realtime_features_component import (
     RealtimeFeatureComponent,
     RealtimeFeatureRequest,
 )
+from wyvern.components.helpers.polars import cast_float32_to_float64
 from wyvern.entities.candidate_entities import CandidateSetEntity
 from wyvern.entities.feature_entities import IDENTIFIER, FeatureDataFrame
 from wyvern.entities.identifier_entities import WyvernEntity
@@ -310,8 +311,10 @@ class FeatureRetrievalPipeline(
                 *real_time_candidate_features,
                 *real_time_candidate_combination_features,
             ]
-            real_time_feature_dfs: List[pl.DataFrame] = [
-                df for df in real_time_feature_dfs_optional if df is not None
+            real_time_feature_dfs = [
+                cast_float32_to_float64(df)
+                for df in real_time_feature_dfs_optional
+                if df is not None
             ]
             real_time_feature_merged_df = pl.DataFrame()
             if real_time_feature_dfs:
