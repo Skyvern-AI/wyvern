@@ -2,7 +2,6 @@
 from typing import Any, Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel
-from pydantic.generics import GenericModel
 
 from wyvern.components.business_logic.business_logic import (
     BusinessLogicPipeline,
@@ -25,28 +24,27 @@ from wyvern.components.pagination.pagination_component import (
 )
 from wyvern.components.pagination.pagination_fields import PaginationFields
 from wyvern.components.pipeline_component import PipelineComponent
-from wyvern.entities.candidate_entities import ScoredCandidate
+from wyvern.entities.candidate_entities import CandidateSetEntity, ScoredCandidate
 from wyvern.entities.model_entities import ModelInput
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.event_logging import event_logger
-from wyvern.wyvern_typing import WYVERN_ENTITY
+from wyvern.wyvern_typing import GENERALIZED_WYVERN_ENTITY, WYVERN_ENTITY
 
 
 class RankingRequest(
     BaseWyvernRequest,
     PaginationFields,
-    GenericModel,
-    Generic[WYVERN_ENTITY],
+    CandidateSetEntity,
+    Generic[GENERALIZED_WYVERN_ENTITY],
 ):
     """
     This is the request for the ranking pipeline.
 
     Attributes:
-        query: the query entity
         candidates: the list of candidate entities
     """
 
-    candidates: List[WYVERN_ENTITY]
+    candidates: List[GENERALIZED_WYVERN_ENTITY]
 
 
 class ResponseCandidate(BaseModel):
