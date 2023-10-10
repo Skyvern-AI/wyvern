@@ -16,6 +16,7 @@ from typing import (
 )
 
 import polars as pl
+from polars import DataFrame
 from pydantic.generics import GenericModel
 
 from wyvern.components.component import Component
@@ -69,7 +70,7 @@ class RealtimeFeatureComponent(
             RealtimeFeatureRequest[REQUEST_ENTITY],
             RealtimeFeatureEntity[PRIMARY_ENTITY, SECONDARY_ENTITY],
         ],
-        Optional[FeatureData],
+        Optional[DataFrame],
     ],
     Generic[PRIMARY_ENTITY, SECONDARY_ENTITY, REQUEST_ENTITY],
 ):
@@ -260,7 +261,7 @@ class RealtimeFeatureComponent(
             RealtimeFeatureEntity[PRIMARY_ENTITY, SECONDARY_ENTITY],
         ],
         **kwargs,
-    ) -> Optional[FeatureData]:
+    ) -> Optional[pl.DataFrame]:
         # TODO (Suchintan): Delete this method -- this has been fully delegated upwards?
         request = input[0]
         entities = input[1]
@@ -270,7 +271,9 @@ class RealtimeFeatureComponent(
             entities.primary_entity,
             entities.secondary_entity,
         ):
-            return None
+            return pl.DataFrame().with_columns(
+                pl.Series(name=IDENTIFIER, dtype=pl.Utf8),
+            )
 
         if (
             entities.secondary_entity is not None
@@ -287,7 +290,7 @@ class RealtimeFeatureComponent(
                     f"Failed to compute composite features for "
                     f"{self} {entities.primary_entity.identifier} {entities.secondary_entity.identifier}",
                 )
-            return resp
+            return self.create_df_with_full_feature_name(resp)
 
         if entities.primary_entity is not None:
             resp = await self.compute_features(
@@ -300,7 +303,7 @@ class RealtimeFeatureComponent(
                     f"Failed to compute features for "
                     f"{self} {entities.primary_entity.identifier}",
                 )
-            return resp
+            return self.create_df_with_full_feature_name(resp)
 
         # TODO (suchintan): Lowercase feature names?
         resp = await self.compute_request_features(request)
@@ -310,7 +313,7 @@ class RealtimeFeatureComponent(
             logger.info(
                 f"Failed to compute request features for {self} {request.request}",
             )
-        return resp
+        return self.create_df_with_full_feature_name(resp)
 
     async def compute_request_features(
         self,
@@ -381,7 +384,7 @@ class RealtimeFeatureComponent(
         )
         df = df.with_columns(
             [
-                pl.Series(name=f"{self.name}:{feature_name}", values=[feature_value])
+                pl.Series(name=f"{self.name}__{feature_name}", values=[feature_value])
                 for feature_name, feature_value in feature_data.features.items()
             ],
         )

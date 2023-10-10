@@ -173,6 +173,7 @@ class Component(Generic[INPUT_TYPE, OUTPUT_TYPE]):
             you just have to pass in feature_name="wyvern_feature".
         """
         current_request = request_context.ensure_current_request()
+        feature_name = feature_name.replace(":", "__")
         df = current_request.feature_df.get_features(
             [identifier],
             [feature_name],
@@ -183,7 +184,7 @@ class Component(Generic[INPUT_TYPE, OUTPUT_TYPE]):
                 identifier=identifier,
                 feature_name=feature_name,
             )
-        return df[feature_name][0] if df[feature_name] else None
+        return df[feature_name][0] if not df[feature_name].is_empty() else None
 
     def get_all_features_for_identifier(
         self,
