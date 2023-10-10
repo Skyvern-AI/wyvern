@@ -149,7 +149,9 @@ class RankingPipeline(
         )
         await self.candidate_logging_component.execute(candidate_logging_request)
 
-        ranked_candidates = await self.rank_candidates(input)
+        ranked_candidates = original_candidates
+        if not self.bypass_ranking(input):
+            ranked_candidates = await self.rank_candidates(input)
 
         pagination_request = PaginationRequest[ScoredCandidate[WYVERN_ENTITY]](
             pagination_fields=input,
@@ -227,3 +229,6 @@ class RankingPipeline(
             business_logic_request,
         )
         return business_logic_response.adjusted_candidates
+
+    def bypass_ranking(self, request: RankingRequest[WYVERN_ENTITY]) -> bool:
+        return False
