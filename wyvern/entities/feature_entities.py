@@ -34,17 +34,6 @@ class FeatureData(BaseModel, frozen=True):
         return self.__str__()
 
 
-class FeatureMap(BaseModel, frozen=True):
-    """
-    A class to represent a map of identifiers to feature data.
-
-    TODO (kerem): Fix the data duplication between this class and the FeatureData class. The identifier field in the
-        FeatureData class is redundant.
-    """
-
-    feature_map: Dict[Identifier, FeatureData]
-
-
 class FeatureDataFrame(BaseModel):
     """
     A class to store features in a polars dataframe.
