@@ -16,7 +16,6 @@ from typing import (
 )
 
 import polars as pl
-from polars import DataFrame
 from pydantic.generics import GenericModel
 
 from wyvern.components.component import Component
@@ -70,7 +69,7 @@ class RealtimeFeatureComponent(
             RealtimeFeatureRequest[REQUEST_ENTITY],
             RealtimeFeatureEntity[PRIMARY_ENTITY, SECONDARY_ENTITY],
         ],
-        Optional[DataFrame],
+        Tuple[str, Optional[pl.DataFrame]],
     ],
     Generic[PRIMARY_ENTITY, SECONDARY_ENTITY, REQUEST_ENTITY],
 ):
@@ -261,7 +260,7 @@ class RealtimeFeatureComponent(
             RealtimeFeatureEntity[PRIMARY_ENTITY, SECONDARY_ENTITY],
         ],
         **kwargs,
-    ) -> Optional[pl.DataFrame]:
+    ) -> Tuple[str, Optional[pl.DataFrame]]:
         # TODO (Suchintan): Delete this method -- this has been fully delegated upwards?
         request = input[0]
         entities = input[1]
@@ -271,7 +270,7 @@ class RealtimeFeatureComponent(
             entities.primary_entity,
             entities.secondary_entity,
         ):
-            return pl.DataFrame().with_columns(
+            return self.name, pl.DataFrame().with_columns(
                 pl.Series(name=IDENTIFIER, dtype=pl.Utf8),
             )
 
@@ -339,7 +338,7 @@ class RealtimeFeatureComponent(
     async def compute_request_features_wrapper(
         self,
         request: RealtimeFeatureRequest[REQUEST_ENTITY],
-    ) -> Optional[pl.DataFrame]:
+    ) -> Tuple[str, Optional[pl.DataFrame]]:
         feature_data = await self.compute_request_features(request)
         return self.create_df_with_full_feature_name(feature_data)
 
@@ -347,7 +346,7 @@ class RealtimeFeatureComponent(
         self,
         entity: PRIMARY_ENTITY,
         request: RealtimeFeatureRequest[REQUEST_ENTITY],
-    ) -> Optional[pl.DataFrame]:
+    ) -> Tuple[str, Optional[pl.DataFrame]]:
         feature_data = await self.compute_features(entity, request)
         return self.create_df_with_full_feature_name(feature_data)
 
@@ -356,7 +355,7 @@ class RealtimeFeatureComponent(
         primary_entity: PRIMARY_ENTITY,
         secondary_entity: SECONDARY_ENTITY,
         request: RealtimeFeatureRequest[REQUEST_ENTITY],
-    ) -> Optional[pl.DataFrame]:
+    ) -> Tuple[str, Optional[pl.DataFrame]]:
         feature_data = await self.compute_composite_features(
             primary_entity,
             secondary_entity,
@@ -367,12 +366,12 @@ class RealtimeFeatureComponent(
     def create_df_with_full_feature_name(
         self,
         feature_data: Optional[FeatureData],
-    ) -> Optional[pl.DataFrame]:
+    ) -> Tuple[str, Optional[pl.DataFrame]]:
         """
         Creates a dataframe with the full feature name for the feature data
         """
         if not feature_data:
-            return None
+            return self.name, None
 
         df = pl.DataFrame().with_columns(
             [
@@ -388,4 +387,4 @@ class RealtimeFeatureComponent(
                 for feature_name, feature_value in feature_data.features.items()
             ],
         )
-        return df
+        return self.name, df

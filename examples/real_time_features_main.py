@@ -337,15 +337,27 @@ class RealTimeFeatureTestingComponent(
         )
 
         time_start = time()
-        feature_map = await self.feature_retrieval_pipeline.execute(request)
+        feature_df = await self.feature_retrieval_pipeline.execute(request)
         logger.info(f"operation feature_retrieval took:{time()-time_start:2.4f} sec")
         profiler.stop()
         profiler.print()
+        feature_dicts = feature_df.df.to_dicts()
+        feature_data: Dict[str, FeatureData] = {
+            str(feature_dict["IDENTIFIER"]): FeatureData(
+                identifier=Identifier(
+                    identifier_type=feature_dict["IDENTIFIER"].split("::")[0],
+                    identifier=feature_dict["IDENTIFIER"].split("::")[1],
+                ),
+                features={
+                    feature_name: feature_value
+                    for feature_name, feature_value in feature_dict.items()
+                    if feature_name != "IDENTIFIER"
+                },
+            )
+            for feature_dict in feature_dicts
+        }
         return FeatureStoreResponse(
-            feature_data={
-                str(identifier): feature_map.feature_map[identifier]
-                for identifier in feature_map.feature_map.keys()
-            },
+            feature_data=feature_data,
         )
 
 

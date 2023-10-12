@@ -161,13 +161,8 @@ class ModelbitComponent(
             Union[WyvernEntity, BaseWyvernRequest]
         ] = input.entities or [input.request]
         target_identifiers = [entity.identifier for entity in target_entities]
-        target_identifier_type = target_identifiers[0].identifier_type
-        target_identifier_keys = [
-            identifier.identifier for identifier in target_identifiers
-        ]
         features = self.get_features(
-            target_identifier_type,
-            target_identifier_keys,
+            target_identifiers,
             self.modelbit_features,
         )
 

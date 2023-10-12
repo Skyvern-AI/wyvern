@@ -69,112 +69,60 @@ async def test_end_to_end(mock_redis, test_client, mock_feature_store):
                     "identifier_type": "request",
                 },
                 "features": {
-                    "RealTimeNumberOfCandidatesFeature:f_number_of_candidates": 3.0,
+                    "RealTimeNumberOfCandidatesFeature__f_number_of_candidates": 3.0,
                 },
             },
             "query::candle": {
                 "identifier": {"identifier": "candle", "identifier_type": "query"},
                 "features": {
-                    "RealTimeQueryFeature:f_query_length": 6.0,
-                    "RealTimeStringFeature:f_query": "candle",
-                    "RealTimeEmbeddingFeature:f_query_embedding_vector_8": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6,
-                        7,
-                        8,
+                    "RealTimeQueryFeature__f_query_length": 6.0,
+                    "RealTimeStringFeature__f_query": "candle",
+                    "RealTimeEmbeddingFeature__f_query_embedding_vector_8": [
+                        1.0,
+                        2.0,
+                        3.0,
+                        4.0,
+                        5.0,
+                        6.0,
+                        7.0,
+                        8.0,
                     ],
+                    "RealTimeUserQueryFeature__f_user_query_name_edit_distance": 3.0,
+                    "RealTimeUserQueryFeature__f_user_query_name_jaccard_similarity": -3.0,
                 },
             },
             "user::1234": {
                 "identifier": {"identifier": "1234", "identifier_type": "user"},
-                "features": {"RealTimeUserFeature:f_user_name_length": 9.0},
-            },
-            "query:user::candle:1234": {
-                "identifier": {
-                    "identifier": "candle:1234",
-                    "identifier_type": "query:user",
-                },
-                "features": {
-                    "RealTimeUserQueryFeature:f_user_query_name_edit_distance": 3.0,
-                    "RealTimeUserQueryFeature:f_user_query_name_jaccard_similarity": -3.0,
-                },
+                "features": {"RealTimeUserFeature__f_user_name_length": 9.0},
             },
             "product::p1": {
                 "identifier": {"identifier": "p1", "identifier_type": "product"},
-                "features": {"RealTimeProductFeature:f_opensearch_score": 1.0},
+                "features": {
+                    "RealTimeMatchedQueriesProductFeature__f_matched_queries_QUERY_1": 1.0,
+                    "RealTimeMatchedQueriesProductFeature__f_matched_queries_QUERY_2": 1.0,
+                    "RealTimeProductFeature__f_opensearch_score": 1.0,
+                    "RealTimeQueryProductFeature__f_query_product_name_edit_distance": 4.0,
+                    "RealTimeQueryProductFeature__f_query_product_name_jaccard_similarity": -4.0,
+                    "RealTimeUserProductFeature__f_user_product_name_edit_distance": 7.0,
+                    "RealTimeUserProductFeature__f_user_product_name_jaccard_similarity": -7.0,
+                },
             },
             "product::p2": {
                 "identifier": {"identifier": "p2", "identifier_type": "product"},
-                "features": {},
+                "features": {
+                    "RealTimeQueryProductFeature__f_query_product_name_edit_distance": 4.0,
+                    "RealTimeQueryProductFeature__f_query_product_name_jaccard_similarity": -4.0,
+                    "RealTimeUserProductFeature__f_user_product_name_edit_distance": 7.0,
+                    "RealTimeUserProductFeature__f_user_product_name_jaccard_similarity": -7.0,
+                },
             },
             "product::p3": {
                 "identifier": {"identifier": "p3", "identifier_type": "product"},
-                "features": {},
-            },
-            "product:query::p1:candle": {
-                "identifier": {
-                    "identifier": "p1:candle",
-                    "identifier_type": "product:query",
-                },
                 "features": {
-                    "RealTimeMatchedQueriesProductFeature:f_matched_queries_QUERY_1": 1.0,
-                    "RealTimeMatchedQueriesProductFeature:f_matched_queries_QUERY_2": 1.0,
-                    "RealTimeQueryProductFeature:f_query_product_name_edit_distance": 4.0,
-                    "RealTimeQueryProductFeature:f_query_product_name_jaccard_similarity": -4.0,
-                },
-            },
-            "product:query::p2:candle": {
-                "identifier": {
-                    "identifier": "p2:candle",
-                    "identifier_type": "product:query",
-                },
-                "features": {
-                    "RealTimeQueryProductFeature:f_query_product_name_edit_distance": 4.0,
-                    "RealTimeQueryProductFeature:f_query_product_name_jaccard_similarity": -4.0,
-                },
-            },
-            "product:query::p3:candle": {
-                "identifier": {
-                    "identifier": "p3:candle",
-                    "identifier_type": "product:query",
-                },
-                "features": {
-                    "RealTimeQueryProductFeature:f_query_product_name_edit_distance": 4.0,
-                    "RealTimeQueryProductFeature:f_query_product_name_jaccard_similarity": -4.0,
-                },
-            },
-            "product:user::p1:1234": {
-                "identifier": {
-                    "identifier": "p1:1234",
-                    "identifier_type": "product:user",
-                },
-                "features": {
-                    "RealTimeUserProductFeature:f_user_product_name_edit_distance": 7.0,
-                    "RealTimeUserProductFeature:f_user_product_name_jaccard_similarity": -7.0,
-                },
-            },
-            "product:user::p2:1234": {
-                "identifier": {
-                    "identifier": "p2:1234",
-                    "identifier_type": "product:user",
-                },
-                "features": {
-                    "RealTimeUserProductFeature:f_user_product_name_edit_distance": 7.0,
-                    "RealTimeUserProductFeature:f_user_product_name_jaccard_similarity": -7.0,
-                },
-            },
-            "product:user::p3:1234": {
-                "identifier": {
-                    "identifier": "p3:1234",
-                    "identifier_type": "product:user",
-                },
-                "features": {
-                    "RealTimeUserProductFeature:f_user_product_name_edit_distance": 7.0,
-                    "RealTimeUserProductFeature:f_user_product_name_jaccard_similarity": -7.0,
+                    "RealTimeQueryProductFeature__f_query_product_name_edit_distance": 4.0,
+                    "RealTimeQueryProductFeature__f_query_product_name_jaccard_similarity": -4.0,
+                    "RealTimeUserProductFeature__f_user_product_name_edit_distance": 7.0,
+                    "RealTimeUserProductFeature__f_user_product_name_jaccard_similarity": -7.0,
                 },
             },
         },
@@ -225,138 +173,72 @@ async def test_end_to_end__2(mock_redis__2, test_client):
                     "identifier_type": "request",
                 },
                 "features": {
-                    "RealTimeNumberOfCandidatesFeature:f_number_of_candidates": 4.0,
+                    "RealTimeNumberOfCandidatesFeature__f_number_of_candidates": 4.0,
                 },
             },
             "query::candle": {
                 "identifier": {"identifier": "candle", "identifier_type": "query"},
                 "features": {
-                    "RealTimeQueryFeature:f_query_length": 6.0,
-                    "RealTimeStringFeature:f_query": "candle",
-                    "RealTimeEmbeddingFeature:f_query_embedding_vector_8": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6,
-                        7,
-                        8,
+                    "RealTimeQueryFeature__f_query_length": 6.0,
+                    "RealTimeStringFeature__f_query": "candle",
+                    "RealTimeEmbeddingFeature__f_query_embedding_vector_8": [
+                        1.0,
+                        2.0,
+                        3.0,
+                        4.0,
+                        5.0,
+                        6.0,
+                        7.0,
+                        8.0,
                     ],
+                    "RealTimeUserQueryFeature__f_user_query_name_edit_distance": 3.0,
+                    "RealTimeUserQueryFeature__f_user_query_name_jaccard_similarity": -3.0,
                 },
             },
             "user::1234": {
                 "identifier": {"identifier": "1234", "identifier_type": "user"},
-                "features": {"RealTimeUserFeature:f_user_name_length": 9.0},
-            },
-            "query:user::candle:1234": {
-                "identifier": {
-                    "identifier": "candle:1234",
-                    "identifier_type": "query:user",
-                },
-                "features": {
-                    "RealTimeUserQueryFeature:f_user_query_name_edit_distance": 3.0,
-                    "RealTimeUserQueryFeature:f_user_query_name_jaccard_similarity": -3.0,
-                },
+                "features": {"RealTimeUserFeature__f_user_name_length": 9.0},
             },
             "product::p1": {
                 "identifier": {"identifier": "p1", "identifier_type": "product"},
-                "features": {"RealTimeProductFeature:f_opensearch_score": 1.0},
+                "features": {
+                    "RealTimeProductFeature__f_opensearch_score": 1.0,
+                    "RealTimeMatchedQueriesProductFeature__f_matched_queries_QUERY_1": 1.0,
+                    "RealTimeMatchedQueriesProductFeature__f_matched_queries_QUERY_2": 1.0,
+                    "RealTimeQueryProductFeature__f_query_product_name_edit_distance": 4.0,
+                    "RealTimeQueryProductFeature__f_query_product_name_jaccard_similarity": -4.0,
+                    "RealTimeUserProductFeature__f_user_product_name_edit_distance": 7.0,
+                    "RealTimeUserProductFeature__f_user_product_name_jaccard_similarity": -7.0,
+                },
             },
             "product::p2": {
                 "identifier": {"identifier": "p2", "identifier_type": "product"},
-                "features": {},
+                "features": {
+                    "RealTimeQueryProductFeature__f_query_product_name_edit_distance": 4.0,
+                    "RealTimeQueryProductFeature__f_query_product_name_jaccard_similarity": -4.0,
+                    "RealTimeUserProductFeature__f_user_product_name_edit_distance": 7.0,
+                    "RealTimeUserProductFeature__f_user_product_name_jaccard_similarity": -7.0,
+                },
             },
             "product::p3": {
                 "identifier": {"identifier": "p3", "identifier_type": "product"},
-                "features": {},
+                "features": {
+                    "RealTimeQueryProductFeature__f_query_product_name_edit_distance": 4.0,
+                    "RealTimeQueryProductFeature__f_query_product_name_jaccard_similarity": -4.0,
+                    "RealTimeUserProductFeature__f_user_product_name_edit_distance": 7.0,
+                    "RealTimeUserProductFeature__f_user_product_name_jaccard_similarity": -7.0,
+                },
             },
             "product::p4": {
                 "identifier": {"identifier": "p4", "identifier_type": "product"},
-                "features": {"RealTimeProductFeature:f_opensearch_score": 100.0},
-            },
-            "product:query::p1:candle": {
-                "identifier": {
-                    "identifier": "p1:candle",
-                    "identifier_type": "product:query",
-                },
                 "features": {
-                    "RealTimeMatchedQueriesProductFeature:f_matched_queries_QUERY_1": 1.0,
-                    "RealTimeMatchedQueriesProductFeature:f_matched_queries_QUERY_2": 1.0,
-                    "RealTimeQueryProductFeature:f_query_product_name_edit_distance": 4.0,
-                    "RealTimeQueryProductFeature:f_query_product_name_jaccard_similarity": -4.0,
-                },
-            },
-            "product:query::p2:candle": {
-                "identifier": {
-                    "identifier": "p2:candle",
-                    "identifier_type": "product:query",
-                },
-                "features": {
-                    "RealTimeQueryProductFeature:f_query_product_name_edit_distance": 4.0,
-                    "RealTimeQueryProductFeature:f_query_product_name_jaccard_similarity": -4.0,
-                },
-            },
-            "product:query::p3:candle": {
-                "identifier": {
-                    "identifier": "p3:candle",
-                    "identifier_type": "product:query",
-                },
-                "features": {
-                    "RealTimeQueryProductFeature:f_query_product_name_edit_distance": 4.0,
-                    "RealTimeQueryProductFeature:f_query_product_name_jaccard_similarity": -4.0,
-                },
-            },
-            "product:query::p4:candle": {
-                "identifier": {
-                    "identifier": "p4:candle",
-                    "identifier_type": "product:query",
-                },
-                "features": {
-                    "RealTimeMatchedQueriesProductFeature:f_matched_queries_MATIAS": 1.0,
-                    "RealTimeMatchedQueriesProductFeature:f_matched_queries_QUERY_2": 1.0,
-                    "RealTimeQueryProductFeature:f_query_product_name_edit_distance": 4.0,
-                    "RealTimeQueryProductFeature:f_query_product_name_jaccard_similarity": -4.0,
-                },
-            },
-            "product:user::p1:1234": {
-                "identifier": {
-                    "identifier": "p1:1234",
-                    "identifier_type": "product:user",
-                },
-                "features": {
-                    "RealTimeUserProductFeature:f_user_product_name_edit_distance": 7.0,
-                    "RealTimeUserProductFeature:f_user_product_name_jaccard_similarity": -7.0,
-                },
-            },
-            "product:user::p2:1234": {
-                "identifier": {
-                    "identifier": "p2:1234",
-                    "identifier_type": "product:user",
-                },
-                "features": {
-                    "RealTimeUserProductFeature:f_user_product_name_edit_distance": 7.0,
-                    "RealTimeUserProductFeature:f_user_product_name_jaccard_similarity": -7.0,
-                },
-            },
-            "product:user::p3:1234": {
-                "identifier": {
-                    "identifier": "p3:1234",
-                    "identifier_type": "product:user",
-                },
-                "features": {
-                    "RealTimeUserProductFeature:f_user_product_name_edit_distance": 7.0,
-                    "RealTimeUserProductFeature:f_user_product_name_jaccard_similarity": -7.0,
-                },
-            },
-            "product:user::p4:1234": {
-                "identifier": {
-                    "identifier": "p4:1234",
-                    "identifier_type": "product:user",
-                },
-                "features": {
-                    "RealTimeUserProductFeature:f_user_product_name_edit_distance": 7.0,
-                    "RealTimeUserProductFeature:f_user_product_name_jaccard_similarity": -7.0,
+                    "RealTimeProductFeature__f_opensearch_score": 100.0,
+                    "RealTimeMatchedQueriesProductFeature__f_matched_queries_MATIAS": 1.0,
+                    "RealTimeMatchedQueriesProductFeature__f_matched_queries_QUERY_2": 1.0,
+                    "RealTimeQueryProductFeature__f_query_product_name_edit_distance": 4.0,
+                    "RealTimeQueryProductFeature__f_query_product_name_jaccard_similarity": -4.0,
+                    "RealTimeUserProductFeature__f_user_product_name_edit_distance": 7.0,
+                    "RealTimeUserProductFeature__f_user_product_name_jaccard_similarity": -7.0,
                 },
             },
         },

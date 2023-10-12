@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import asyncio
 import logging
-from typing import Generic, List, Optional, Set, Type
+from collections import defaultdict
+from typing import Generic, List, Optional, Set, Tuple, Type
 
 import polars as pl
 from ddtrace import tracer
@@ -92,6 +93,41 @@ class FeatureRetrievalPipeline(
             *upstreams,
             name=name,
         )
+
+    @tracer.wrap(name="FeatureRetrievalPipeline._concat_real_time_features")
+    def _concat_real_time_features(
+        self,
+        real_time_feature_dfs: List[Tuple[str, Optional[pl.DataFrame]]],
+    ) -> Optional[pl.DataFrame]:
+        """
+        This method is used to cast and concatenate real-time features into one DataFrame.
+
+        Args:
+            real_time_feature_dfs: A list of DataFrames that contain real-time features.
+
+        Returns:
+            A DataFrame that contains all the real-time features.
+        """
+        grouped_features = defaultdict(list)
+        for key, value in real_time_feature_dfs:
+            grouped_features[key].append(cast_float32_to_float64(value))
+
+        merged_features = [
+            pl.concat(value, how="diagonal") if len(value) > 1 else value[0]
+            for value in grouped_features.values()
+        ]
+
+        if not merged_features:
+            return None
+
+        real_time_feature_merged_df = merged_features[0]
+        for df in merged_features[1:]:
+            real_time_feature_merged_df = real_time_feature_merged_df.join(
+                df,
+                on=IDENTIFIER,
+                how="outer",
+            )
+        return real_time_feature_merged_df
 
     @tracer.wrap(name="FeatureRetrievalPipeline._generate_real_time_features")
     def _generate_real_time_features(
@@ -208,7 +244,7 @@ class FeatureRetrievalPipeline(
                 feature_retrieval_response=feature_df,
             )
             real_time_request_no_entity_features: List[
-                Optional[pl.DataFrame]
+                Tuple[str, Optional[pl.DataFrame]]
             ] = await asyncio.gather(
                 *[
                     real_time_feature.compute_request_features_wrapper(
@@ -221,7 +257,7 @@ class FeatureRetrievalPipeline(
 
         with tracer.trace("FeatureRetrievalPipeline.real_time_entity_features"):
             real_time_request_features: List[
-                Optional[pl.DataFrame]
+                Tuple[str, Optional[pl.DataFrame]]
             ] = await asyncio.gather(
                 *[
                     real_time_feature.compute_features_wrapper(
@@ -236,7 +272,7 @@ class FeatureRetrievalPipeline(
 
         with tracer.trace("FeatureRetrievalPipeline.real_time_combination_features"):
             real_time_request_combination_features: List[
-                Optional[pl.DataFrame]
+                Tuple[str, Optional[pl.DataFrame]]
             ] = await asyncio.gather(
                 *[
                     real_time_feature.compute_composite_features_wrapper(
@@ -256,8 +292,10 @@ class FeatureRetrievalPipeline(
                 ]
             )
 
-        real_time_candidate_features: List[Optional[pl.DataFrame]] = []
-        real_time_candidate_combination_features: List[Optional[pl.DataFrame]] = []
+        real_time_candidate_features: List[Tuple[str, Optional[pl.DataFrame]]] = []
+        real_time_candidate_combination_features: List[
+            Tuple[str, Optional[pl.DataFrame]]
+        ] = []
 
         if isinstance(input.request, CandidateSetEntity):
             with tracer.trace("FeatureRetrievalPipeline.real_time_candidate_features"):
@@ -304,27 +342,21 @@ class FeatureRetrievalPipeline(
         #   and we collect them together ahead of this dict comprehension
         # pytest / linter validation: we should assert for feature name conflicts -- this should never happen
         with tracer.trace("FeatureRetrievalPipeline.merge_feature_dfs"):
-            real_time_feature_dfs_optional = [
-                *real_time_request_no_entity_features,
-                *real_time_request_features,
-                *real_time_request_combination_features,
-                *real_time_candidate_features,
-                *real_time_candidate_combination_features,
-            ]
-            real_time_feature_dfs = [
-                cast_float32_to_float64(df)
-                for df in real_time_feature_dfs_optional
-                if df is not None
-            ]
-            real_time_feature_merged_df = pl.DataFrame()
-            if real_time_feature_dfs:
-                real_time_feature_merged_df = pl.concat(
-                    real_time_feature_dfs,
-                    how="diagonal",
-                )
+            real_time_feature_merged_df = self._concat_real_time_features(
+                [
+                    *real_time_request_no_entity_features,
+                    *real_time_request_features,
+                    *real_time_request_combination_features,
+                    *real_time_candidate_features,
+                    *real_time_candidate_combination_features,
+                ],
+            )
 
         with tracer.trace("FeatureRetrievalPipeline.create_feature_response"):
-            if real_time_feature_merged_df.is_empty():
+            if (
+                real_time_feature_merged_df is None
+                or real_time_feature_merged_df.is_empty()
+            ):
                 feature_responses = feature_df.df
             else:
                 await self.feature_logger_component.execute(
