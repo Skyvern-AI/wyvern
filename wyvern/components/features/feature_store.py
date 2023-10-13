@@ -6,6 +6,7 @@ import polars as pl
 from ddtrace import tracer
 from pydantic import BaseModel
 
+from wyvern import request_context
 from wyvern.components.component import Component
 from wyvern.config import settings
 from wyvern.core.http import aiohttp_client
@@ -119,8 +120,23 @@ class FeatureStoreRetrievalComponent(
             identifier.identifier: identifier for identifier in identifiers
         }
 
+        current_request = request_context.ensure_current_request()
+        current_request.feature_orig_identifiers.update(
+            {
+                feature_name: {
+                    get_identifier_key(
+                        identifier_by_identifiers[identifier],
+                    ): identifier_by_identifiers[identifier]
+                    for identifier in results[0]["values"]
+                }
+                # skip identifier column itself
+                for feature_name in feature_names[1:]
+            },
+        )
+
         # Start with the IDENTIFIER column since we need to map the str -> Identifier
         df_columns = [
+            # get_identifier_key will return the primary identifier for composite identifiers
             pl.Series(
                 name=IDENTIFIER,
                 values=[

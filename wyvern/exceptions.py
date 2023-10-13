@@ -171,3 +171,11 @@ class MissingModelChainOutputError(WyvernError):
 
 class MissingModelOutputError(WyvernError):
     message = "Identifier is missing in the model output"
+
+
+class WyvernLoggingOriginalIdentifierMissingError(WyvernError):
+    """
+    Raised when original identifier is missing during feature logging
+    """
+
+    message = "Original identifier is missing for primary identifier={identifier} feature_name={feature_name}."

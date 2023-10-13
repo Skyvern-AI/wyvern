@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import defaultdict
 from functools import cached_property
 from typing import Any, Dict, List, Optional, Set
 
@@ -388,6 +389,7 @@ async def test_hydrate(mock_redis):
         model_output_map={},
         events=[],
         feature_df=FeatureDataFrame(),
+        feature_orig_identifiers=defaultdict(dict),
     )
     request_context.set(test_wyvern_request)
 
@@ -450,6 +452,7 @@ async def test_hydrate__duplicate_brand(mock_redis__duplicate_brand):
         events=[],
         feature_df=FeatureDataFrame(),
         model_output_map={},
+        feature_orig_identifiers=defaultdict(dict),
     )
     request_context.set(test_wyvern_request)
 

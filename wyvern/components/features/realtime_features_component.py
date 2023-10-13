@@ -18,6 +18,7 @@ from typing import (
 import polars as pl
 from pydantic.generics import GenericModel
 
+from wyvern import request_context
 from wyvern.components.component import Component
 from wyvern.entities.feature_entities import IDENTIFIER, FeatureData, FeatureDataFrame
 from wyvern.entities.identifier import get_identifier_key
@@ -372,6 +373,15 @@ class RealtimeFeatureComponent(
         """
         if not feature_data:
             return self.name, None
+
+        current_request = request_context.ensure_current_request()
+        for feature_name in feature_data.features.keys():
+            feature_name = f"{self.name}__{feature_name}"
+            dict_to_update = current_request.feature_orig_identifiers[feature_name]
+            dict_to_update.update(
+                {get_identifier_key(feature_data.identifier): feature_data.identifier},
+            )
+            current_request.feature_orig_identifiers[feature_name] = dict_to_update
 
         df = pl.DataFrame().with_columns(
             [

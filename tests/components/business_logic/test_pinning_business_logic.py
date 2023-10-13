@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import defaultdict
 from typing import Dict, List
 
 import pytest
@@ -66,6 +67,7 @@ async def set_up_pinning_components(
             entity_store={},
             events=[],
             feature_df=FeatureDataFrame(),
+            feature_orig_identifiers=defaultdict(dict),
             model_output_map={},
         ),
     )

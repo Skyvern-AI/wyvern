@@ -362,7 +362,6 @@ class FeatureRetrievalPipeline(
                 await self.feature_logger_component.execute(
                     FeatureEventLoggingRequest(
                         request=input.request,
-                        feature_df=FeatureDataFrame(df=real_time_feature_merged_df),
                     ),
                 )
                 feature_responses = feature_df.df.join(

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Union
 from urllib.parse import urlparse
@@ -11,6 +12,7 @@ from pydantic import BaseModel
 from wyvern.components.events.events import LoggedEvent
 from wyvern.entities.feature_entities import FeatureDataFrame
 from wyvern.entities.identifier import Identifier
+from wyvern.exceptions import WyvernLoggingOriginalIdentifierMissingError
 
 
 @dataclass
@@ -44,6 +46,11 @@ class WyvernRequest:
     events: List[Callable[[], List[LoggedEvent[Any]]]]
 
     feature_df: FeatureDataFrame
+    # feature_orig_identifiers is a hack to get around the fact that the feature dataframe does not store
+    # the original identifiers of the entities. This is needed for logging the features with the correct
+    # identifiers. The below map is a map of the feature name to the primary identifier key of the entity to the
+    # original identifier of the entity
+    feature_orig_identifiers: Dict[str, Dict[str, Identifier]]
 
     # the key is the name of the model and the value is a map of the identifier to the model score
     model_output_map: Dict[
@@ -93,6 +100,7 @@ class WyvernRequest:
             entity_store={},
             events=[],
             feature_df=FeatureDataFrame(),
+            feature_orig_identifiers=defaultdict(dict),
             model_output_map={},
             request_id=request_id,
             run_id=run_id,
@@ -132,3 +140,26 @@ class WyvernRequest:
         if model_name not in self.model_output_map:
             return None
         return self.model_output_map[model_name].get(identifier)
+
+    def get_original_identifier(
+        self,
+        primary_identifier_key: str,
+        feature_name: str,
+    ) -> Identifier:
+        """Gets the original identifier for a feature name and primary identifier key.
+
+        Args:
+            primary_identifier_key: The primary identifier key.
+            feature_name: The name of the feature.
+
+
+        Returns:
+            The original identifier.
+        """
+        try:
+            return self.feature_orig_identifiers[feature_name][primary_identifier_key]
+        except KeyError:
+            raise WyvernLoggingOriginalIdentifierMissingError(
+                identifier=primary_identifier_key,
+                feature_name=feature_name,
+            )
