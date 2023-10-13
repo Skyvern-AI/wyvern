@@ -57,7 +57,7 @@ class FeatureDataFrame(BaseModel):
         df = self.df.filter(pl.col(IDENTIFIER).is_in(identifier_keys))
 
         # Process feature names, adding identifier to the selection
-        feature_names = [IDENTIFIER] + [f.replace(":", "__") for f in feature_names]
+        feature_names = [IDENTIFIER] + feature_names
         existing_cols = df.columns
         for col_name in feature_names:
             if col_name not in existing_cols:

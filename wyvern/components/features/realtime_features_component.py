@@ -376,7 +376,7 @@ class RealtimeFeatureComponent(
 
         current_request = request_context.ensure_current_request()
         for feature_name in feature_data.features.keys():
-            feature_name = f"{self.name}__{feature_name}"
+            feature_name = f"{self.name}:{feature_name}"
             dict_to_update = current_request.feature_orig_identifiers[feature_name]
             dict_to_update.update(
                 {get_identifier_key(feature_data.identifier): feature_data.identifier},
@@ -393,7 +393,7 @@ class RealtimeFeatureComponent(
         )
         df = df.with_columns(
             [
-                pl.Series(name=f"{self.name}__{feature_name}", values=[feature_value])
+                pl.Series(name=f"{self.name}:{feature_name}", values=[feature_value])
                 for feature_name, feature_value in feature_data.features.items()
             ],
         )

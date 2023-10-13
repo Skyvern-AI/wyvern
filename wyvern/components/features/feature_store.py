@@ -114,6 +114,9 @@ class FeatureStoreRetrievalComponent(
 
         response_json = await response.json()
         feature_names = response_json["metadata"]["feature_names"]
+        feature_names = [
+            feature_name.replace("__", ":") for feature_name in feature_names
+        ]
         results = response_json["results"]
 
         identifier_by_identifiers = {
