@@ -54,6 +54,17 @@ class FeatureDataFrame(BaseModel):
     ) -> pl.DataFrame:
         # Filter the dataframe by identifier. If the identifier is a composite identifier, use the primary identifier
         identifier_keys = [get_identifier_key(identifier) for identifier in identifiers]
+        return self.get_features_by_identifier_keys(
+            identifier_keys=identifier_keys,
+            feature_names=feature_names,
+        )
+
+    def get_features_by_identifier_keys(
+        self,
+        identifier_keys: List[str],
+        feature_names: List[str],
+    ) -> pl.DataFrame:
+        # Filter the dataframe by identifier
         df = self.df.filter(pl.col(IDENTIFIER).is_in(identifier_keys))
 
         # Process feature names, adding identifier to the selection

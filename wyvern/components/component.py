@@ -5,13 +5,13 @@ import asyncio
 import logging
 from enum import Enum
 from functools import cached_property
-from typing import Dict, Generic, List, Optional, Set, Union
+from typing import Dict, Generic, List, Optional, Set, Tuple, Union
 from uuid import uuid4
 
 import polars as pl
 
 from wyvern import request_context
-from wyvern.entities.identifier import Identifier
+from wyvern.entities.identifier import Identifier, get_identifier_key
 from wyvern.exceptions import WyvernFeatureValueError
 from wyvern.wyvern_typing import INPUT_TYPE, OUTPUT_TYPE, WyvernFeature
 
@@ -149,12 +149,33 @@ class Component(Generic[INPUT_TYPE, OUTPUT_TYPE]):
     def get_features(
         identifiers: List[Identifier],
         feature_names: List[str],
-    ) -> pl.DataFrame:
+    ) -> List[Tuple[str, List[WyvernFeature]]]:
         current_request = request_context.ensure_current_request()
-        return current_request.feature_df.get_features(
-            identifiers,
+        identifier_keys = [get_identifier_key(identifier) for identifier in identifiers]
+        df = current_request.feature_df.get_features_by_identifier_keys(
+            identifier_keys,
             feature_names,
         )
+
+        # build tuples where the identifier column is the first element and the feature columns are the rest
+        rows = df.rows()
+        identifier_to_features_dict = {
+            # row[0] is the identifier column, it is a string
+            # row[1:] are the feature columns, each column is a WyvernFeature
+            row[0]: row[1:]
+            for row in rows
+        }
+
+        empty_feature_list = [None] * len(feature_names)
+        tuples = [
+            (
+                identifier_key,
+                identifier_to_features_dict.get(identifier_key, empty_feature_list),
+            )
+            for identifier_key in identifier_keys
+        ]
+
+        return tuples  # type: ignore
 
     @staticmethod
     def get_feature(
