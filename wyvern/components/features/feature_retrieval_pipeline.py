@@ -110,7 +110,8 @@ class FeatureRetrievalPipeline(
         """
         grouped_features = defaultdict(list)
         for key, value in real_time_feature_dfs:
-            grouped_features[key].append(cast_float32_to_float64(value))
+            if value is not None:
+                grouped_features[key].append(cast_float32_to_float64(value))
 
         merged_features = [
             pl.concat(value, how="diagonal") if len(value) > 1 else value[0]
