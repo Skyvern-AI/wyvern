@@ -19,7 +19,6 @@ from wyvern.components.single_entity_pipeline import (
     SingleEntityPipelineResponse,
 )
 from wyvern.entities.candidate_entities import CandidateSetEntity
-from wyvern.entities.feature_entities import FeatureData, FeatureMap
 from wyvern.entities.identifier import CompositeIdentifier, Identifier, IdentifierType
 from wyvern.entities.identifier_entities import (
     ProductEntity,
@@ -44,8 +43,6 @@ __all__ = [
     "CandidateSetEntity",
     "ChainedModelInput",
     "CompositeIdentifier",
-    "FeatureData",
-    "FeatureMap",
     "Identifier",
     "IdentifierType",
     "ModelComponent",

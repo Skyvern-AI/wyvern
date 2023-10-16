@@ -99,6 +99,14 @@ class WyvernFeatureNameError(WyvernError):
     )
 
 
+class WyvernFeatureValueError(WyvernError):
+    """
+    Raised when there is an error in feature value
+    """
+
+    message = "More than one feature value found for identifier={identifier} feature_name={feature_name}."
+
+
 class WyvernModelInputError(WyvernError):
     """
     Raised when there is an error in model input
@@ -163,3 +171,11 @@ class MissingModelChainOutputError(WyvernError):
 
 class MissingModelOutputError(WyvernError):
     message = "Identifier is missing in the model output"
+
+
+class WyvernLoggingOriginalIdentifierMissingError(WyvernError):
+    """
+    Raised when original identifier is missing during feature logging
+    """
+
+    message = "Original identifier is missing for primary identifier={identifier} feature_name={feature_name}."

@@ -15,10 +15,13 @@ from typing import (
     get_args,
 )
 
+import polars as pl
 from pydantic.generics import GenericModel
 
+from wyvern import request_context
 from wyvern.components.component import Component
-from wyvern.entities.feature_entities import FeatureData, FeatureMap
+from wyvern.entities.feature_entities import IDENTIFIER, FeatureData, FeatureDataFrame
+from wyvern.entities.identifier import get_identifier_key
 from wyvern.entities.identifier_entities import WyvernEntity
 from wyvern.feature_store.constants import (
     FULL_FEATURE_NAME_SEPARATOR,
@@ -47,7 +50,7 @@ class RealtimeFeatureRequest(GenericModel, Generic[REQUEST_ENTITY]):
     """
 
     request: REQUEST_ENTITY
-    feature_retrieval_response: FeatureMap
+    feature_retrieval_response: FeatureDataFrame
 
 
 class RealtimeFeatureEntity(GenericModel, Generic[PRIMARY_ENTITY, SECONDARY_ENTITY]):
@@ -67,7 +70,7 @@ class RealtimeFeatureComponent(
             RealtimeFeatureRequest[REQUEST_ENTITY],
             RealtimeFeatureEntity[PRIMARY_ENTITY, SECONDARY_ENTITY],
         ],
-        Optional[FeatureData],
+        Tuple[str, Optional[pl.DataFrame]],
     ],
     Generic[PRIMARY_ENTITY, SECONDARY_ENTITY, REQUEST_ENTITY],
 ):
@@ -258,7 +261,7 @@ class RealtimeFeatureComponent(
             RealtimeFeatureEntity[PRIMARY_ENTITY, SECONDARY_ENTITY],
         ],
         **kwargs,
-    ) -> Optional[FeatureData]:
+    ) -> Tuple[str, Optional[pl.DataFrame]]:
         # TODO (Suchintan): Delete this method -- this has been fully delegated upwards?
         request = input[0]
         entities = input[1]
@@ -268,7 +271,9 @@ class RealtimeFeatureComponent(
             entities.primary_entity,
             entities.secondary_entity,
         ):
-            return None
+            return self.name, pl.DataFrame().with_columns(
+                pl.Series(name=IDENTIFIER, dtype=pl.Utf8),
+            )
 
         if (
             entities.secondary_entity is not None
@@ -285,7 +290,7 @@ class RealtimeFeatureComponent(
                     f"Failed to compute composite features for "
                     f"{self} {entities.primary_entity.identifier} {entities.secondary_entity.identifier}",
                 )
-            return resp
+            return self.create_df_with_full_feature_name(resp)
 
         if entities.primary_entity is not None:
             resp = await self.compute_features(
@@ -298,7 +303,7 @@ class RealtimeFeatureComponent(
                     f"Failed to compute features for "
                     f"{self} {entities.primary_entity.identifier}",
                 )
-            return resp
+            return self.create_df_with_full_feature_name(resp)
 
         # TODO (suchintan): Lowercase feature names?
         resp = await self.compute_request_features(request)
@@ -308,7 +313,7 @@ class RealtimeFeatureComponent(
             logger.info(
                 f"Failed to compute request features for {self} {request.request}",
             )
-        return resp
+        return self.create_df_with_full_feature_name(resp)
 
     async def compute_request_features(
         self,
@@ -334,45 +339,62 @@ class RealtimeFeatureComponent(
     async def compute_request_features_wrapper(
         self,
         request: RealtimeFeatureRequest[REQUEST_ENTITY],
-    ) -> Optional[FeatureData]:
+    ) -> Tuple[str, Optional[pl.DataFrame]]:
         feature_data = await self.compute_request_features(request)
-        return self.set_full_feature_name(feature_data)
+        return self.create_df_with_full_feature_name(feature_data)
 
     async def compute_features_wrapper(
         self,
         entity: PRIMARY_ENTITY,
         request: RealtimeFeatureRequest[REQUEST_ENTITY],
-    ) -> Optional[FeatureData]:
+    ) -> Tuple[str, Optional[pl.DataFrame]]:
         feature_data = await self.compute_features(entity, request)
-        return self.set_full_feature_name(feature_data)
+        return self.create_df_with_full_feature_name(feature_data)
 
     async def compute_composite_features_wrapper(
         self,
         primary_entity: PRIMARY_ENTITY,
         secondary_entity: SECONDARY_ENTITY,
         request: RealtimeFeatureRequest[REQUEST_ENTITY],
-    ) -> Optional[FeatureData]:
+    ) -> Tuple[str, Optional[pl.DataFrame]]:
         feature_data = await self.compute_composite_features(
             primary_entity,
             secondary_entity,
             request,
         )
-        return self.set_full_feature_name(feature_data)
+        return self.create_df_with_full_feature_name(feature_data)
 
-    def set_full_feature_name(
+    def create_df_with_full_feature_name(
         self,
         feature_data: Optional[FeatureData],
-    ) -> Optional[FeatureData]:
+    ) -> Tuple[str, Optional[pl.DataFrame]]:
         """
-        Sets the full feature name for the feature data
+        Creates a dataframe with the full feature name for the feature data
         """
         if not feature_data:
-            return None
+            return self.name, None
 
-        return FeatureData(
-            identifier=feature_data.identifier,
-            features={
-                f"{self.name}:{feature_name}": feature_value
-                for feature_name, feature_value in feature_data.features.items()
-            },
+        current_request = request_context.ensure_current_request()
+        for feature_name in feature_data.features.keys():
+            feature_name = f"{self.name}:{feature_name}"
+            dict_to_update = current_request.feature_orig_identifiers[feature_name]
+            dict_to_update.update(
+                {get_identifier_key(feature_data.identifier): feature_data.identifier},
+            )
+            current_request.feature_orig_identifiers[feature_name] = dict_to_update
+
+        df = pl.DataFrame().with_columns(
+            [
+                pl.Series(
+                    name=IDENTIFIER,
+                    values=[get_identifier_key(feature_data.identifier)],
+                ),
+            ],
         )
+        df = df.with_columns(
+            [
+                pl.Series(name=f"{self.name}:{feature_name}", values=[feature_value])
+                for feature_name, feature_value in feature_data.features.items()
+            ],
+        )
+        return self.name, df

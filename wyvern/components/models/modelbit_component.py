@@ -161,15 +161,14 @@ class ModelbitComponent(
             Union[WyvernEntity, BaseWyvernRequest]
         ] = input.entities or [input.request]
         target_identifiers = [entity.identifier for entity in target_entities]
+        identifier_features_tuples = self.get_features(
+            target_identifiers,
+            self.modelbit_features,
+        )
+
         all_requests = [
-            [
-                idx + 1,
-                [
-                    self.get_feature(identifier, feature_name)
-                    for feature_name in self.modelbit_features
-                ],
-            ]
-            for idx, identifier in enumerate(target_identifiers)
+            [idx + 1, features]
+            for idx, (identifier, features) in enumerate(identifier_features_tuples)
         ]
         return target_identifiers, all_requests
 

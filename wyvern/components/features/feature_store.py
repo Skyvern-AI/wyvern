@@ -1,21 +1,18 @@
 # -*- coding: utf-8 -*-
 import logging
-from typing import Dict, List, Optional
+from typing import List, Optional
 
+import polars as pl
 from ddtrace import tracer
 from pydantic import BaseModel
 
+from wyvern import request_context
 from wyvern.components.component import Component
 from wyvern.config import settings
 from wyvern.core.http import aiohttp_client
-from wyvern.entities.feature_entities import (
-    FeatureData,
-    FeatureMap,
-    build_empty_feature_map,
-)
-from wyvern.entities.identifier import Identifier
+from wyvern.entities.feature_entities import IDENTIFIER, FeatureDataFrame
+from wyvern.entities.identifier import Identifier, get_identifier_key
 from wyvern.exceptions import WyvernFeatureNameError, WyvernFeatureStoreError
-from wyvern.wyvern_typing import WyvernFeature
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +34,7 @@ class FeatureStoreRetrievalRequest(BaseModel):
 
 
 class FeatureStoreRetrievalComponent(
-    Component[FeatureStoreRetrievalRequest, FeatureMap],
+    Component[FeatureStoreRetrievalRequest, FeatureDataFrame],
 ):
     """
     Component to retrieve features from the feature store. This component is responsible for fetching features from
@@ -71,7 +68,7 @@ class FeatureStoreRetrievalComponent(
         self,
         identifiers: List[Identifier],
         feature_names: List[str],
-    ) -> FeatureMap:
+    ) -> FeatureDataFrame:
         """
         Fetches features from the feature store for the given identifiers and feature names.
 
@@ -83,7 +80,7 @@ class FeatureStoreRetrievalComponent(
             FeatureMap containing the features for the given identifiers and feature names.
         """
         if not feature_names or not settings.FEATURE_STORE_ENABLED:
-            return FeatureMap(feature_map={})
+            return FeatureDataFrame()
 
         logger.info(f"Fetching features from feature store: {feature_names}")
         invalid_feature_names: List[str] = [
@@ -94,7 +91,7 @@ class FeatureStoreRetrievalComponent(
         request_body = {
             "features": feature_names,
             "entities": {
-                "IDENTIFIER": [identifier.identifier for identifier in identifiers],
+                IDENTIFIER: [identifier.identifier for identifier in identifiers],
             },
             "full_feature_names": True,
         }
@@ -117,32 +114,49 @@ class FeatureStoreRetrievalComponent(
 
         response_json = await response.json()
         feature_names = response_json["metadata"]["feature_names"]
-        feature_name_keys = [
+        feature_names = [
             feature_name.replace("__", ":", 1) for feature_name in feature_names
         ]
-
         results = response_json["results"]
-        response_identifiers = results[0]["values"]
 
         identifier_by_identifiers = {
             identifier.identifier: identifier for identifier in identifiers
         }
 
-        feature_map: Dict[Identifier, FeatureData] = {}
-        for i in range(len(response_identifiers)):
-            feature_data: Dict[str, WyvernFeature] = {
-                feature_name_keys[j]: results[j]["values"][i]
-                # the first feature_name is IDENTIFIER which we will skip
-                for j in range(1, len(feature_names))
-            }
+        current_request = request_context.ensure_current_request()
+        current_request.feature_orig_identifiers.update(
+            {
+                feature_name: {
+                    get_identifier_key(
+                        identifier_by_identifiers[identifier],
+                    ): identifier_by_identifiers[identifier]
+                    for identifier in results[0]["values"]
+                }
+                # skip identifier column itself
+                for feature_name in feature_names[1:]
+            },
+        )
 
-            identifier = identifier_by_identifiers[response_identifiers[i]]
-            feature_map[identifier] = FeatureData(
-                identifier=identifier,
-                features=feature_data,
-            )
+        # Start with the IDENTIFIER column since we need to map the str -> Identifier
+        df_columns = [
+            # get_identifier_key will return the primary identifier for composite identifiers
+            pl.Series(
+                name=IDENTIFIER,
+                values=[
+                    get_identifier_key(identifier_by_identifiers[identifier])
+                    for identifier in results[0]["values"]
+                ],
+            ),
+        ]
+        df_columns.extend(
+            [
+                pl.Series(name=feature_name, values=results[i + 1]["values"])
+                for i, feature_name in enumerate(feature_names[1:])
+            ],
+        )
+        df = pl.DataFrame().with_columns(df_columns)
 
-        return FeatureMap(feature_map=feature_map)
+        return FeatureDataFrame(df=df)
 
     @tracer.wrap(name="FeatureStoreRetrievalComponent.execute")
     async def execute(
@@ -150,7 +164,7 @@ class FeatureStoreRetrievalComponent(
         input: FeatureStoreRetrievalRequest,
         handle_exceptions: bool = False,
         **kwargs,
-    ) -> FeatureMap:
+    ) -> FeatureDataFrame:
         """
         Fetches features from the feature store for the given identifiers and feature names. This method is a wrapper
         around `fetch_features_from_feature_store` which handles exceptions and returns an empty FeatureMap in case of
@@ -167,7 +181,10 @@ class FeatureStoreRetrievalComponent(
         except WyvernFeatureStoreError as e:
             if handle_exceptions:
                 # logging is handled where the exception is raised
-                return build_empty_feature_map(input.identifiers, input.feature_names)
+                return FeatureDataFrame.build_empty_df(
+                    input.identifiers,
+                    input.feature_names,
+                )
             else:
                 raise e
 

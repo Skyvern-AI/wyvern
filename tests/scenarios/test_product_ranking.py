@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import defaultdict
 from functools import cached_property
 from typing import Any, Dict, List, Optional, Set
 
@@ -19,7 +20,7 @@ from wyvern.config import settings
 from wyvern.core.compression import wyvern_encode
 from wyvern.core.http import aiohttp_client
 from wyvern.entities.candidate_entities import CandidateSetEntity
-from wyvern.entities.feature_entities import FeatureData, FeatureMap
+from wyvern.entities.feature_entities import FeatureData, FeatureDataFrame
 from wyvern.entities.identifier import Identifier
 from wyvern.entities.identifier_entities import ProductEntity, WyvernEntity
 from wyvern.entities.model_entities import ModelInput, ModelOutput
@@ -387,7 +388,8 @@ async def test_hydrate(mock_redis):
         entity_store={},
         model_output_map={},
         events=[],
-        feature_map=FeatureMap(feature_map={}),
+        feature_df=FeatureDataFrame(),
+        feature_orig_identifiers=defaultdict(dict),
     )
     request_context.set(test_wyvern_request)
 
@@ -448,8 +450,9 @@ async def test_hydrate__duplicate_brand(mock_redis__duplicate_brand):
         headers={},
         entity_store={},
         events=[],
-        feature_map=FeatureMap(feature_map={}),
+        feature_df=FeatureDataFrame(),
         model_output_map={},
+        feature_orig_identifiers=defaultdict(dict),
     )
     request_context.set(test_wyvern_request)
 

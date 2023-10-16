@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wyvern-ai"
-version = "0.0.26"
+version = "0.0.27"
 description = ""
 authors = ["Wyvern AI <info@wyvern.ai>"]
 readme = "README.md"
@@ -33,6 +33,7 @@ aiohttp = {extras = ["speedups"], version = "^3.8.5"}
 requests = "^2.31.0"
 platformdirs = "^3.8"
 posthog = "^3.0.2"
+polars = "^0.19.6"
 
 
 [tool.poetry.group.dev.dependencies]

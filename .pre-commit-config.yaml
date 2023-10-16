@@ -62,6 +62,7 @@ repos:
           - types-tqdm
           - nest-asyncio
           - aiohttp
+          - polars
         exclude: "^tests/"
 
   # Check for spelling

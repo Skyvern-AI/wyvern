@@ -8,7 +8,7 @@ from pydantic.main import BaseModel
 from wyvern import request_context
 from wyvern.components.component import Component
 from wyvern.components.events.events import EventType, LoggedEvent
-from wyvern.entities.feature_entities import FeatureMap
+from wyvern.entities.feature_entities import IDENTIFIER
 from wyvern.event_logging import event_logger
 from wyvern.wyvern_typing import REQUEST_ENTITY, WyvernFeature
 
@@ -47,11 +47,13 @@ class FeatureEventLoggingRequest(
 
     Attributes:
         request: The request to log feature events for.
-        feature_map: The feature map to log.
+        feature_df: The feature data frame to log.
     """
 
     request: REQUEST_ENTITY
-    feature_map: FeatureMap
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class FeatureEventLoggingComponent(
@@ -75,6 +77,10 @@ class FeatureEventLoggingComponent(
                 A list of feature events.
             """
             timestamp = datetime.utcnow()
+
+            # Extract column names excluding "IDENTIFIER"
+            feature_columns = wyvern_request.feature_df.df.columns[1:]
+
             return [
                 FeatureEvent(
                     request_id=input.request.request_id,
@@ -82,14 +88,21 @@ class FeatureEventLoggingComponent(
                     api_source=url_path,
                     event_timestamp=timestamp,
                     event_data=FeatureLogEventData(
-                        feature_identifier=feature_data.identifier.identifier,
-                        feature_identifier_type=feature_data.identifier.identifier_type,
-                        feature_name=feature_name,
-                        feature_value=feature_value,
+                        feature_identifier_type=wyvern_request.get_original_identifier(
+                            row[IDENTIFIER],
+                            col,
+                        ).identifier_type,
+                        feature_identifier=wyvern_request.get_original_identifier(
+                            row[IDENTIFIER],
+                            col,
+                        ).identifier,
+                        feature_name=col,
+                        feature_value=row[col],
                     ),
                 )
-                for feature_data in input.feature_map.feature_map.values()
-                for feature_name, feature_value in feature_data.features.items()
+                for row in wyvern_request.feature_df.df.iter_rows(named=True)
+                for col in feature_columns
+                if row[col]
             ]
 
         event_logger.log_events(feature_event_generator)  # type: ignore

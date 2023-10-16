@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import defaultdict
 from typing import Dict, List
 
 import pytest
@@ -13,7 +14,7 @@ from wyvern.components.business_logic.pinning_business_logic import (
     PinningBusinessLogicComponent,
 )
 from wyvern.entities.candidate_entities import ScoredCandidate
-from wyvern.entities.feature_entities import FeatureMap
+from wyvern.entities.feature_entities import FeatureDataFrame
 from wyvern.entities.identifier_entities import ProductEntity
 from wyvern.entities.request import BaseWyvernRequest
 from wyvern.wyvern_request import WyvernRequest
@@ -65,7 +66,8 @@ async def set_up_pinning_components(
             headers={},
             entity_store={},
             events=[],
-            feature_map=FeatureMap(feature_map={}),
+            feature_df=FeatureDataFrame(),
+            feature_orig_identifiers=defaultdict(dict),
             model_output_map={},
         ),
     )
