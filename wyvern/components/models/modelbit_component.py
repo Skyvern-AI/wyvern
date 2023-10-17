@@ -4,6 +4,8 @@ import logging
 from functools import cached_property
 from typing import Any, Dict, List, Optional, Set, Tuple, TypeAlias, Union, final
 
+from ddtrace import tracer
+
 from wyvern.components.models.model_component import (
     BaseModelComponent,
     MultiEntityModelComponent,
@@ -74,13 +76,15 @@ class ModelbitMixin(BaseModelComponent[INPUT_TYPE, MODEL_OUTPUT]):
         """
         return set(self.modelbit_features)
 
+    @tracer.wrap(name="ModelbitMixin.inference")
     async def inference(self, input: INPUT_TYPE, **kwargs) -> MODEL_OUTPUT:
         """
         This method sends a request to Modelbit and returns the output.
         """
         # TODO shu: currently we don't support modelbit inference just for request if the input contains entities
 
-        target_identifiers, all_requests = await self.build_requests(input)
+        with tracer.trace("Modelbit.build_requests"):
+            target_identifiers, all_requests = await self.build_requests(input)
 
         if len(target_identifiers) != len(all_requests):
             raise WyvernModelbitValidationError(
