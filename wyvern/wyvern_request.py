@@ -3,12 +3,13 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Coroutine, Dict, List, Optional, Union
 from urllib.parse import urlparse
 
 import fastapi
 from pydantic import BaseModel
 
+from wyvern import request_context
 from wyvern.components.events.events import LoggedEvent
 from wyvern.entities.feature_entities import FeatureDataFrame
 from wyvern.entities.identifier import Identifier
@@ -70,6 +71,7 @@ class WyvernRequest:
     request_id: Optional[str] = None
     run_id: str = "0"
 
+    shadow_requests: Optional[List[Dict[str, Any]]] = None
     # TODO: params
 
     @classmethod
@@ -163,3 +165,29 @@ class WyvernRequest:
                 identifier=primary_identifier_key,
                 feature_name=feature_name,
             )
+
+    def add_shadow_request_call(
+        self, callable: Callable[..., Coroutine[Any, Any, Any]], *args, **kwargs
+    ):
+        if self.shadow_requests is None:
+            self.shadow_requests = []
+
+        self.shadow_requests.append(
+            {
+                "callable": callable,
+                "args": args,
+                "kwargs": kwargs,
+            },
+        )
+
+    async def execute_shadow_requests(self):
+        if self.shadow_requests is None:
+            return
+        try:
+            request_context.set(self)
+            for shadow_request in self.shadow_requests:
+                await shadow_request["callable"](
+                    *shadow_request["args"], **shadow_request["kwargs"]
+                )
+        finally:
+            request_context.reset()

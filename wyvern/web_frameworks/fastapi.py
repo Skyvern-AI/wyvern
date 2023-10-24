@@ -160,6 +160,10 @@ class WyvernFastapi:
                 output = await root_component.execute(data)
 
                 background_tasks.add_task(
+                    wyvern_req.execute_shadow_requests,
+                )
+
+                background_tasks.add_task(
                     wyvern_kinesis_firehose.put_record_batch_callable,
                     KinesisFirehoseStream.EVENT_STREAM,
                     # TODO (suchintan): "invariant" list error
