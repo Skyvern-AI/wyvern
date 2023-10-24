@@ -354,12 +354,18 @@ def process_historical_registry_features_request(
     entity_df = pd.DataFrame(request.entities)
     # no timezone is allowed in the timestamp
     entity_df["event_timestamp"] = entity_df["event_timestamp"].dt.tz_localize(None)
+    # TODO: use sql to get the result.
+    # example:
+    # https://docs.feast.dev/getting-started/concepts/feature-retrieval
+    # #example-entity-sql-query-for-generating-training-data
     result = store.get_historical_features(
         entity_df=entity_df,
         features=request.features or [],
         full_feature_names=request.full_feature_names,
     )
+    # TODO: to_sql(); replace IDENTIFIER by the original identifier_type
     result_df = result.to_df()
+    # TODO: group IDENTIFIER and event_timestamp
     result_df.drop_duplicates(subset=["IDENTIFIER", "event_timestamp"], inplace=True)
     return entity_df.merge(
         result_df,
