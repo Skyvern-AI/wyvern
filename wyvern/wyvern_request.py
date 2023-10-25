@@ -3,16 +3,30 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import fastapi
 from pydantic import BaseModel
 
+from wyvern import request_context
 from wyvern.components.events.events import LoggedEvent
 from wyvern.entities.feature_entities import FeatureDataFrame
 from wyvern.entities.identifier import Identifier
 from wyvern.exceptions import WyvernLoggingOriginalIdentifierMissingError
+
+
+class ShadowRequest:
+    callable: Callable[..., Coroutine[Any, Any, Any]]
+    args: Tuple[Any, ...]
+    kwargs: Dict[str, Any]
+
+    def __init__(
+        self, shadow_callable: Callable[..., Coroutine[Any, Any, Any]], *args, **kwargs
+    ):
+        self.callable = shadow_callable
+        self.args = args
+        self.kwargs = kwargs
 
 
 @dataclass
@@ -69,6 +83,8 @@ class WyvernRequest:
 
     request_id: Optional[str] = None
     run_id: str = "0"
+
+    shadow_requests: Optional[List[ShadowRequest]] = None
 
     # TODO: params
 
@@ -163,3 +179,24 @@ class WyvernRequest:
                 identifier=primary_identifier_key,
                 feature_name=feature_name,
             )
+
+    def add_shadow_request_call(
+        self,
+        shadow_request: ShadowRequest,
+    ):
+        if self.shadow_requests is None:
+            self.shadow_requests = []
+
+        self.shadow_requests.append(shadow_request)
+
+    async def execute_shadow_requests(self):
+        if self.shadow_requests is None:
+            return
+        try:
+            request_context.set(self)
+            for shadow_request in self.shadow_requests:
+                await shadow_request.callable(
+                    *shadow_request.args, **shadow_request.kwargs
+                )
+        finally:
+            request_context.reset()
