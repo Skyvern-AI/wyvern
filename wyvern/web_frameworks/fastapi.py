@@ -163,13 +163,6 @@ class WyvernFastapi:
                     wyvern_req.execute_shadow_requests,
                 )
 
-                background_tasks.add_task(
-                    wyvern_kinesis_firehose.put_record_batch_callable,
-                    KinesisFirehoseStream.EVENT_STREAM,
-                    # TODO (suchintan): "invariant" list error
-                    event_logger.get_logged_events_generator(),  # type: ignore
-                )
-
                 # profiler.stop()
                 # profiler.print(show_all=True)
             except ValidationError as e:
@@ -188,6 +181,11 @@ class WyvernFastapi:
                 logger.exception(f"Unexpected error error={e} request_payload={json}")
                 raise HTTPException(status_code=500, detail=str(e))
             finally:
+                background_tasks.add_task(
+                    wyvern_kinesis_firehose.put_record_batch_callable,
+                    KinesisFirehoseStream.EVENT_STREAM,
+                    event_logger.get_logged_events_generator(),  # type: ignore
+                )
                 request_context.reset()
             if not output:
                 raise HTTPException(status_code=500, detail="something is wrong")
