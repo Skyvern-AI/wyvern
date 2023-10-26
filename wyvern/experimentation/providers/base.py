@@ -19,7 +19,7 @@ class BaseExperimentationProvider(ABC):
     """
 
     @abstractmethod
-    def get_result(self, experiment_id: str, entity_id: str, **kwargs) -> str:
+    def get_result(self, experiment_id: str, entity_id: str, **kwargs) -> Optional[str]:
         """
         Get the result (variant) for a given experiment and entity.
 
@@ -29,7 +29,7 @@ class BaseExperimentationProvider(ABC):
         - kwargs (dict): Any additional arguments to pass to the provider for targeting.
 
         Returns:
-        - str: The result (variant) assigned to the entity for the specified experiment.
+        - str | None: The result (variant) assigned to the entity for the specified experiment or None.
         """
         raise NotImplementedError
 
