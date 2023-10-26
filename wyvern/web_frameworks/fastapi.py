@@ -181,6 +181,7 @@ class WyvernFastapi:
                 logger.exception(f"Unexpected error error={e} request_payload={json}")
                 raise HTTPException(status_code=500, detail=str(e))
             finally:
+                # log events no matter exception or not
                 background_tasks.add_task(
                     wyvern_kinesis_firehose.put_record_batch_callable,
                     KinesisFirehoseStream.EVENT_STREAM,
