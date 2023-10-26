@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import importlib
 import logging
+import secrets
 import time
 import traceback
 from collections import defaultdict
@@ -33,6 +34,7 @@ from wyvern.components.features.realtime_features_component import (
 )
 from wyvern.config import settings
 from wyvern.feature_store.historical_feature_util import (
+    build_and_merge_realtime_pivot_tables,
     build_historical_real_time_feature_requests,
     build_historical_registry_feature_requests,
     process_historical_real_time_features_requests,
@@ -41,7 +43,9 @@ from wyvern.feature_store.historical_feature_util import (
 )
 from wyvern.feature_store.schemas import (
     GetHistoricalFeaturesRequest,
+    GetHistoricalFeaturesRequestV2,
     GetHistoricalFeaturesResponse,
+    GetHistoricalFeaturesResponseV2,
     GetOnlineFeaturesRequest,
     MaterializeRequest,
 )
@@ -454,6 +458,139 @@ def generate_wyvern_store_app(
 
         return GetHistoricalFeaturesResponse(
             results=final_df.to_dict(orient="records"),
+        )
+
+    @app.post(f"{settings.WYVERN_HISTORICAL_FEATURES_PATH}_v2")
+    async def get_historical_features_v2(
+        data: GetHistoricalFeaturesRequestV2,
+    ) -> GetHistoricalFeaturesResponseV2:
+        # TODO: validate the data input: lengths of requests, timestamps and all the entities should be the same
+        # if "request" not in data.entities:
+        #     raise HTTPException(
+        #         status_code=400,
+        #         detail="request is required in entities",
+        #     )
+        # length_of_requests = len(data.entities["request"])
+        # length_of_timestamps = len(data.timestamps)
+        # if length_of_requests != length_of_timestamps:
+        #     raise HTTPException(
+        #         status_code=400,
+        #         detail=(
+        #             f"Length of requests({length_of_requests}) and "
+        #             f"timestamps({length_of_timestamps}) should be the same"
+        #         ),
+        #     )
+        # if length_of_requests > MAX_HISTORICAL_REQUEST_SIZE:
+        #     raise HTTPException(
+        #         status_code=400,
+        #         detail=(
+        #             f"The max size of requests is {MAX_HISTORICAL_REQUEST_SIZE}. Got {length_of_requests} requests."
+        #         ),
+        #     )
+        # for key, value in data.entities.items():
+        #     if len(value) != length_of_requests:
+        #         raise HTTPException(
+        #             status_code=400,
+        #             detail=f"Length of requests({length_of_requests}) and {key}({len(value)}) should be the same",
+        #         )
+
+        # Generate a 10-digit hex for the request
+        hex_id = secrets.token_hex(5)
+
+        # convert the data input to pandas dataframe
+        realtime_features, feast_features = separate_real_time_features(data.features)
+        # TODO: analyze all the realtime features and generate all the composite feature columns in the dataframe
+        # the column name will be the composite feature name
+        valid_realtime_features: List[str] = []
+        composite_entities: Dict[str, List[str]] = {}
+        for realtime_feature in realtime_features:
+            entity_type_column = RealtimeFeatureComponent.get_entity_type_column(
+                realtime_feature,
+            )
+            entity_names = RealtimeFeatureComponent.get_entity_names(realtime_feature)
+            if not entity_type_column or not entity_names:
+                logger.warning(f"feature={realtime_feature} is not found")
+                continue
+
+            if len(entity_names) == 2:
+                entity_name_1 = entity_names[0]
+                entity_name_2 = entity_names[1]
+
+                # TODO: valid entity_name_1 and entity_name_2 are in the table columns
+                # if entity_name_1 not in data.entities:
+                #     logger.warning(
+                #         f"Realtime feature {realtime_feature} depends on "
+                #         f"entity={entity_name_1}, which is not found in entities",
+                #     )
+                #     continue
+                # if entity_name_2 not in data.entities:
+                #     logger.warning(
+                #         f"Realtime feature {realtime_feature} depends on "
+                #         f"entity={entity_name_2}, which is not found in entities",
+                #     )
+                #     continue
+                composite_entities[entity_type_column] = entity_names
+            valid_realtime_features.append(realtime_feature)
+
+        # TODO: generate all the composite feature columns in the remote composite table
+        # this needs to be a sql query that generates a temporary table RT_{HEX_ID}_COMPOSITE
+        # for entity_type_column in composite_entities:
+        #     entity_name1, entity_name2 = composite_entities[entity_type_column]
+        #     df[entity_type_column] = df[entity_name1] + ":" + df[entity_name2]
+
+        composite_columns = ",".join(
+            [
+                ":".join(entities) + f" as {entity_type_column}"
+                for entity_type_column, entities in composite_entities.items()
+            ],
+        )
+        select_sql = f"""
+        SELECT *, {composite_columns}, timestamp as event_timestamp
+        FROM {data.table}
+        """
+        # create temporary table with this select_sql query
+
+        build_and_merge_realtime_pivot_tables(hex_id, realtime_features)
+
+        # feast_requests = build_historical_registry_feature_requests(
+        #     store=store,
+        #     feature_names=feast_features,
+        #     entity_values=data.entities,
+        #     timestamps=data.timestamps,
+        # )
+        # feast_responses = process_historical_registry_features_requests(
+        #     store=store,
+        #     requests=feast_requests,
+        # )
+
+        # for feast_response in feast_responses:
+        #     if len(feast_response.IDENTIFIER) != len(df["request"]):
+        #         raise HTTPException(
+        #             status_code=400,
+        #             detail=(
+        #                 f"Length of feature store response({len(feast_response.IDENTIFIER)}) "
+        #                 f"and request({len(df['request'])}) should be the same"
+        #             ),
+        #         )
+        #     new_columns = [
+        #         column
+        #         for column in feast_response.columns
+        #         if column not in ["IDENTIFIER", "event_timestamp"]
+        #     ]
+        #     df = df.join(feast_response[new_columns])
+
+        # composite_keys = [key for key in composite_entities.keys() if key in df]
+        # composite_keys_uppercase = [
+        #     key.upper() for key in composite_entities.keys() if key.upper() in df
+        # ]
+        # drop_columns = composite_keys + composite_keys_uppercase + ["REQUEST_ID"]
+        # drop_columns = [column for column in drop_columns if column in df]
+        # df.drop(columns=drop_columns, inplace=True)
+        # final_df = df.replace({np.nan: None})
+        # final_df["timestamp"] = final_df["timestamp"].astype(str)
+
+        return GetHistoricalFeaturesResponseV2(
+            result_table="result_table",
         )
 
     return app

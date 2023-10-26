@@ -117,6 +117,41 @@ def build_historical_real_time_feature_requests(
     return result_dict
 
 
+def build_and_merge_realtime_pivot_tables(
+    hex_id: str,
+    full_feature_names: List[str],
+) -> Dict[str, RequestEntityIdentifierObjects]:
+    """
+    Build historical real-time feature requests grouped by entity types so that we can process them in parallel.
+
+    Args:
+        full_feature_names: a list of full feature names.
+        request_ids: a list of request ids.
+        entities: a dictionary of entity names and their values.
+
+    Returns:
+        A dictionary of entity types and their corresponding requests.
+    """
+    features_grouped_by_entity = group_realtime_features_by_entity_type(
+        full_feature_names=full_feature_names,
+    )
+    result_dict: Dict[str, RequestEntityIdentifierObjects] = {}
+    for (
+        entity_identifier_type,
+        curr_feature_names,
+    ) in features_grouped_by_entity.items():
+        entity_list = entity_identifier_type.split(SQL_COLUMN_SEPARATOR)
+
+        if len(entity_list) > 2:
+            logger.warning("Invalid entity_identifier_type={entity_identifier_type}")
+            continue
+        # TODO: PIVOT to generate
+
+        # TODO: merge the PIVOT table into the _COMPOSITE table
+
+    return result_dict
+
+
 def process_historical_real_time_features_requests(
     requests: Dict[str, RequestEntityIdentifierObjects],
 ) -> Dict[str, pd.DataFrame]:

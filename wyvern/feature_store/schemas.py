@@ -38,6 +38,21 @@ class GetHistoricalFeaturesRequest(BaseModel):
     features: List[str] = []
 
 
+class GetHistoricalFeaturesRequestV2(BaseModel):
+    """
+    Request object for getting historical features.
+
+    Attributes:
+        entities: A dictionary of entity name to entity value.
+        timestamps: A list of timestamps. Used to retrieve historical features at specific timestamps. If not provided,
+            the latest feature values will be returned.
+        features: A list of feature names.
+    """
+
+    table: str
+    features: List[str] = []
+
+
 class GetFeastHistoricalFeaturesRequest(BaseModel):
     """
     Request object for getting historical features from Feast.
@@ -64,6 +79,17 @@ class GetHistoricalFeaturesResponse(BaseModel):
     """
 
     results: List[Dict[str, Any]] = []
+
+
+class GetHistoricalFeaturesResponseV2(BaseModel):
+    """
+    Response object for getting historical features.
+
+    Attributes:
+        result_table: the name of the transient table that holds the result.
+    """
+
+    result_table: str
 
 
 class MaterializeRequest(BaseModel):
