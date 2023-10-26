@@ -27,7 +27,7 @@ lz4 = "^4.3.2"
 more-itertools = "^9.1.0"
 tqdm = "^4.65.0"
 nest-asyncio = "^1.5.7"
-eppo-server-sdk = "^1.2.2"
+eppo-server-sdk = "^1.2.3"
 scipy = "^1.10.1"
 aiohttp = {extras = ["speedups"], version = "^3.8.5"}
 requests = "^2.31.0"

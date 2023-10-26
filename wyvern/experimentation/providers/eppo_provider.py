@@ -49,7 +49,7 @@ class EppoExperimentationClient(BaseExperimentationProvider):
                 error=e,
             )
 
-    def get_result(self, experiment_id: str, entity_id: str, **kwargs) -> str:
+    def get_result(self, experiment_id: str, entity_id: str, **kwargs) -> Optional[str]:
         """
         Fetches the variant for a given experiment and entity from the Eppo client.
 
@@ -59,10 +59,11 @@ class EppoExperimentationClient(BaseExperimentationProvider):
         - **kwargs: Additional arguments to be passed to the Eppo client's get_assignment method.
 
         Returns:
-        - str: The assigned variant for the given experiment and entity.
+        - str | None: The result (variant) assigned to the entity for the specified experiment or None.
         """
         client = eppo_client.get_instance()
-        return client.get_assignment(entity_id, experiment_id, kwargs)
+        variation = client.get_assignment_variation(entity_id, experiment_id, kwargs)
+        return variation.value if variation else None
 
     def log_result(
         self,
