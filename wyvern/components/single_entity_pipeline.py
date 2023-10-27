@@ -10,6 +10,9 @@ from wyvern.components.business_logic.business_logic import (
 from wyvern.components.component import Component
 from wyvern.components.events.events import LoggedEvent
 from wyvern.components.models.model_component import SingleEntityModelComponent
+from wyvern.components.models.model_experimentation_component import (
+    ModelExperimentation,
+)
 from wyvern.components.pipeline_component import PipelineComponent
 from wyvern.entities.identifier import Identifier
 from wyvern.entities.model_entities import MODEL_OUTPUT_DATA_TYPE
@@ -33,7 +36,7 @@ class SingleEntityPipeline(
     def __init__(
         self,
         *upstreams: Component,
-        model: SingleEntityModelComponent,
+        model: SingleEntityModelComponent | ModelExperimentation,
         business_logic: Optional[
             SingleEntityBusinessLogicPipeline[REQUEST_ENTITY, MODEL_OUTPUT_DATA_TYPE]
         ] = None,
