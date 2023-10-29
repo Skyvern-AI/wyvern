@@ -532,25 +532,26 @@ def generate_wyvern_store_app(
                 composite_entities[entity_type_column] = entity_names
             valid_realtime_features.append(realtime_feature)
 
-        # TODO: generate all the composite feature columns in the remote composite table
-        # this needs to be a sql query that generates a temporary table RT_{HEX_ID}_COMPOSITE
-        # for entity_type_column in composite_entities:
-        #     entity_name1, entity_name2 = composite_entities[entity_type_column]
-        #     df[entity_type_column] = df[entity_name1] + ":" + df[entity_name2]
-
         composite_columns = ",".join(
             [
-                ":".join(entities) + f" as {entity_type_column}"
+                " || ':' || ".join(entities) + f" AS {entity_type_column}"
                 for entity_type_column, entities in composite_entities.items()
             ],
         )
+        composite_historical_feature_table = f"HISTORICAL_FEATURES_{hex_id}"
+
+        # TODO: send this sql to snowflake to create temporary table with this select_sql query
         select_sql = f"""
-        SELECT *, {composite_columns}, timestamp as event_timestamp
+        CREATE TABLE {composite_historical_feature_table} AS
+        SELECT *, {composite_columns}, TIMESTAMP as event_timestamp
         FROM {data.table}
         """
-        # create temporary table with this select_sql query
 
-        build_and_merge_realtime_pivot_tables(hex_id, realtime_features)
+        result_table = build_and_merge_realtime_pivot_tables(
+            valid_realtime_features,
+            data.table,
+            composite_historical_feature_table,
+        )
 
         # feast_requests = build_historical_registry_feature_requests(
         #     store=store,
@@ -590,7 +591,7 @@ def generate_wyvern_store_app(
         # final_df["timestamp"] = final_df["timestamp"].astype(str)
 
         return GetHistoricalFeaturesResponseV2(
-            result_table="result_table",
+            result_table=result_table,
         )
 
     return app
