@@ -495,7 +495,7 @@ def generate_wyvern_store_app(
         #         )
 
         # Generate a 10-digit hex for the request
-        hex_id = secrets.token_hex(5)
+        random_id = secrets.token_hex(5)
 
         # convert the data input to pandas dataframe
         realtime_features, feast_features = separate_real_time_features(data.features)
@@ -538,7 +538,7 @@ def generate_wyvern_store_app(
                 for entity_type_column, entities in composite_entities.items()
             ],
         )
-        composite_historical_feature_table = f"HISTORICAL_FEATURES_{hex_id}"
+        composite_historical_feature_table = f"HISTORICAL_FEATURES_{random_id}"
 
         # TODO: send this sql to snowflake to create temporary table with this select_sql query
         select_sql = f"""
