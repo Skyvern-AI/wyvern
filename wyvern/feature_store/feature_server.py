@@ -34,6 +34,7 @@ from wyvern.components.features.realtime_features_component import (
 )
 from wyvern.config import settings
 from wyvern.feature_store.historical_feature_util import (
+    build_and_merge_feast_tables,
     build_and_merge_realtime_pivot_tables,
     build_historical_real_time_feature_requests,
     build_historical_registry_feature_requests,
