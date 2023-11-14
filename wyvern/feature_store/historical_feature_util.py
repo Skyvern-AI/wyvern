@@ -451,7 +451,7 @@ def build_and_merge_feast_tables(
 
         # dedupe (IDENTIFIER, event_timestamp)
         identifier_table_sql = f"""
-        WITH identifier_table_sql_dupe AS ({identifier_table_sql_dupe})
+        WITH identifier_table_sql_dedupe AS ({identifier_table_sql_dupe})
         SELECT IDENTIFIER, event_timestamp
         FROM identifier_table_sql_dupe
         WHERE rn = 1
@@ -472,14 +472,26 @@ def build_and_merge_feast_tables(
             result_sql,
             flags=re.IGNORECASE,
         )
-        final_sql = f"""
-        WITH identifier_tbl_dupe AS ({identifier_table_sql_dupe}),
-        identifier_tbl AS (
-            SELECT IDENTIFIER, event_timestamp
-            FROM identifier_tbl_dupe,
-            WHERE rn = 1
-        ),
-        {result_sql}
+        new_feast_table_sql = f"""
+        CREATE TABLE {next_table}_feast AS (
+            WITH identifier_tbl_dupe AS ({identifier_table_sql_dupe}),
+            identifier_tbl AS (
+                SELECT IDENTIFIER, event_timestamp
+                FROM identifier_tbl_dupe,
+                WHERE rn = 1
+            ),
+            {result_sql}
+        )
+        """
+
+        # left join to the previous composite table
+        new_composite_table_sql = f"""
+        CREATE TABLE {next_table} AS (
+            SELECT *
+            FROM {prev_table}
+            LEFT JOIN {next_table}_feast
+            ON {prev_table}.{identifier_column} = {next_table}_feast.IDENTIFIER and {prev_table}.event_timestamp = {next_table}_feast.event_timestamp
+        )
         """
         counter += 1
         prev_table = next_table
