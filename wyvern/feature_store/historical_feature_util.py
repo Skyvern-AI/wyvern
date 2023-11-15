@@ -170,12 +170,12 @@ def build_and_merge_realtime_pivot_tables(
             ],
         )
         feature_names_pivot_raw = ",".join(
-            ["\"'{fn}'\" as {fn}" for fn in curr_feature_names_underscore],
+            [f"\"'{fn}'\" as {fn}" for fn in curr_feature_names_underscore],
         )
 
         # TODO: send this sql to snowflake
         pivot_sql = f"""
-        CREATE TABLE {next_table} AS (
+        CREATE TEMPORARY TABLE {next_table} AS (
             WITH PIVOT_DATA AS (
                 SELECT F.REQUEST_ID AS REQUEST,
                        F.API_SOURCE,
@@ -200,14 +200,16 @@ def build_and_merge_realtime_pivot_tables(
                 {prev_table}.*,{feature_names_with_pivot_table_str}
             FROM
                 {prev_table}
-            LEFT JOIN PIVOT_TABLE ON {prev_table}.REQUEST = PIVOT_TABLE.REQUEST AND {prev_table}.{entity_identifier_type} = PIVOT_TABLE.FEATURE_IDENTIFIER
+            LEFT JOIN PIVOT_TABLE ON
+                {prev_table}.REQUEST = PIVOT_TABLE.REQUEST AND
+                {prev_table}.{entity_identifier_type} = PIVOT_TABLE.FEATURE_IDENTIFIER
         )
         """
         context.cursor().execute(pivot_sql)
         counter += 1
         prev_table = next_table
         next_table = f"{composite_table}_{counter}"
-    return next_table
+    return prev_table
 
 
 def process_historical_real_time_features_requests(
@@ -436,6 +438,8 @@ def build_and_merge_feast_tables(
                 f"Entity name should be singular or composite: {entity_name}",
             )
 
+        feature_columns = [fn.replace(":", "__") for fn in feature_names]
+
         # TODO: validate that all entities are in the entity_df_table
         # for entity in entities:
         # if entity not in entity_values:
@@ -454,7 +458,7 @@ def build_and_merge_feast_tables(
 
         # dedupe (IDENTIFIER, event_timestamp)
         identifier_table_sql = f"""
-        WITH identifier_table_sql_dedupe AS ({identifier_table_sql_dupe})
+        WITH identifier_table_sql_dupe AS ({identifier_table_sql_dupe})
         SELECT IDENTIFIER, event_timestamp
         FROM identifier_table_sql_dupe
         WHERE rn = 1
@@ -471,30 +475,34 @@ def build_and_merge_feast_tables(
         # in the format "feast_entity_df_" followed by a hex string (UUID without dashes)
         result_sql = re.sub(
             r'"feast_entity_df_[0-9a-f]{32}"',
-            '"identifier_tbl"',
+            "identifier_tbl",
             result_sql,
             flags=re.IGNORECASE,
         )
         new_feast_table_sql = f"""
-        CREATE TABLE {next_table}_feast AS (
-            WITH identifier_tbl_dupe AS ({identifier_table_sql_dupe}),
-            identifier_tbl AS (
-                SELECT IDENTIFIER, event_timestamp
-                FROM identifier_tbl_dupe,
-                WHERE rn = 1
-            ),
+        CREATE TEMPORARY TABLE {next_table}_feast AS (
+        WITH identifier_tbl_dupe AS ({identifier_table_sql_dupe}),
+        identifier_tbl AS (
+            SELECT IDENTIFIER, event_timestamp
+            FROM identifier_tbl_dupe
+            WHERE rn = 1
+        ),
             {result_sql}
         )
         """
         context.cursor().execute(new_feast_table_sql)
 
         # left join to the previous composite table
+        picked_feature_columns_str = ", ".join(
+            [f'{next_table}_feast."{c}"' for c in feature_columns],
+        )
         new_composite_table_sql = f"""
         CREATE TABLE {next_table} AS (
-            SELECT *
+            SELECT {prev_table}.*, {picked_feature_columns_str}
             FROM {prev_table}
             LEFT JOIN {next_table}_feast
-            ON {prev_table}.{identifier_column} = {next_table}_feast.IDENTIFIER and {prev_table}.event_timestamp = {next_table}_feast.event_timestamp
+            ON {prev_table}.{identifier_column} = {next_table}_feast.IDENTIFIER and
+                {prev_table}.event_timestamp = {next_table}_feast.event_timestamp
         )
         """
         context.cursor().execute(new_composite_table_sql)

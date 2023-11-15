@@ -466,43 +466,11 @@ def generate_wyvern_store_app(
     async def get_historical_features_v2(
         data: GetHistoricalFeaturesRequestV2,
     ) -> GetHistoricalFeaturesResponseV2:
-        # TODO: validate the data input: lengths of requests, timestamps and all the entities should be the same
-        # if "request" not in data.entities:
-        #     raise HTTPException(
-        #         status_code=400,
-        #         detail="request is required in entities",
-        #     )
-        # length_of_requests = len(data.entities["request"])
-        # length_of_timestamps = len(data.timestamps)
-        # if length_of_requests != length_of_timestamps:
-        #     raise HTTPException(
-        #         status_code=400,
-        #         detail=(
-        #             f"Length of requests({length_of_requests}) and "
-        #             f"timestamps({length_of_timestamps}) should be the same"
-        #         ),
-        #     )
-        # if length_of_requests > MAX_HISTORICAL_REQUEST_SIZE:
-        #     raise HTTPException(
-        #         status_code=400,
-        #         detail=(
-        #             f"The max size of requests is {MAX_HISTORICAL_REQUEST_SIZE}. Got {length_of_requests} requests."
-        #         ),
-        #     )
-        # for key, value in data.entities.items():
-        #     if len(value) != length_of_requests:
-        #         raise HTTPException(
-        #             status_code=400,
-        #             detail=f"Length of requests({length_of_requests}) and {key}({len(value)}) should be the same",
-        #         )
-
         # Generate a 10-digit hex for the request
         random_id = secrets.token_hex(5)
 
         # convert the data input to pandas dataframe
         realtime_features, feast_features = separate_real_time_features(data.features)
-        # TODO: analyze all the realtime features and generate all the composite feature columns in the dataframe
-        # the column name will be the composite feature name
         valid_realtime_features: List[str] = []
         composite_entities: Dict[str, List[str]] = {}
         for realtime_feature in realtime_features:
@@ -515,22 +483,6 @@ def generate_wyvern_store_app(
                 continue
 
             if len(entity_names) == 2:
-                entity_name_1 = entity_names[0]
-                entity_name_2 = entity_names[1]
-
-                # TODO: valid entity_name_1 and entity_name_2 are in the table columns
-                # if entity_name_1 not in data.entities:
-                #     logger.warning(
-                #         f"Realtime feature {realtime_feature} depends on "
-                #         f"entity={entity_name_1}, which is not found in entities",
-                #     )
-                #     continue
-                # if entity_name_2 not in data.entities:
-                #     logger.warning(
-                #         f"Realtime feature {realtime_feature} depends on "
-                #         f"entity={entity_name_2}, which is not found in entities",
-                #     )
-                #     continue
                 composite_entities[entity_type_column] = entity_names
             valid_realtime_features.append(realtime_feature)
 
@@ -542,13 +494,11 @@ def generate_wyvern_store_app(
         )
         composite_historical_feature_table = f"HISTORICAL_FEATURES_{random_id}"
 
-        # TODO: send this sql to snowflake to create temporary table with this select_sql query
         select_sql = f"""
-        CREATE TABLE {composite_historical_feature_table} AS
+        CREATE TEMPORARY TABLE {composite_historical_feature_table} AS
         SELECT *, {composite_columns}, TIMESTAMP as event_timestamp
         FROM {data.table}
         """
-
         snowflake_ctx = generate_snowflake_ctx()
         snowflake_ctx.cursor().execute(select_sql)
 
