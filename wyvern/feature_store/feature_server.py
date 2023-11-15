@@ -29,6 +29,7 @@ from feast.type_map import python_values_to_proto_values
 from feast.value_type import ValueType
 from google.protobuf.json_format import MessageToDict
 
+from wyvern.clients.snowflake import generate_snowflake_ctx
 from wyvern.components.features.realtime_features_component import (
     RealtimeFeatureComponent,
 )
@@ -548,51 +549,23 @@ def generate_wyvern_store_app(
         FROM {data.table}
         """
 
+        snowflake_ctx = generate_snowflake_ctx()
+        snowflake_ctx.cursor().execute(select_sql)
+
         result_table = build_and_merge_realtime_pivot_tables(
             valid_realtime_features,
             data.table,
             composite_historical_feature_table,
+            snowflake_ctx,
         )
-
-        # feast_requests = build_historical_registry_feature_requests(
-        #     store=store,
-        #     feature_names=feast_features,
-        #     entity_values=data.entities,
-        #     timestamps=data.timestamps,
-        # )
-        # feast_responses = process_historical_registry_features_requests(
-        #     store=store,
-        #     requests=feast_requests,
-        # )
-
-        # for feast_response in feast_responses:
-        #     if len(feast_response.IDENTIFIER) != len(df["request"]):
-        #         raise HTTPException(
-        #             status_code=400,
-        #             detail=(
-        #                 f"Length of feature store response({len(feast_response.IDENTIFIER)}) "
-        #                 f"and request({len(df['request'])}) should be the same"
-        #             ),
-        #         )
-        #     new_columns = [
-        #         column
-        #         for column in feast_response.columns
-        #         if column not in ["IDENTIFIER", "event_timestamp"]
-        #     ]
-        #     df = df.join(feast_response[new_columns])
-
-        # composite_keys = [key for key in composite_entities.keys() if key in df]
-        # composite_keys_uppercase = [
-        #     key.upper() for key in composite_entities.keys() if key.upper() in df
-        # ]
-        # drop_columns = composite_keys + composite_keys_uppercase + ["REQUEST_ID"]
-        # drop_columns = [column for column in drop_columns if column in df]
-        # df.drop(columns=drop_columns, inplace=True)
-        # final_df = df.replace({np.nan: None})
-        # final_df["timestamp"] = final_df["timestamp"].astype(str)
-
+        merged_table = build_and_merge_feast_tables(
+            store,
+            feast_features,
+            result_table,
+            snowflake_ctx,
+        )
         return GetHistoricalFeaturesResponseV2(
-            result_table=result_table,
+            result_table=merged_table,
         )
 
     return app

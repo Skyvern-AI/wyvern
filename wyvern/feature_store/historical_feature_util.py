@@ -122,6 +122,7 @@ def build_and_merge_realtime_pivot_tables(
     full_feature_names: List[str],
     input_table: str,
     composite_table: str,
+    context: SnowflakeConnection,
 ) -> str:
     """
     Build historical real-time feature requests grouped by entity types so that we can process them in parallel.
@@ -202,6 +203,7 @@ def build_and_merge_realtime_pivot_tables(
             LEFT JOIN PIVOT_TABLE ON {prev_table}.REQUEST = PIVOT_TABLE.REQUEST AND {prev_table}.{entity_identifier_type} = PIVOT_TABLE.FEATURE_IDENTIFIER
         )
         """
+        context.cursor().execute(pivot_sql)
         counter += 1
         prev_table = next_table
         next_table = f"{composite_table}_{counter}"
@@ -411,6 +413,7 @@ def build_and_merge_feast_tables(
     store: FeatureStore,
     feature_names: List[str],
     composite_table: str,
+    context: SnowflakeConnection,
 ) -> str:
     features_grouped_by_entities = group_registry_features_by_entities(
         feature_names,
@@ -483,6 +486,7 @@ def build_and_merge_feast_tables(
             {result_sql}
         )
         """
+        context.cursor().execute(new_feast_table_sql)
 
         # left join to the previous composite table
         new_composite_table_sql = f"""
@@ -493,11 +497,13 @@ def build_and_merge_feast_tables(
             ON {prev_table}.{identifier_column} = {next_table}_feast.IDENTIFIER and {prev_table}.event_timestamp = {next_table}_feast.event_timestamp
         )
         """
+        context.cursor().execute(new_composite_table_sql)
+
         counter += 1
         prev_table = next_table
         next_table = f"{composite_table}_{counter}"
 
-    return ""
+    return prev_table
 
 
 def process_historical_registry_features_requests(
